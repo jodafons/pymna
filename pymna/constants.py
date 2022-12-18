@@ -1,0 +1,8 @@
+
+
+#
+# Component name
+#
+
+RESISTOR  = "R"
+

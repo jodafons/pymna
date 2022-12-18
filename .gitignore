@@ -1,0 +1,27 @@
+
+*.pyc
+.ipynb_checkpoints/*
+doc/.ipynb_checkpoints/*
+*.mat
+*.pic
+*.gz
+*.npz
+*.root
+*.log
+*.pdf
+*.eps
+*.pdf
+*.tex
+*.C
+*.bak
+*.out
+cmt/boost_test.cxx.o
+MoreFilesForYou-*
+.asetup.save
+build
+.python-version
+pymna-env
+# vscode
+./.vscode/*
+.pytest_cache
+

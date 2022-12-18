@@ -1,0 +1,5 @@
+sphinx
+tqdm
+prettytable
+numpy
+schemdraw
