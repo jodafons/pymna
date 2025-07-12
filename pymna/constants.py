@@ -4,5 +4,5 @@
 # Component name
 #
 
-RESISTOR  = "R"
+
 

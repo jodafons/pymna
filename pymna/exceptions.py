@@ -3,7 +3,6 @@ __all__ = ["InvalidElement", "InvalidMethod"]
 
 
 class InvalidElement(Exception):
-
     def __init__(self, message, errors):
         super(InvalidElement, self).__init__(message)
         self.errors=errors
