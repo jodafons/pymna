@@ -4,10 +4,9 @@ __all__ = [
             "Resistor",
             "Capacitor",
             "Indutor",
-            "parser_resistor_from_netlist_row",
-            "parser_capacitor_from_netlist_row",
-            "parser_indutor_from_netlist_row",
         ]
+
+import numpy as np
 
 from pymna import enumerator as enum
 from pymna.elements import Element
@@ -38,8 +37,13 @@ class Resistor(Element):
 
     #
     # Backward method
-    #
-    def backward(self, A, b, deltaT : float, current_branch : int):
+    def backward(self, 
+                 A : np.array, 
+                 b : np.array, 
+                 t : float,
+                 deltaT : float,
+                 current_branch : int, 
+                 ):
         G = (1/self.R)
         A[self.a, self.a] +=  G
         A[self.a, self.b] += -G
@@ -47,6 +51,8 @@ class Resistor(Element):
         A[self.b, self.b] +=  G
         return current_branch
 
+    def update(self, b, x):
+        pass
 
 
 
@@ -74,8 +80,14 @@ class Capacitor(Element):
         self.C  = capacitance # component value
         self.ic = initial_condition
 
-
-    def backward(self, A, b, t : float, deltaT : float, current_branch : int):
+    
+    def backward(self, 
+                 A : np.array, 
+                 b : np.array, 
+                 t : float,
+                 deltaT : float,
+                 current_branch : int, 
+                 ):
         #
         # v(t0+dt) = v(t0) + 1/C \int_{t0}^{t0+dt}j(t)dt
         #
@@ -92,7 +104,7 @@ class Capacitor(Element):
     #
     # Update all initial conditions
     #
-    def update(self, x):
+    def update(self, b, x):
         self.ic = x[self.a] - x[self.b]
 
 
@@ -121,7 +133,14 @@ class Indutor(Element):
     #
     # j(t0+dt) = j(t0) + 1/L \int_{t0}^{t0+dt}v(t)dt
     #
-    def backward(self, A, b, deltaT : float, current_branch : int):
+    def backward(self, 
+                 A : np.array, 
+                 b : np.array, 
+                 t : float,
+                 deltaT : float,
+                 current_branch : int, 
+                 ):
+
         current_branch+=1
         jx = current_branch
         R = self.L/deltaT # L/dt
@@ -136,34 +155,8 @@ class Indutor(Element):
     #
     # Update all initial conditions
     #
-    def update(self, x):
+    def update(self, b, x):
         self.ic = x[self.jx]
-
-
-#
-# netlist parsers
-#
-
-def parser_resistor_from_netlist_row( row : Tuple ) -> Resistor:
-    if row[1]!=enum.Element.RESISTOR and len(row)!=5:
-        raise InvalidElement(f"Element with name {row[0]} don't match with the element Resistor.")
-    name, element, a, b, resistence = row 
-    return Resistor(a,b,resistence,name=name)
-
-
-def parser_capacitor_from_netlist_row( row : Tuple ) -> Capacitor:
-    if row[1]!=enum.Element.CAPACITOR and len(row)!=6:
-        raise InvalidElement(f"Element with name {row[0]} don't match with the element Capacitor.")
-    name, element, a, b, capacitance, ic = row 
-    return Capacitor(a,b,capacitance,initial_condition=ic, name=name)
-
-
-def parser_indutor_from_netlist_row( row : Tuple ) -> Indutor:
-    if row[1]!=enum.Element.CAPACITOR and len(row)!=6:
-        raise InvalidElement(f"Element with name {row[0]} don't match with the element Indutor.")
-    name, element, a, b, indutance, ic = row 
-    return Indutor(a,b,indutance,initial_condition=ic, name=name)
-
 
 
 

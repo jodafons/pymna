@@ -5,6 +5,8 @@ __all__ = [
             "SinusoidalVoltageSource",
         ]
 
+import numpy as np
+
 from pymna import enumerator as enum
 from pymna.exceptions import InvalidElement
 from typing import Tuple
@@ -34,7 +36,9 @@ class IndependentSource:
             alpha            : float=0,
             delay            : float=0
             ) -> float:
-        if (t < delay) or (delay + (1/frequency)*number_of_cycles)
+
+     
+        if (t < delay) or (t>(delay + (1/frequency)*number_of_cycles)):
             V = dc + amplitude * np.sin( (np.pi * angle)/180 )
         else:
             V = (dc + amplitude*np.exp( -1 * alpha * (t-delay) )) * np.sin( 2*np.pi*frequency*(t-delay) + (np.pi*angle)/180 )
@@ -50,7 +54,8 @@ class IndependentSource:
               rise_time       : float=0,
               fall_time       : float=0,
               time_on         : float=0,
-              delay           : float=0):
+              delay           : float=0
+            ) -> float:
 
         rise_time = step if rise_time==0 else rise_time
         fall_time = step if fall_time==0 else fall_time
@@ -75,9 +80,8 @@ class IndependentSource:
 
 
     def dc(self,
-           t     : float,
            dc    : float 
-           ):
+           ) -> float:
         return dc
 
 
@@ -107,17 +111,27 @@ class SinusoidalVoltageSource(IndependentSource):
         self.alpha     = alpha
         self.delay     = delay
 
-    def backward( self, A, b , t : int, deltaT : float, current_branch : int) -> int:
-
-        V = self.sin(t, self,amplitude, self,frequency, self.number_of_cycles, self.dc, self.angle, self.alpha, self.delay)
+    def backward(self, 
+                 A : np.array, 
+                 b : np.array, 
+                 t : float,
+                 deltaT : float,
+                 current_branch : int, 
+                 ):
+   
         current_branch += 1
         jx = current_branch
+        V = self.sin(t, self.amplitude, self.frequency, self.number_of_cycles, self.dc, self.angle, self.alpha, self.delay)
         A[self.positive, jx] +=  1
         A[self.negative, jx] += -1
         A[jx, self.positive] += -1
         A[jx, self.negative] +=  1
         b[jx] += V
         return current_branch
+
+    def update(self, b, x ):
+        pass
+
 
 
 class PulseVoltageSource(IndependentSource):
@@ -132,15 +146,13 @@ class PulseVoltageSource(IndependentSource):
                  delay       : float=0,
                  rise_time   : float=0,
                  fall_time   : float=0,
-                 time_on     : float=0
+                 time_on     : float=0,
                  angle       : float=0,
                  alpha       : float=0,
                  name        : str=""
                 ):
 
         Source.__init__(self, positive, negative, name=name)
-        simulator      = get_simulator_service()
-        self.jx        = simulator.create_current()
         self.amplitude = amplitude
         self.frequency = frequency
         self.number_of_cycles = number_of_cycles
@@ -150,13 +162,15 @@ class PulseVoltageSource(IndependentSource):
         self.delay     = delay
 
 
-    def backward( self, A, b , t : int , ):
+    def backward(self, A, b, t : float=0, deltaT : float=0, current_branch : int=0):
+
         V = self.pulse(t,...)
         A[self.positive,self.jx] +=  1
         A[self.negative,self.jx] += -1
         A[self.jx, self.positive] += -1
         A[self.jx, self.negative] +=  1
         b[self.jx] += -V
+        return current_branch
 
 
 

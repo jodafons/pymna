@@ -2,6 +2,7 @@ __all__ = ["Circuit"]
 
 from typing import Union, List
 from pymna.elements import Capacitor, Resistor
+from pymna.elements import SinusoidalVoltageSource
 
 
 class Circuit:
@@ -21,6 +22,10 @@ class Circuit:
             self.n_nodes+=1
             self.nodes[node]=self.n_nodes
         return self.nodes[node]
+
+    def __add__(self, elm ):
+        self.elements.append(elm)
+        return self
 
     @property
     def number_of_nodes(self):
@@ -54,6 +59,32 @@ class Circuit:
                       name=name)
         self.elements.append(R)
         return R
+
+
+    def SinusoidalVoltageSource(self,
+                 positive  : Union[int,str],
+                 negative  : Union[int,str],
+                 amplitude : float,
+                 frequency : float,
+                 number_of_cycles : int,
+                 dc        : float=0,
+                 delay     : float=0,
+                 angle     : float=0,
+                 alpha     : float=0,
+                 name      : str=""
+                ):
+
+        Vsin = SinusoidalVoltageSource(self.node(positive), 
+                                       self.node(negative), 
+                                       amplitude, 
+                                       frequency, 
+                                       number_of_cycles,
+                                       dc = dc,
+                                       delay = delay,
+                                       angle = angle,
+                                       alpha = alpha,
+                                       name = name)
+        self+=Vsin
 
 
 if __name__ == "__main__":

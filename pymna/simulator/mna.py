@@ -7,7 +7,7 @@ from pymna.elements.circuit import Circuit
 
 class Simulator:
 
-    def __init__(self , temperature : float=25, max_nodes : int=100):
+    def __init__(self , temperature : float=25, max_nodes : int=1000):
         self.temperature = temperature
         self.max_nodes = max_nodes
 
@@ -30,16 +30,20 @@ class Simulator:
                   
                    ) -> List:
 
-        A                = np.zeros( (self.max_nodes, self.max_nodes) )
-        b                = np.zeros( (self.max_nodes, 1))
-        x                = np.zeros( b.shape )
-        x_newton_raphson = np.zeros( b.shape )
-        tolerance        = 1
+   
         t                = 0
-        result           = []
-        current_branch   = circuit.number_of_nodes+1
-       
+        e                = []
+        times            = []
+
+
+        reshape=True
+        max_nodes = self.max_nodes
         while t <= end_time:
+
+
+            A                = np.zeros( (max_nodes, max_nodes) )
+            b                = np.zeros( (max_nodes, ))
+            x_newton_raphson = np.zeros( b.shape )
 
             if t==0:
                 max_internal_step = 1
@@ -72,11 +76,19 @@ class Simulator:
                             number_of_guesses+=1
                             number_of_execution_newton_raphson=0
 
-
+                        current_branch   = circuit.number_of_nodes
                         for elm in circuit.elements:
                             current_branch = elm.backward(A,b,t,delta_t,current_branch)
-                        x = self.solve(A,b)
 
+                        if reshape:
+                            max_nodes = current_branch+1
+                            A = A[0:max_nodes, 0:max_nodes]
+                            b = b[0:max_nodes]
+                            #x = x[0:current_branch+1]
+                            x_newton_raphson = x_newton_raphson[0:max_nodes]
+                            reshape=False
+
+                        x = self.solve(A,b)
                         tolerance = np.abs( x - x_newton_raphson ).max()
                         if tolerance > self.tolerance:
                             x = x_newton_raphson
@@ -86,11 +98,19 @@ class Simulator:
                     # end of Newton Raphson
 
                 else:
+                    current_branch   = circuit.number_of_nodes
                     for elm in circuit.elements:
                         current_branch = elm.backward(A,b,t,delta_t,current_branch)
+                    if reshape:
+                        max_nodes = current_branch+1
+                        A = A[0:max_nodes, 0:max_nodes]
+                        b = b[0:max_nodes]
+                        x_newton_raphson = x_newton_raphson[0:max_nodes]
+                        reshape=False
+            
+               
                     x = self.solve(A,b)
-
-                
+          
                 # update ICs
                 for elm in circuit.elements:
                     elm.update( b, x )
@@ -100,11 +120,20 @@ class Simulator:
             # end of internal step
 
             t += delta_t
+            times.append(t)
             internal_step = 0
-            result.append( x )
+            e.append( x )
 
-        return result
+        e = np.array(e)
+        result = {"t":times}
+        for node_name, node_idx in circuit.nodes.items():
+            result[ node_name ] = e[ :, node_idx ] 
+        return e
 
 
     def solve( self, A, b) -> np.array:
-        return np.linalg.solve(A[1:, 1:], b[1:])
+        x = np.linalg.solve(A[1::, 1::],b[1::])
+        return np.concatenate(([0],x))
+
+
+
