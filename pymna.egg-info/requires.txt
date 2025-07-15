@@ -3,6 +3,6 @@ tqdm
 prettytable
 numpy
 schemdraw
-matplotlib 
+matplotlib
 loguru
 jupyterlab

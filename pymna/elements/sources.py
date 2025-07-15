@@ -3,7 +3,6 @@
 __all__ = [
             "PulseVoltageSource",
             "SinusoidalVoltageSource",
-            "DCVoltageSource",
         ]
 
 from pymna import enumerator as enum
@@ -13,20 +12,19 @@ from abc import ABC
 
 
 
-class Source:
+class IndependentSource:
 
     def __init__(self,
+                 name     : str,
                  positive : int,
                  negative : int,
-                 name     : str=""
                  ):
         self.positive = positive
         self.negative = negative
         self.name     = name
 
 
-
-    def sin(self
+    def sin(self,
             t                : float,
             amplitude        : float,
             frequency        : float,
@@ -85,24 +83,22 @@ class Source:
 
 
 
-class SinusoidalVoltageSource(Source):
+class SinusoidalVoltageSource(IndependentSource):
 
     def __init__(self,
                  positive  : int,
                  negative  : int,
                  amplitude : float,
-                 dc        : float,
                  frequency : float,
                  number_of_cycles : int,
+                 dc        : float=0,
                  delay     : float=0,
                  angle     : float=0,
                  alpha     : float=0,
                  name      : str=""
                 ):
 
-        Source.__init__(self, positive, negative, name=name)
-        simulator      = get_simulator_service()
-        self.jx        = simulator.create_current()
+        IndependentSource.__init__(self, name, positive, negative)
         self.amplitude = amplitude
         self.frequency = frequency
         self.number_of_cycles = number_of_cycles
@@ -111,16 +107,20 @@ class SinusoidalVoltageSource(Source):
         self.alpha     = alpha
         self.delay     = delay
 
-    def backward( self, A, b , t : int):
-        V = self.sin(t, ...)
-        A[self.positive][self.jx] +=  1
-        A[self.negative][self.jx] += -1
-        A[self.jx][self.positive] += -1
-        A[self.jx][self.negative] +=  1
-        b[self.jx] += V
+    def backward( self, A, b , t : int, deltaT : float, current_branch : int) -> int:
+
+        V = self.sin(t, self,amplitude, self,frequency, self.number_of_cycles, self.dc, self.angle, self.alpha, self.delay)
+        current_branch += 1
+        jx = current_branch
+        A[self.positive, jx] +=  1
+        A[self.negative, jx] += -1
+        A[jx, self.positive] += -1
+        A[jx, self.negative] +=  1
+        b[jx] += V
+        return current_branch
 
 
-class PulseVoltageSource(Source):
+class PulseVoltageSource(IndependentSource):
 
     def __init__(self,
                  positive    : int,
@@ -150,16 +150,13 @@ class PulseVoltageSource(Source):
         self.delay     = delay
 
 
-    def backward( self, A, b , t : int):
+    def backward( self, A, b , t : int , ):
         V = self.pulse(t,...)
-        A[self.positive][self.jx] +=  1
-        A[self.negative][self.jx] += -1
-        A[self.jx][self.positive] += -1
-        A[self.jx][self.negative] +=  1
+        A[self.positive,self.jx] +=  1
+        A[self.negative,self.jx] += -1
+        A[self.jx, self.positive] += -1
+        A[self.jx, self.negative] +=  1
         b[self.jx] += -V
 
-
-
-class DCVoltageSource(Source):
 
 

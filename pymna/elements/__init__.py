@@ -1,13 +1,22 @@
 
 __all__ = []
 
-from . import resistor
-__all__.extend( resistor.__all__ )
-from .resistor import *
+from . import element
+__all__.extend( element.__all__ )
+from .element import *
 
-from . import capacitor
-__all__.extend( capacitor.__all__ )
-from .capacitor import *
+from . import basics
+__all__.extend( basics.__all__ )
+from .basics import *
+
+from . import circuit
+__all__.extend( circuit.__all__ )
+from .circuit import *
+
+from . import sources
+__all__.extend( sources.__all__ )
+from .sources import *
+
 
 
 

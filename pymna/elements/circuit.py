@@ -1,49 +1,65 @@
+__all__ = ["Circuit"]
 
-
+from typing import Union, List
+from pymna.elements import Capacitor, Resistor
 
 
 class Circuit:
-    def __init__(self, name : str=""):
-        self.name = name
-        self.elements = []
-        self.gnd = 0
 
-    def __add__(self, element):
-        self.elements.append(element)
-        return self
+    def __init__(self, 
+                 name : str=""
+                 ):
+        self.name       = name
+        self.elements   = []
+        self.gnd        = 0
+        self.nodes      = {self.gnd:0}
+        self.n_nodes    = 0
+        self.has_nolinear_elements = False
 
-    
+    def node( self, node : Union[int,str] ) -> int:
+        if node not in self.nodes.keys():
+            self.n_nodes+=1
+            self.nodes[node]=self.n_nodes
+        return self.nodes[node]
+
+    @property
+    def number_of_nodes(self):
+        return self.n_nodes
+
 
     def C(self,
-          a : int,
-          b : int,
+          a : Union[int,str],
+          b : Union[int,str],
           capacitance : float,
           name : str="",
           initial_condition : float=0
-          ):
-        
-        capacitor = Capacitor(a,b,capacitance, initial_condition=initial_condition, name=name)
-        self.elements.append(capacitor)
-        return capacitor
+          ) -> Capacitor:
+        C = Capacitor( self.node(a), 
+                       self.node(b), 
+                       capacitance, 
+                       initial_condition=initial_condition, 
+                       name=name)
+        self.elements.append(C)
+        return C
     
     def R(self,
-          a : int,
-          b : int,
+          a : Union[int,str],
+          b : Union[int,str],
           resistence : float,
-          name : str=""):
-
-        resistor = Resistor(a,b,resistence,name=name)
-        self.__add__(resistor)
-        return resistor
-
+          name : str="",
+          ) -> Resistor:
+        R = Resistor( self.node(a), 
+                      self.node(b), 
+                      resistence, 
+                      name=name)
+        self.elements.append(R)
+        return R
 
 
 if __name__ == "__main__":
-
+    from pymna.units import *
     circuit = Circuit(name="RC")
-    circuit.SinusoidalVoltageSource(circuit.new_node(), circuit.gnd,  amplitude=1*V, freq=60*Hz, name="input")
-    circuit.R( 1, 2, 100, name="R1")
-    circuit.C( 2, circuit.gnd, 50*uF, name="C1" )
-    simulator = TimeSimulator( start=0, end=5*minutes )
-    simulator.run( circuit )
-
+    circuit.SinusoidalVoltageSource("in", circuit.gnd,  amplitude=1*V, freq=60*Hz, name="input")
+    circuit.R( "in", "out", 1*kOhm, name="R1")
+    circuit.C( "out", circuit.gnd, 50*uF, name="C1" )
+    

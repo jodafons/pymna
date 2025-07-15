@@ -1,0 +1,34 @@
+Metadata-Version: 2.4
+Name: pymna
+Version: 1.0.0
+Summary: pymna orquestrator
+Home-page: https://github.com/jodafons/pymna
+Author: João Victor da Fonseca Pinto
+Author-email: jodafons@lps.ufrj.br
+License: GPL-3.0
+Keywords: circuit simulation
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: License :: OSI Approved :: GNU General Public License v3 (GPLv3)
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Description-Content-Type: text/markdown
+Requires-Dist: sphinx
+Requires-Dist: tqdm
+Requires-Dist: prettytable
+Requires-Dist: numpy
+Requires-Dist: schemdraw
+Requires-Dist: matplotlib
+Requires-Dist: loguru
+Requires-Dist: jupyterlab
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: keywords
+Dynamic: license
+Dynamic: requires-dist
+Dynamic: summary

@@ -1,5 +1,5 @@
 
-__all__ = ["InvalidElement", "InvalidMethod"]
+__all__ = ["InvalidElement", "InvalidMethod","ImpossibleSolution"]
 
 
 class InvalidElement(Exception):
@@ -9,6 +9,11 @@ class InvalidElement(Exception):
 
 
 class InvalidMethod(Exception):
+    def __init__(self, message, errors):
+        super(MethodElement, self).__init__(message)
+        self.errors=errors
+
+class ImpossibleSolution(Exception):
     def __init__(self, message, errors):
         super(MethodElement, self).__init__(message)
         self.errors=errors

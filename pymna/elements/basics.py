@@ -10,7 +10,7 @@ __all__ = [
         ]
 
 from pymna import enumerator as enum
-from pymna.exceptions import InvalidElement
+from pymna.elements import Element
 from typing import Tuple
 
 
@@ -30,7 +30,7 @@ class Resistor(Element):
                  resistence : float, 
                  name : str=""
                 ):
-        Element.__init__(self,enum.Element.RESISTOR, name=name)
+        Element.__init__(self,name)
         self.a = a # node 1
         self.b = b # node 2
         self.R = resistence # component value
@@ -39,19 +39,16 @@ class Resistor(Element):
     #
     # Backward method
     #
-    def backward(self, A, b):
+    def backward(self, A, b, deltaT : float, current_branch : int):
         G = (1/self.R)
-        A[self.a][self.a] +=  G
-        A[self.a][self.b] += -G
-        A[self.b][self.a] += -G
-        A[self.b][self.b] +=  G
+        A[self.a, self.a] +=  G
+        A[self.a, self.b] += -G
+        A[self.b, self.a] += -G
+        A[self.b, self.b] +=  G
+        return current_branch
 
 
 
-
-
-
-   
 
 #
 # Capacitor
@@ -71,26 +68,26 @@ class Capacitor(Element):
                  initial_condition : float=0,
                  name : str=""
                 ):
-        Element.__init__(self, enum.Element.CAPACITOR, name=name)
-
+        Element.__init__(self,name)
         self.a  = a # node 1
         self.b  = b # node 2
         self.C  = capacitance # component value
         self.ic = initial_condition
 
 
-    def backward(self, A, b):
+    def backward(self, A, b, t : float, deltaT : float, current_branch : int):
         #
         # v(t0+dt) = v(t0) + 1/C \int_{t0}^{t0+dt}j(t)dt
         #
-        R = config.deltaT/self.C # dt/C
+        R = deltaT/self.C # dt/C
         G = (1/R) # C/dt
-        A[self.a][self.a] +=  G
-        A[self.a][self.b] += -G
-        A[self.b][self.a] += -G
-        A[self.b][self.b] +=  G
+        A[self.a, self.a] +=  G
+        A[self.a, self.b] += -G
+        A[self.b, self.a] += -G
+        A[self.b, self.b] +=  G
         b[self.a]         +=  G*self.ic # +C/dt v(t0)
         b[self.b]         += -G*self.ic # -C/dt v(t0)
+        return current_branch
 
     #
     # Update all initial conditions
@@ -100,43 +97,41 @@ class Capacitor(Element):
 
 
 
-
-
 #
 # Indutor
 #
 class Indutor(Element):
 
     def __init__(self,
+
                  a : int,
                  b : int,
                  indutance : float,
                  initial_condition : float=0,
                  name : str=""
                 ):
-
-        simulator = get_simulator_service()
-        self.a  = netlist[1] # node 1
-        self.b  = netlist[2] # node 2
-        self.jx = simulator.create_current()
-        self.L  = netlist[3] # component value
-        self.ic = netlist[4] # initial condition
+        Element.__init__(self,name)
+        self.a  = a # node 1
+        self.b  = b # node 2
+        self.L  = L # component value
+        self.ic = ic # initial condition
         
 
 
     #
     # j(t0+dt) = j(t0) + 1/L \int_{t0}^{t0+dt}v(t)dt
     #
-    def backward(self, A, b):
-        simulator = get_simulator_service()
-        R = self.L/simulator.deltaT # L/dt
-        A[self.a][self.jx]  +=  1 # current out node a
-        A[self.b][self.jx]  += -1 # current in node b
-        A[self.jx][self.a]  += -1 # Va
-        A[self.jx][self.b]  +=  1 # Vb
-        A[self.jx][self.jx] += R
-        b[self.jx]          += R*self.ic
-
+    def backward(self, A, b, deltaT : float, current_branch : int):
+        current_branch+=1
+        jx = current_branch
+        R = self.L/deltaT # L/dt
+        A[self.a, jx]  +=  1 # current out node a
+        A[self.b, jx]  += -1 # current in node b
+        A[jx, self.a]  += -1 # Va
+        A[jx, self.b]  +=  1 # Vb
+        A[jx, jx]      += R
+        b[jx]          += R*self.ic
+        return current_branch
 
     #
     # Update all initial conditions
