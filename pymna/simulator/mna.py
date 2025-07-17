@@ -1,3 +1,21 @@
+"""
+This module contains the Simulator class, which is responsible for simulating electrical circuits.
+The Simulator can perform both AC analysis and transient analysis of circuits defined by the Circuit class.
+It utilizes numerical methods, including the Newton-Raphson method, to solve nonlinear equations that arise during the simulation.
+
+Classes:
+- Simulator: A class that simulates the behavior of electrical circuits.
+
+Methods:
+- __init__: Initializes the Simulator with temperature and maximum nodes.
+- ac: Performs AC analysis on a given circuit (not yet implemented).
+- transient: Simulates the transient response of a circuit over a specified time period.
+- solve: Solves the linear equation Ax = b using NumPy's linear algebra solver.
+"""
+"""
+
+"""
+
 __all__ = ["Simulator"]
 
 import numpy as np
@@ -19,18 +37,37 @@ class Simulator:
 
 
     def transient(self, 
-                  circuit                      : Circuit, 
-                  end_time                     : float, 
-                  step_time                    : float,
-                  tolerance                    : float=1,
-                  max_number_of_internal_step  : int=1,
-                  max_number_of_guesses        : int=100,
-                  max_number_of_newton_raphson : int=20,
-                  step_factor                  : float=1e9,
-                  
-                   ) -> List:
+                      circuit                      : Circuit, 
+                      end_time                     : float, 
+                      step_time                    : float,
+                      tolerance                    : float=1,
+                      max_number_of_internal_step  : int=1,
+                      max_number_of_guesses        : int=100,
+                      max_number_of_newton_raphson : int=20,
+                      step_factor                  : float=1e9,
+                      
+                       ) -> List:
+        """
+        Simulates the transient response of a circuit over a specified time period.
+        Parameters:
+        - circuit (Circuit): The circuit to be simulated.
+        - end_time (float): The time at which the simulation ends.
+        - step_time (float): The time increment for each simulation step.
+        - tolerance (float, optional): The tolerance for convergence in Newton-Raphson method. Default is 1.
+        - max_number_of_internal_step (int, optional): Maximum number of internal steps per time increment. Default is 1.
+        - max_number_of_guesses (int, optional): Maximum number of guesses for Newton-Raphson method. Default is 100.
+        - max_number_of_newton_raphson (int, optional): Maximum iterations for Newton-Raphson method. Default is 20.
+        - step_factor (float, optional): Factor to adjust the step size. Default is 1e9.
+        
+        Returns:
+        - List: A list containing the time points and corresponding node voltages.
+        
+        Notes:
+        - The method uses the Newton-Raphson method for solving nonlinear equations.
+        - If the solution does not converge within the specified number of iterations or guesses, an exception is raised.
+        - The circuit's elements are updated at each internal step based on the computed voltages.
+        """
 
-   
         t                = 0
         e                = []
         times            = []

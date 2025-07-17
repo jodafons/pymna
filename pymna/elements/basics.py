@@ -1,5 +1,22 @@
 
 
+"""
+This module defines basic electrical elements including Resistor, Capacitor, and Inductor.
+These elements are subclasses of the Element class and implement methods for simulating
+their behavior in electrical circuits.
+
+Classes:
+    - Resistor: Represents a resistor element in a circuit.
+    - Capacitor: Represents a capacitor element in a circuit.
+    - Indutor: Represents an inductor element in a circuit.
+
+Each class includes methods for initializing the element, performing backward analysis,
+and updating initial conditions.
+"""
+
+
+
+
 __all__ = [
             "Resistor",
             "Capacitor",
@@ -13,6 +30,7 @@ from pymna.elements import Element
 from typing import Tuple
 
 
+
 #
 # Resistor
 #
@@ -24,11 +42,21 @@ class Resistor(Element):
     #           \/    \/    \/
     #
     def __init__(self, 
-                 a : int, 
-                 b : int, 
-                 resistence : float, 
-                 name : str=""
-                ):
+             a : int, 
+             b : int, 
+             resistence : float, 
+             name : str=""
+            ):
+        """
+        Initializes an instance of the Element class.
+
+        Parameters:
+        a (int): The first node connected by the element.
+        b (int): The second node connected by the element.
+        resistence (float): The resistance value of the element.
+        name (str, optional): The name of the element. Defaults to an empty string.
+
+        """
         Element.__init__(self,name)
         self.a = a # node 1
         self.b = b # node 2
@@ -68,12 +96,23 @@ class Capacitor(Element):
     #          | |
     #
     def __init__(self,
-                 a : int,
-                 b : int,
-                 capacitance : float,
-                 initial_condition : float=0,
-                 name : str=""
-                ):
+             a : int,
+             b : int,
+             capacitance : float,
+             initial_condition : float=0,
+             name : str=""
+            ):
+        """
+        Initializes a new instance of the Element class.
+
+        Parameters:
+        a (int): The first node connected to the element (node 1).
+        b (int): The second node connected to the element (node 2).
+        capacitance (float): The capacitance value of the element.
+        initial_condition (float, optional): The initial condition of the element. Defaults to 0.
+        name (str, optional): The name of the element. Defaults to an empty string.
+
+        """
         Element.__init__(self,name)
         self.a  = a # node 1
         self.b  = b # node 2
@@ -116,17 +155,27 @@ class Indutor(Element):
 
     def __init__(self,
 
-                 a : int,
-                 b : int,
-                 indutance : float,
-                 initial_condition : float=0,
-                 name : str=""
-                ):
-        Element.__init__(self,name)
-        self.a  = a # node 1
-        self.b  = b # node 2
-        self.L  = L # component value
-        self.ic = ic # initial condition
+             a : int,
+             b : int,
+             inductance : float,
+             initial_condition : float=0,
+             name : str=""
+            ):
+        """
+        Initializes a new instance of the class.
+
+        Parameters:
+        a (int): The first node (node 1).
+        b (int): The second node (node 2).
+        inductance (float): The inductance value of the component.
+        initial_condition (float, optional): The initial condition of the component. Defaults to 0.
+        name (str, optional): The name of the component. Defaults to an empty string.
+        """
+        Element.__init__(self, name)
+        self.a  = a  # node 1
+        self.b  = b  # node 2
+        self.L  = inductance  # component value
+        self.ic = initial_condition  # initial condition
         
 
 
