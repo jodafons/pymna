@@ -293,6 +293,9 @@ class PulseVoltageSource(Source):
                                    T=params[11],
                                    number_of_cycles=params[12])
 
+
+
+
 class VoltageSourceControlByVoltage(Source):
 
     # This class represents a voltage source controlled by another voltage source.
@@ -338,10 +341,10 @@ class VoltageSourceControlByVoltage(Source):
 
 
     @classmethod
-    def from_nl( cls, params : Union[Tuple[str, str, int, int, int, int, float]] ) -> VoltageSourceControlByVoltage:
+    def from_nl( cls, params : Tuple[str, str, int, int, int, int, float] ) -> VoltageSourceControlByVoltage:
         # VoltageSourceControlByVoltage: 'E', name, noIn, noOut, control_noIn, control_noOut, Av
-        if params[0] != 'E':
-            raise InvalidElement("Invalid parameters for VoltageSourceControlByVoltage: expected 'E' as first element.")
+        if params[0] != 'E' or len(params) != 7:
+            raise InvalidElement(f"Invalid parameters for VoltageSourceControlByVoltage: expected 'E'({params[0]}) as first element and 7 ({len(params)})parameters in total.")
         return VoltageSourceControlByVoltage( nodeIn=params[2], 
                                               nodeOut=params[3], 
                                               controlNodeIn=params[4], 
@@ -393,6 +396,19 @@ class CurrentSourceControlByVoltage:
         return current_branch
 
 
+    @classmethod
+    def from_nl( cls, params : Tuple[str, str, int, int, int, int, float] ) -> CurrentSourceControlByVoltage:
+        # CurrentSourceControlByVoltage: 'F', name, noIn, noOut, control_noIn, control_noOut, Ai
+        if params[0] != 'F' or len(params) != 7:
+            raise InvalidElement(f"Invalid parameters for CurrentSourceControlByVoltage: expected 'F'({params[0]}) as first element and 7 ({len(params)})parameters in total.")
+        return CurrentSourceControlByVoltage( nodeIn=params[2], 
+                                              nodeOut=params[3], 
+                                              controlNodeIn=params[4], 
+                                              controlNodeOut=params[5], 
+                                              Ai=params[6],
+                                              name=params[1])
+
+
 class CurrentSourceControlByVoltage(Source):
     
     # This class represents a current source controlled by a voltage source.
@@ -433,6 +449,19 @@ class CurrentSourceControlByVoltage(Source):
         A[jx, self.controlNodeIn ] +=  1
         A[jx, self.controlNodeOut] += -1
         return current_branch
+
+
+    @classmethod
+    def from_nl( cls, params : Tuple[str, str, int, int, int, int, float] ) -> CurrentSourceControlByVoltage:
+        # CurrentSourceControlByVoltage: 'G', name, noIn, noOut, control_noIn, control_noOut, Gm
+        if params[0] != 'G' or len(params) != 7:
+            raise InvalidElement(f"Invalid parameters for CurrentSourceControlByVoltage: expected 'G'({params[0]}) as first element and 7 ({len(params)})parameters in total.")
+        return CurrentSourceControlByVoltage( nodeIn=params[2], 
+                                              nodeOut=params[3], 
+                                              controlNodeIn=params[4], 
+                                              controlNodeOut=params[5], 
+                                              Gm=params[6],
+                                              name=params[1])
 
 
 class VoltageSourceControlByCurrent(Source):
@@ -478,3 +507,15 @@ class VoltageSourceControlByCurrent(Source):
 
         return current_branch
 
+
+    @classmethod
+    def from_nl( cls, params : Tuple[str, str, int, int, int, int, float] ) -> VoltageSourceControlByCurrent:
+        # VoltageSourceControlByCurrent: 'H', name, noIn, noOut, control_noIn, control_noOut, Rm
+        if params[0] != 'H' or len(params) != 7:
+            raise InvalidElement(f"Invalid parameters for VoltageSourceControlByCurrent: expected 'H'({params[0]}) as first element and 7 ({len(params)})parameters in total.")
+        return VoltageSourceControlByCurrent( nodeIn=params[2], 
+                                              nodeOut=params[3], 
+                                              controlNodeIn=params[4], 
+                                              controlNodeOut=params[5], 
+                                              Rm=params[6],
+                                              name=params[1])
