@@ -79,9 +79,6 @@ class Resistor(Element):
         A[self.b, self.b] +=  G
         return current_branch
 
-    def update(self, b, x):
-        pass
-
 
 
 #

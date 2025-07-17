@@ -149,16 +149,21 @@ class SinusoidalVoltageSource(Source):
    
         current_branch += 1
         jx = current_branch
-        V = self.sin(t, self.amplitude, self.frequency, self.number_of_cycles, self.dc, self.angle, self.alpha, self.delay)
-        A[self.node_in, jx] +=  1
+        V = self.sin(t, self.amplitude, 
+                        self.frequency, 
+                        self.number_of_cycles, 
+                        self.dc, 
+                        self.angle, 
+                        self.alpha, 
+                        self.delay)
+
+        # Update the matrix A and vector b for the voltage source
+        A[self.node_in, jx]  +=  1
         A[self.node_out, jx] += -1
-        A[jx, self.node_in] += -1
+        A[jx, self.node_in]  += -1
         A[jx, self.node_out] +=  1
         b[jx] += V
         return current_branch
-
-    def update(self, b, x ):
-        pass
 
 
 
@@ -229,11 +234,15 @@ class PulseVoltageSource(Source):
 
 class VoltageSourceControlByVoltage(Source):
 
+    # This class represents a voltage source controlled by another voltage source.
+    # The letter is 'E'.
     def __init__(self, 
-             node_in  : int,
-             node_out : int,
-             Av       : float,
-             name : str=""
+                 node_in          : int,
+                 node_out         : int,
+                 control_node_in  : int,
+                 control_node_out : int,
+                 Av               : float,
+                 name             : str=""
             ):
         """
         Initializes a Source object.
@@ -250,6 +259,9 @@ class VoltageSourceControlByVoltage(Source):
         
         Source.__init__(self, node_in, node_out, name=name)
         self.Av = Av
+        self.control_node_in = control_node_in
+        self.control_node_out = control_node_out
+
 
     def backward(self, A, b, t : float=0, deltaT : float=0, current_branch : int=0):
 
@@ -267,4 +279,140 @@ class VoltageSourceControlByVoltage(Source):
  
 
 class CurrentSourceControlByVoltage:
+   
+   # This class represents a current source controlled by a voltage source.
+   # The letter if 'F'
+    def __init__(self, 
+             node_in  : int,
+             node_out : int,
+             control_node_in  : int,
+             control_node_out : int,
+             Ai       : float,
+             name : str=""
+            ):
+        """
+        Initializes a Source object.
+
+        Parameters:
+        node_in (int): The input node identifier.
+        node_out (int): The output node identifier.
+        Ai (float): The current gain.
+        name (str, optional): The name of the source. Defaults to an empty string.
+        
+        Calls the parent class's __init__ method to initialize the node identifiers.
+        """
+        Source.__init__(self, node_in, node_out, name=name)
+        self.Ai = Ai
+        self.control_node_in = control_node_in
+        self.control_node_out = control_node_out
+
+
+
+    def backward(self, A, b, t : float=0, deltaT : float=0, current_branch : int=0):
+
+        current_branch += 1
+        jx = current_branch
+        A[self.control_node_in , jx]  +=  1
+        A[self.control_node_out, jx]  += -1
+        A[jx, self.control_node_in]   += -1
+        A[jx, self.control_node_out]  +=  1
+        A[self.node_in , jx]          +=  self.Ai
+        A[self.node_out , jx]         += -self.Ai
+        return current_branch
+
+
+class CurrentSourceControlByVoltage(Source):
+    
+    # This class represents a current source controlled by a voltage source.
+    # The letter is 'G'.
+    def __init__(self, 
+             node_in  : int,
+             node_out : int,
+             control_node_in  : int,
+             control_node_out : int,
+             Gm       : float,
+             name     : str=""
+            ):
+        """
+        Initializes a Source object with the given parameters.
+
+        Parameters:
+        node_in (int): The input node of the source.
+        node_out (int): The output node of the source.
+        control_node_in (int): The control input node for the source.
+        control_node_out (int): The control output node for the source.
+        Gm (float): Transconductance gain of the source.
+        name (str, optional): The name of the source. Defaults to an empty string.
+
+        """
+        Source.__init__(self, node_in, node_out, name=name)
+        self.Gm = Gm
+        self.control_node_in = control_node_in
+        self.control_node_out = control_node_out
+
+    def backward(self, A, b, t : float=0, deltaT : float=0, current_branch : int=0):
+
+        G = 
+
+        current_branch += 1
+        jx = current_branch
+        A[self.node_in , jx]         +=  self.Ai
+        A[self.node_out , jx]        += -self.Ai
+        A[jx, self.node_in]          += -1
+        A[jx, self.node_out]         +=  1
+        A[jx, self.control_node_in]  +=  1
+        A[jx, self.control_node_out] += -1
+        return current_branch
+
+
+class VoltageSourceControlByCurrent(Source):
+
+    # This class represents a voltage source controlled by a current source.
+    # The letter is 'H'.
+    def __init__(self, 
+                 node_in          : int,
+                 node_out         : int,
+                 control_node_in  : int,
+                 control_node_out : int,
+                 Rm               : float,
+                 name             : str=""
+            ):
+        """
+        Initializes a Source object.
+
+        Parameters:
+        node_in (int): The input node identifier.
+        node_out (int): The output node identifier.
+        Rm (float): The resistence gain.
+        name (str, optional): The name of the source. Defaults to an empty string.
+
+        This constructor calls the parent class's __init__ method to initialize
+        the node identifiers and sets the resistence gain.
+        """
+        
+        Source.__init__(self, node_in, node_out, name=name)
+        self.Rm = Rm
+        self.control_node_in = control_node_in
+        self.control_node_out = control_node_out
+
+    def backward(self, A, b, t : float=0, deltaT : float=0, current_branch : int=0):
+        
+        current_branch += 1
+        # current main branch
+        jx = current_branch
+        current_branch += 1
+        # current control branch
+        jy = current_branch
+
+        A[self.node_in  , jx]         +=  1 # I
+        A[self.node_out , jx]         += -1 # I
+        A[self.control_node_in  , jy] +=  1 # I
+        A[self.control_node_out, jy]  += -1 # I
+        A[jx, self.control_node_in]   += -1 # V
+        A[jx, self.control_node_out]  +=  1 # V
+        A[jx, self.control_node_in]   += -1 # V
+        A[jx, self.control_node_out]  +=  1 # V
+        A[jx,jy]                      += self.Rm
+
+        return current_branch
 
