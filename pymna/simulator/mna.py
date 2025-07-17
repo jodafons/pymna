@@ -128,7 +128,7 @@ class Simulator:
         result = {"t":times}
         for node_name, node_idx in circuit.nodes.items():
             result[ node_name ] = e[ :, node_idx ] 
-        return e
+        return result
 
 
     def solve( self, A, b) -> np.array:

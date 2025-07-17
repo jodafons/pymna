@@ -44,7 +44,7 @@ class Circuit:
                        capacitance, 
                        initial_condition=initial_condition, 
                        name=name)
-        self.elements.append(C)
+        self+=C
         return C
     
     def R(self,
@@ -57,7 +57,7 @@ class Circuit:
                       self.node(b), 
                       resistence, 
                       name=name)
-        self.elements.append(R)
+        self+=R
         return R
 
 
