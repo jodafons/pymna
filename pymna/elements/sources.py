@@ -117,6 +117,9 @@ class Source:
 
 
 
+#
+# Signal sources
+#
 
 
 class SinusoidalVoltageSource(Source):
@@ -194,10 +197,10 @@ class SinusoidalVoltageSource(Source):
         
         # Vsin: I/V, name, nodeIn, nodeOut, 'SIN', DC, AMPLITUDE, FREQ, DELAY, ATTENUATION (alpha), ANGLE, NUMBER_OF_CYCLES
         if params[0] != 'I' or params[1] != 'V':
-            raise InvalidElement("Invalid parameters for SinusoidalVoltageSource: expected 'V' or 'I' as first element.")
+            raise InvalidElement(f"Invalid parameters for SinusoidalVoltageSource: expected 'V' or 'I' ({params[0]}) as first element.")
         
-        if params[3] != "SIN":
-            raise InvalidElement("Invalid parameters for SinusoidalVoltageSource: expected 'SIN' as third element.")
+        if params[4] != "SIN" and len(params) != 12:
+            raise InvalidElement(f"Invalid parameters for SinusoidalVoltageSource: expected 'SIN' ({params[4]}) as third element and 12 {len(params)} parameters in total.")
 
         return SinusoidalVoltageSource (nodeIn=params[2], 
                                         nodeOut=params[3], 
@@ -276,12 +279,12 @@ class PulseVoltageSource(Source):
 
 
     @classmethod
-    def from_nl( cls, params : Union[Tuple[str, str, int, int, float, float, int, float, float, float]] ) -> PulseVoltageSource:
+    def from_nl( cls, params : Tuple[str, str, int, int, float, float, int, float, float, float]] ) -> PulseVoltageSource:
         # PulseVoltageSource: 'I/V', name, nodeIn, nodeOut, 'PULSE', AMPLITUDE_1, AMPLITUDE_2, DELAY, RISE_TIME, FALL_TIME, TIME_ON, PERIOUD, NUMBER_OF_CYCLES
         if params[0] != 'I' or params[1] != 'V':
-            raise InvalidElement("Invalid parameters for PulseVoltageSource: expected 'I' as first element.")
-        if params[3] != "PULSE":
-            raise InvalidElement("Invalid parameters for PulseVoltageSource: expected 'PULSE' as third element.")
+            raise InvalidElement(f"Invalid parameters for PulseVoltageSource: expected 'I/V' ({params[0]}) as first element.")
+        if params[4] != "PULSE" and len(params) != 13:
+            raise InvalidElement(f"Invalid parameters for PulseVoltageSource: expected 'PULSE' ({params[4]}) as third element and 13 ({len(params)}) parameters in total.")
         return PulseVoltageSource( nodeIn=params[2],
                                    nodeOut=params[3],
                                    amplitude_1=params[5],
@@ -294,6 +297,10 @@ class PulseVoltageSource(Source):
                                    number_of_cycles=params[12])
 
 
+
+#
+# Voltage and current source gains
+#
 
 
 class VoltageSourceControlByVoltage(Source):
