@@ -25,8 +25,9 @@ __all__ = [
 
 import numpy as np
 
-from pymna import enumerator as enum
+from pymna import enumerator as en1um
 from pymna.elements import Element
+from pymna.exceptions import InvalidElement
 from typing import Tuple
 
 
@@ -37,15 +38,15 @@ from typing import Tuple
 class Resistor(Element):
 
     #               
-    #        /\    /\    /\
-    # a o---/  \  /  \  /  \  /---o b
-    #           \/    \/    \/
+    #           /\    /\    /\
+    # noIn o---/  \  /  \  /  \  /---o noOut
+    #              \/    \/    \/
     #
     def __init__(self, 
-             a : int, 
-             b : int, 
-             resistence : float, 
-             name : str=""
+                 noIn       : int, 
+                 noOut      : int, 
+                 resistence : float, 
+                 name       : str=""
             ):
         """
         Initializes an instance of the Element class.
@@ -58,8 +59,8 @@ class Resistor(Element):
 
         """
         Element.__init__(self,name)
-        self.a = a # node 1
-        self.b = b # node 2
+        self.noIn = noIn # node 1
+        self.noOut = noOut # node 2
         self.R = resistence # component value
 
 
@@ -73,11 +74,19 @@ class Resistor(Element):
                  current_branch : int, 
                  ):
         G = (1/self.R)
-        A[self.a, self.a] +=  G
-        A[self.a, self.b] += -G
-        A[self.b, self.a] += -G
-        A[self.b, self.b] +=  G
+        A[self.noIn , self.noIn ] +=  G
+        A[self.noIn , self.noOut] += -G
+        A[self.noOut, self.noIn ] += -G
+        A[self.noOut, self.noOut] +=  G
         return current_branch
+
+
+    @classmethod
+    def from_nl( cls, params : Tuple[str, str, int, int, float] ) -> Resistor:
+        # Resistor: 'R', name, noIn, noOut, resistance
+        if params[0]!="R":
+            raise InvalidElement("Invalid parameters for Resistor: expected 'R' as first element.")
+        return Resistor(noIn=params[2], noOut=params[3], resistence=params[4], name=params[1])
 
 
 
@@ -111,8 +120,8 @@ class Capacitor(Element):
 
         """
         Element.__init__(self,name)
-        self.a  = a # node 1
-        self.b  = b # node 2
+        self.noIn  = a # node 1
+        self.noOut  = b # node 2
         self.C  = capacitance # component value
         self.ic = initial_condition
 
@@ -129,19 +138,27 @@ class Capacitor(Element):
         #
         R = deltaT/self.C # dt/C
         G = (1/R) # C/dt
-        A[self.a, self.a] +=  G
-        A[self.a, self.b] += -G
-        A[self.b, self.a] += -G
-        A[self.b, self.b] +=  G
-        b[self.a]         +=  G*self.ic # +C/dt v(t0)
-        b[self.b]         += -G*self.ic # -C/dt v(t0)
+        A[self.noIn, self.noIn] +=  G
+        A[self.noIn, self.noOut] += -G
+        A[self.noOut, self.noIn] += -G
+        A[self.noOut, self.noOut] +=  G
+        b[self.noIn]         +=  G*self.ic # +C/dt v(t0)
+        b[self.noOut]         += -G*self.ic # -C/dt v(t0)
         return current_branch
 
     #
     # Update all initial conditions
     #
     def update(self, b, x):
-        self.ic = x[self.a] - x[self.b]
+        self.ic = x[self.noIn] - x[self.noOut]
+
+
+    @classmethod
+    def from_nl( cls, params : Union[Tuple[str, str, int, int, float] , Tuple[str, str, int, int, float, float]] ) -> Capacitor:
+        # Capacitor: 'C', name, noIn, noOut, capacitance, ic=0
+        if params[0]!="C":
+            raise InvalidElement("Invalid parameters for Capacitor: expected 'C' as first element.")
+        return Capacitor(noIn=params[2], noOut=params[3], capacitance=params[4], name=params[1] , initial_condition=params[5] if len(params) > 5 else 0)
 
 
 
@@ -169,8 +186,8 @@ class Indutor(Element):
         name (str, optional): The name of the component. Defaults to an empty string.
         """
         Element.__init__(self, name)
-        self.a  = a  # node 1
-        self.b  = b  # node 2
+        self.noIn  = a  # node 1
+        self.noOut  = b  # node 2
         self.L  = inductance  # component value
         self.ic = initial_condition  # initial condition
         
@@ -190,10 +207,10 @@ class Indutor(Element):
         current_branch+=1
         jx = current_branch
         R = self.L/deltaT # L/dt
-        A[self.a, jx]  +=  1 # current out node a
-        A[self.b, jx]  += -1 # current in node b
-        A[jx, self.a]  += -1 # Va
-        A[jx, self.b]  +=  1 # Vb
+        A[self.noIn, jx]  +=  1 # current out node a
+        A[self.noOut, jx]  += -1 # current in node b
+        A[jx, self.noIn]  += -1 # Va
+        A[jx, self.noOut]  +=  1 # Vb
         A[jx, jx]      += R
         b[jx]          += R*self.ic
         return current_branch
@@ -205,4 +222,9 @@ class Indutor(Element):
         self.ic = x[self.jx]
 
 
-
+    @classmethod
+    def from_nl( cls, params : Union[Tuple[str, str, int, int, float] , Tuple[str, str, int, int, float, float]] ) -> Indutor:
+        # Inductor: 'L', name, noIn, noOut, inductance, ic=0
+        if params[0]!="L":
+            raise InvalidElement("Invalid parameters for Inductor: expected 'L' as first element.")
+        return Indutor(noIn=params[2], noOut=params[3], inductance=params[4], name=params[1] , initial_condition=params[5] if len(params) > 5 else 0)
