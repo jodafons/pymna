@@ -1,8 +1,32 @@
 
 
+"""
+This module provides classes and functions for simulating various types of voltage sources 
+in electrical circuits. It includes implementations for sinusoidal and pulse voltage sources, 
+as well as a constant DC voltage source. The sources can be characterized by parameters such 
+as amplitude, frequency, delay, and damping factors, allowing for flexible circuit simulations.
+
+Classes:
+- Source: Base class for all sources in the circuit.
+- SinusoidalVoltageSource: Represents a sinusoidal voltage source.
+- PulseVoltageSource: Represents a pulse voltage source.
+
+Functions:
+- sin: Calculates the value of a sinusoidal voltage source at a given time.
+- pulse: Calculates the value of a pulse voltage source at a given time.
+- dc: Returns a constant DC voltage value.
+"""
+
 __all__ = [
             "PulseVoltageSource",
             "SinusoidalVoltageSource",
+            "VoltageSourceControlByVoltage",
+            "CurrentSourceControlByVoltage",
+            "CurrentSourceControlByVoltage",
+            "VoltageSourceControlByCurrent",
+            "sin",
+            "pulse",
+            "dc"
         ]
 
 import numpy as np
@@ -20,7 +44,7 @@ def sin(t                : float,
         number_of_cycles : int,
         dc               : float=0,
         angle            : float=0,
-        alpha            : float=0,
+        attenuation      : float=0,
         delay            : float=0
         ) -> float:
     """
@@ -29,7 +53,7 @@ def sin(t                : float,
     if (t < delay) or (t>(delay + (1/frequency)*number_of_cycles)):
         V = dc + amplitude * np.sin( (np.pi * angle)/180 )
     else:
-        V = (dc + amplitude*np.exp( -1 * alpha * (t-delay) )) * np.sin( 2*np.pi*frequency*(t-delay) + (np.pi*angle)/180 )
+        V = (dc + amplitude*np.exp( -1 * attenuation * (t-delay) )) * np.sin( 2*np.pi*frequency*(t-delay) + (np.pi*angle)/180 )
     return V
 
 
@@ -98,46 +122,42 @@ class Source:
 class SinusoidalVoltageSource(Source):
 
     def __init__(self,
-                 nodeIn  : int,
-                 nodeOut  : int,
-                 amplitude : float,
-                 frequency : float,
-                 number_of_cycles : int,
-                 dc        : float=0,
-                 delay     : float=0,
-                 angle     : float=0,
-                 alpha     : float=0,
-                 name      : str=""
-                ):
-            """
-            Initializes an instance of the IndependentSource class.
+                     nodeIn           : int,
+                     nodeOut          : int,
+                     amplitude        : float,
+                     frequency        : float,
+                     number_of_cycles : int,
+                     dc               : float=0,
+                     delay            : float=0,
+                     angle            : float=0,
+                     attenuation      : float=0,
+                     name             : str=""
+                    ):
+                """
+                Initializes an instance of the IndependentSource class.
 
-            This class represents an independent source in a circuit simulation,
-            characterized by its amplitude, frequency, number of cycles, and other
-            parameters that define its behavior.
+                Parameters:
+                nodeIn (int): The input node number.
+                nodeOut (int): The output node number.
+                amplitude (float): The amplitude of the source.
+                frequency (float): The frequency of the source.
+                number_of_cycles (int): The number of cycles for the source.
+                dc (float, optional): The DC offset. Defaults to 0.
+                delay (float, optional): The delay before the source starts. Defaults to 0.
+                angle (float, optional): The phase angle of the source. Defaults to 0.
+                attenuation (float, optional): The attenuation parameter for the source. Defaults to 0.
+                name (str, optional): The name of the source. Defaults to an empty string.
+                """
 
-            Parameters:
-            nodeIn (int): The input node of the source.
-            nodeOut (int): The output node of the source.
-            amplitude (float): The peak amplitude of the source.
-            frequency (float): The frequency of the source in Hertz.
-            number_of_cycles (int): The number of cycles the source will operate.
-            dc (float, optional): The DC offset of the source. Defaults to 0.
-            delay (float, optional): The delay before the source starts. Defaults to 0.
-            angle (float, optional): The phase angle of the source in degrees. Defaults to 0.
-            alpha (float, optional): The damping factor of the source. Defaults to 0.
-            name (str, optional): The name of the source. Defaults to an empty string.
+                IndependentSource.__init__(self, name, nodeIn, nodeOut)
+                self.amplitude = amplitude
+                self.frequency = frequency
+                self.number_of_cycles = number_of_cycles
+                self.dc        = dc
+                self.angle     = angle
+                self.attenuation     = attenuation
+                self.delay     = delay
 
-            """
-
-            IndependentSource.__init__(self, name, nodeIn, nodeOut)
-            self.amplitude = amplitude
-            self.frequency = frequency
-            self.number_of_cycles = number_of_cycles
-            self.dc        = dc
-            self.angle     = angle
-            self.alpha     = alpha
-            self.delay     = delay
 
     def backward(self, 
                  A : np.array, 
@@ -154,7 +174,7 @@ class SinusoidalVoltageSource(Source):
                         self.number_of_cycles, 
                         self.dc, 
                         self.angle, 
-                        self.alpha, 
+                        self.attenuation, 
                         self.delay)
 
         # Update the matrix A and vector b for the voltage source
@@ -167,37 +187,27 @@ class SinusoidalVoltageSource(Source):
 
 
 
-    @classmethod
-    def from_nl( cls, params : Union[Tuple[str, str, int, int, float] , Tuple[str, str, int, int, float, float]] ) -> Indutor:
-        # Inductor: 'L', name, noIn, noOut, inductance, ic=0
-        if params[0]!="L":
-            raise InvalidElement("Invalid parameters for Inductor: expected 'L' as first element.")
-        return Indutor(noIn=params[2], noOut=params[3], inductance=params[4], name=params[1] , initial_condition=params[5] if len(params) > 5 else 0)
-
 
 
     @classmethod
-    def from_nl( cls, params : Union[Tuple[str, str, int, int, float, float, int, float, float, float]] ) -> SinusoidalVoltageSource:
-        """
-        Creates an instance of SinusoidalVoltageSource from a tuple of parameters.
+    def from_nl( cls, params : Tuple[str, str, int, int, str, float, float, float, float, float, float, int] ) -> SinusoidalVoltageSource:
         
-        Parameters:
-        params (tuple): A tuple containing the parameters for the source.
+        # Vsin: I/V, name, nodeIn, nodeOut, 'SIN', DC, AMPLITUDE, FREQ, DELAY, ATTENUATION (alpha), ANGLE, NUMBER_OF_CYCLES
+        if params[0] != 'I' or params[1] != 'V':
+            raise InvalidElement("Invalid parameters for SinusoidalVoltageSource: expected 'V' or 'I' as first element.")
         
-        Returns:
-        SinusoidalVoltageSource: An instance of the SinusoidalVoltageSource class.
-        """
-        if params[0] != 'Vsin':
-            raise InvalidElement("Invalid parameters for SinusoidalVoltageSource: expected 'Vsin' as first element.")
-        return SinusoidalVoltageSource(nodeIn=params[2], 
+        if params[3] != "SIN":
+            raise InvalidElement("Invalid parameters for SinusoidalVoltageSource: expected 'SIN' as third element.")
+
+        return SinusoidalVoltageSource (nodeIn=params[2], 
                                         nodeOut=params[3], 
-                                        amplitude=params[4], 
-                                        frequency=params[5], 
-                                        number_of_cycles=params[6],
-                                        dc=params[7],
+                                        amplitude=params[6], 
+                                        frequency=params[7], 
+                                        number_of_cycles=params[11],
+                                        dc=params[5],
                                         delay=params[8],
-                                        angle=params[9],
-                                        alpha=params[10],
+                                        angle=params[10],
+                                        attenuation=params[9],
                                         name=params[1])
 
 
@@ -216,7 +226,7 @@ class PulseVoltageSource(Source):
              fall_time   : float=0,
              time_on     : float=0,
              angle       : float=0,
-             alpha       : float=0,
+             attenuation       : float=0,
              name        : str=""
             ):
         """
@@ -239,7 +249,7 @@ class PulseVoltageSource(Source):
         fall_time (float, optional): The time it takes for the signal to fall to zero. Default is 0.
         time_on (float, optional): The duration for which the source is active. Default is 0.
         angle (float, optional): The phase angle of the source signal. Default is 0.
-        alpha (float, optional): The damping factor for the source signal. Default is 0.
+        attenuation (float, optional): The damping factor for the source signal. Default is 0.
         name (str, optional): The name of the source. Default is an empty string.
 
         """
@@ -250,7 +260,7 @@ class PulseVoltageSource(Source):
         self.number_of_cycles = number_of_cycles
         self.dc        = dc
         self.angle     = angle
-        self.alpha     = alpha
+        self.attenuation     = attenuation
         self.delay     = delay
 
 
@@ -265,7 +275,23 @@ class PulseVoltageSource(Source):
         return current_branch
 
 
-
+    @classmethod
+    def from_nl( cls, params : Union[Tuple[str, str, int, int, float, float, int, float, float, float]] ) -> PulseVoltageSource:
+        # PulseVoltageSource: 'I/V', name, nodeIn, nodeOut, 'PULSE', AMPLITUDE_1, AMPLITUDE_2, DELAY, RISE_TIME, FALL_TIME, TIME_ON, PERIOUD, NUMBER_OF_CYCLES
+        if params[0] != 'I' or params[1] != 'V':
+            raise InvalidElement("Invalid parameters for PulseVoltageSource: expected 'I' as first element.")
+        if params[3] != "PULSE":
+            raise InvalidElement("Invalid parameters for PulseVoltageSource: expected 'PULSE' as third element.")
+        return PulseVoltageSource( nodeIn=params[2],
+                                   nodeOut=params[3],
+                                   amplitude_1=params[5],
+                                   amplitude_2=params[6],
+                                   delay=params[7],
+                                   rise_time=params[8],
+                                   fall_time=params[9],
+                                   time_on=params[10],
+                                   T=params[11],
+                                   number_of_cycles=params[12])
 
 class VoltageSourceControlByVoltage(Source):
 
