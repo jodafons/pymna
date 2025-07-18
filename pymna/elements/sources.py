@@ -1,33 +1,19 @@
 
-
 """
-This module provides classes and functions for simulating various types of voltage sources 
-in electrical circuits. It includes implementations for sinusoidal and pulse voltage sources, 
-as well as a constant DC voltage source. The sources can be characterized by parameters such 
-as amplitude, frequency, delay, and damping factors, allowing for flexible circuit simulations.
+This module defines various types of voltage sources used in circuit simulations.
+It includes classes for sinusoidal and pulse voltage sources, as well as utility
+functions to calculate their values at a given time.
 
 Classes:
-- Source: Base class for all sources in the circuit.
-- SinusoidalVoltageSource: Represents a sinusoidal voltage source.
-- PulseVoltageSource: Represents a pulse voltage source.
+    - Source: Base class for all sources in a circuit.
+    - SinusoidalVoltageSource: Represents a sinusoidal voltage source.
+    - PulseVoltageSource: Represents a pulse voltage source.
 
 Functions:
-- sin: Calculates the value of a sinusoidal voltage source at a given time.
-- pulse: Calculates the value of a pulse voltage source at a given time.
-- dc: Returns a constant DC voltage value.
+    - sin: Calculates the value of a sinusoidal voltage source at a given time.
+    - pulse: Calculates the value of a pulse voltage source at a given time.
+    - dc: Returns a constant DC voltage value.
 """
-
-__all__ = [
-            "PulseVoltageSource",
-            "SinusoidalVoltageSource",
-            "VoltageSourceControlByVoltage",
-            "CurrentSourceControlByVoltage",
-            "CurrentSourceControlByVoltage",
-            "VoltageSourceControlByCurrent",
-            "sin",
-            "pulse",
-            "dc"
-        ]
 
 import numpy as np
 
@@ -35,8 +21,6 @@ from pymna import enumerator as enum
 from pymna.exceptions import InvalidElement
 from typing import Tuple
 from abc import ABC
-
-
 
 def sin(t                : float,
         amplitude        : float,
@@ -49,13 +33,25 @@ def sin(t                : float,
         ) -> float:
     """
     Calculates the value of a sinusoidal voltage source at time t.
+
+    Parameters:
+        t (float): The time at which to calculate the voltage.
+        amplitude (float): The amplitude of the sinusoidal source.
+        frequency (float): The frequency of the sinusoidal source.
+        number_of_cycles (int): The number of cycles for the source.
+        dc (float, optional): The DC offset. Defaults to 0.
+        angle (float, optional): The phase angle of the source. Defaults to 0.
+        attenuation (float, optional): The attenuation parameter for the source. Defaults to 0.
+        delay (float, optional): The delay before the source starts. Defaults to 0.
+
+    Returns:
+        float: The calculated voltage at time t.
     """
     if (t < delay) or (t>(delay + (1/frequency)*number_of_cycles)):
         V = dc + amplitude * np.sin( (np.pi * angle)/180 )
     else:
         V = (dc + amplitude*np.exp( -1 * attenuation * (t-delay) )) * np.sin( 2*np.pi*frequency*(t-delay) + (np.pi*angle)/180 )
     return V
-
 
 def pulse(t               : float,
           step            : float,
@@ -69,6 +65,20 @@ def pulse(t               : float,
         ) -> float:
     """
     Calculates the value of a pulse voltage source at time t.
+
+    Parameters:
+        t (float): The time at which to calculate the voltage.
+        step (float): The time step for the pulse calculation.
+        amplitude_1 (float): The first amplitude value for the pulse.
+        amplitude_2 (float): The second amplitude value for the pulse.
+        T (float): The period of the pulse signal.
+        rise_time (float, optional): The time it takes for the signal to rise. Defaults to 0.
+        fall_time (float, optional): The time it takes for the signal to fall. Defaults to 0.
+        time_on (float, optional): The duration for which the pulse is active. Defaults to 0.
+        delay (float, optional): The delay before the pulse starts. Defaults to 0.
+
+    Returns:
+        float: The calculated voltage at time t.
     """
     rise_time = step if rise_time==0 else rise_time
     fall_time = step if fall_time==0 else fall_time
@@ -90,19 +100,23 @@ def pulse(t               : float,
         V = amplitude_1
     return V
 
-
 def dc(dc    : float 
        ) -> float:
     """
     Returns a constant DC voltage value.
+
+    Parameters:
+        dc (float): The DC voltage value to return.
+
+    Returns:
+        float: The constant DC voltage value.
     """
     return dc
 
-
-
 class Source:
+    
     def __init__(self,
-                 name     : str,
+                 name    : str,
                  nodeIn  : int,
                  nodeOut : int,
                  ):
@@ -110,17 +124,15 @@ class Source:
         Initializes a Source object.
         This class represents a source in a circuit, which can be used to
         provide voltage or current to a circuit.
+
+        Parameters:
+            name (str): The name of the source.
+            nodeIn (int): The input node number.
+            nodeOut (int): The output node number.
         """
-        self.nodeIn = nodeIn
-        self.nodeOut = nodeOut
+        self.nodeIn   = nodeIn
+        self.nodeOut  = nodeOut
         self.name     = name
-
-
-
-#
-# Signal sources
-#
-
 
 class SinusoidalVoltageSource(Source):
 
@@ -136,40 +148,40 @@ class SinusoidalVoltageSource(Source):
                      attenuation      : float=0,
                      name             : str=""
                     ):
-                """
-                Initializes an instance of the IndependentSource class.
+        """
+        Initializes an instance of the SinusoidalVoltageSource class.
 
-                Parameters:
-                nodeIn (int): The input node number.
-                nodeOut (int): The output node number.
-                amplitude (float): The amplitude of the source.
-                frequency (float): The frequency of the source.
-                number_of_cycles (int): The number of cycles for the source.
-                dc (float, optional): The DC offset. Defaults to 0.
-                delay (float, optional): The delay before the source starts. Defaults to 0.
-                angle (float, optional): The phase angle of the source. Defaults to 0.
-                attenuation (float, optional): The attenuation parameter for the source. Defaults to 0.
-                name (str, optional): The name of the source. Defaults to an empty string.
-                """
-
-                IndependentSource.__init__(self, name, nodeIn, nodeOut)
-                self.amplitude = amplitude
-                self.frequency = frequency
-                self.number_of_cycles = number_of_cycles
-                self.dc        = dc
-                self.angle     = angle
-                self.attenuation     = attenuation
-                self.delay     = delay
-
+        Parameters:
+            nodeIn (int): The input node number.
+            nodeOut (int): The output node number.
+            amplitude (float): The amplitude of the source.
+            frequency (float): The frequency of the source.
+            number_of_cycles (int): The number of cycles for the source.
+            dc (float, optional): The DC offset. Defaults to 0.
+            delay (float, optional): The delay before the source starts. Defaults to 0.
+            angle (float, optional): The phase angle of the source. Defaults to 0.
+            attenuation (float, optional): The attenuation parameter for the source. Defaults to 0.
+            name (str, optional): The name of the source. Defaults to an empty string.
+        """
+        Source.__init__(self, name, nodeIn, nodeOut)
+        self.amplitude   = amplitude
+        self.frequency   = frequency
+        self.number_of_cycles = number_of_cycles
+        self.dc          = dc
+        self.angle       = angle
+        self.attenuation = attenuation
+        self.delay       = delay
 
     def backward(self, 
-                 A : np.array, 
-                 b : np.array, 
-                 t : float,
-                 deltaT : float,
-                 current_branch : int, 
-                 ):
-   
+                 A                : np.array, 
+                 b                : np.array, 
+                 x                : np.array,
+                 x_newton_raphson : np.array,
+                 t                : float,
+                 dt               : float,
+                 current_branch   : int, 
+                 ) -> int:
+                 
         current_branch += 1
         jx = current_branch
         V = self.sin(t, self.amplitude, 
@@ -188,13 +200,18 @@ class SinusoidalVoltageSource(Source):
         b[jx] += V
         return current_branch
 
-
-
-
-
     @classmethod
-    def from_nl( cls, params : Tuple[str, str, int, int, str, float, float, float, float, float, float, int] ) -> SinusoidalVoltageSource:
-        
+    def from_nl(cls, params: Tuple[str, str, int, int, str, float, float, float, float, float, float, int]) -> SinusoidalVoltageSource:
+        """
+        Creates a SinusoidalVoltageSource instance from a parameter tuple.
+
+        Parameters:
+            cls: The class itself.
+            params (Tuple): A tuple containing parameters for the source.
+
+        Returns:
+            SinusoidalVoltageSource: An instance of the SinusoidalVoltageSource class.
+        """
         # Vsin: I/V, name, nodeIn, nodeOut, 'SIN', DC, AMPLITUDE, FREQ, DELAY, ATTENUATION (alpha), ANGLE, NUMBER_OF_CYCLES
         if params[0] != 'I' or params[1] != 'V':
             raise InvalidElement(f"Invalid parameters for SinusoidalVoltageSource: expected 'V' or 'I' ({params[0]}) as first element.")
@@ -202,7 +219,7 @@ class SinusoidalVoltageSource(Source):
         if params[4] != "SIN" and len(params) != 12:
             raise InvalidElement(f"Invalid parameters for SinusoidalVoltageSource: expected 'SIN' ({params[4]}) as third element and 12 {len(params)} parameters in total.")
 
-        return SinusoidalVoltageSource (nodeIn=params[2], 
+        return SinusoidalVoltageSource(nodeIn=params[2], 
                                         nodeOut=params[3], 
                                         amplitude=params[6], 
                                         frequency=params[7], 
@@ -212,8 +229,6 @@ class SinusoidalVoltageSource(Source):
                                         angle=params[10],
                                         attenuation=params[9],
                                         name=params[1])
-
-
 
 class PulseVoltageSource(Source):
 
@@ -241,42 +256,46 @@ class PulseVoltageSource(Source):
         fall time, and delay to simulate real-world behavior.
 
         Parameters:
-        nodeIn (int): The input node of the source.
-        nodeOut (int): The output node of the source.
-        amplitude_1 (float): The first amplitude value for the source.
-        amplitude_2 (float): The second amplitude value for the source.
-        T (float): The period of the source signal.
-        number_of_cycles (int, optional): The number of cycles to simulate. Default is 1.
-        delay (float, optional): The delay before the source starts. Default is 0.
-        rise_time (float, optional): The time it takes for the signal to rise to its peak. Default is 0.
-        fall_time (float, optional): The time it takes for the signal to fall to zero. Default is 0.
-        time_on (float, optional): The duration for which the source is active. Default is 0.
-        angle (float, optional): The phase angle of the source signal. Default is 0.
-        attenuation (float, optional): The damping factor for the source signal. Default is 0.
-        name (str, optional): The name of the source. Default is an empty string.
-
+            nodeIn (int): The input node of the source.
+            nodeOut (int): The output node of the source.
+            amplitude_1 (float): The first amplitude value for the source.
+            amplitude_2 (float): The second amplitude value for the source.
+            T (float): The period of the source signal.
+            number_of_cycles (int, optional): The number of cycles to simulate. Default is 1.
+            delay (float, optional): The delay before the source starts. Default is 0.
+            rise_time (float, optional): The time it takes for the signal to rise to its peak. Default is 0.
+            fall_time (float, optional): The time it takes for the signal to fall to zero. Default is 0.
+            time_on (float, optional): The duration for which the source is active. Default is 0.
+            angle (float, optional): The phase angle of the source. Default is 0.
+            attenuation (float, optional): The damping factor for the source. Default is 0.
+            name (str, optional): The name of the source. Default is an empty string.
         """
-        
-        Source.__init__(self, nodeIn, nodeOut, name=name)
-        self.amplitude = amplitude
-        self.frequency = frequency
+        Source.__init__(self, name, nodeIn, nodeOut)
+        self.amplitude   = amplitude
+        self.frequency   = frequency
         self.number_of_cycles = number_of_cycles
-        self.dc        = dc
-        self.angle     = angle
-        self.attenuation     = attenuation
-        self.delay     = delay
+        self.dc          = dc
+        self.angle       = angle
+        self.attenuation = attenuation
+        self.delay       = delay
 
-
-    def backward(self, A, b, t : float=0, deltaT : float=0, current_branch : int=0):
+    def backward(self, 
+                 A                : np.array, 
+                 b                : np.array, 
+                 x                : np.array,
+                 x_newton_raphson : np.array,
+                 t                : float,
+                 dt               : float,
+                 current_branch   : int, 
+                 ) -> int:
 
         V = self.pulse(t,...)
-        A[self.nodeIn,self.jx] +=  1
-        A[self.nodeOut,self.jx] += -1
-        A[self.jx, self.nodeIn] += -1
+        A[self.nodeIn,self.jx]   +=  1
+        A[self.nodeOut,self.jx]  += -1
+        A[self.jx, self.nodeIn]  += -1
         A[self.jx, self.nodeOut] +=  1
         b[self.jx] += -V
         return current_branch
-
 
     @classmethod
     def from_nl( cls, params : Tuple[str, str, int, int, float, float, int, float, float, float]] ) -> PulseVoltageSource:
@@ -295,7 +314,6 @@ class PulseVoltageSource(Source):
                                    time_on=params[10],
                                    T=params[11],
                                    number_of_cycles=params[12])
-
 
 
 #
@@ -328,24 +346,30 @@ class VoltageSourceControlByVoltage(Source):
         the node identifiers and sets the voltage gain.
         """
         
-        Source.__init__(self, nodeIn, nodeOut, name=name)
+        Source.__init__(self, name, nodeIn, nodeOut)
         self.Av = Av
         self.controlNodeIn = controlNodeIn
         self.controlNodeOut = controlNodeOut
 
-
-    def backward(self, A, b, t : float=0, deltaT : float=0, current_branch : int=0):
+    def backward(self, 
+                 A                : np.array, 
+                 b                : np.array, 
+                 x                : np.array,
+                 x_newton_raphson : np.array,
+                 t                : float,
+                 dt               : float,
+                 current_branch   : int, 
+                 ) -> int:
 
         current_branch += 1
         jx = current_branch
-        A[self.nodeIn , jx]         +=  1
-        A[self.nodeOut , jx]        += -1
-        A[jx, self.nodeIn]          += -1
-        A[jx, self.nodeOut]         += 1
+        A[self.nodeIn , jx]        +=  1
+        A[self.nodeOut , jx]       += -1
+        A[jx, self.nodeIn]         += -1
+        A[jx, self.nodeOut]        += 1
         A[jx, self.controlNodeIn]  += self.Av
         A[jx, self.controlNodeOut] += -self.Av 
         return current_branch
-
 
     @classmethod
     def from_nl( cls, params : Tuple[str, str, int, int, int, int, float] ) -> VoltageSourceControlByVoltage:
@@ -359,7 +383,6 @@ class VoltageSourceControlByVoltage(Source):
                                               Av=params[6],
                                               name=params[1])
  
-
 class CurrentSourceControlByVoltage:
    
    # This class represents a current source controlled by a voltage source.
@@ -383,14 +406,20 @@ class CurrentSourceControlByVoltage:
         
         Calls the parent class's __init__ method to initialize the node identifiers.
         """
-        Source.__init__(self, nodeIn, nodeOut, name=name)
+        Source.__init__(self, name, nodeIn, nodeOut)
         self.Ai = Ai
-        self.controlNodeIn = controlNodeIn
+        self.controlNodeIn  = controlNodeIn
         self.controlNodeOut = controlNodeOut
 
-
-
-    def backward(self, A, b, t : float=0, deltaT : float=0, current_branch : int=0):
+    def backward(self, 
+                 A                : np.array, 
+                 b                : np.array, 
+                 x                : np.array,
+                 x_newton_raphson : np.array,
+                 t                : float,
+                 dt               : float,
+                 current_branch   : int, 
+                 ) -> int:
 
         current_branch += 1
         jx = current_branch
@@ -401,7 +430,6 @@ class CurrentSourceControlByVoltage:
         A[self.nodeIn , jx]          +=  self.Ai
         A[self.nodeOut , jx]         += -self.Ai
         return current_branch
-
 
     @classmethod
     def from_nl( cls, params : Tuple[str, str, int, int, int, int, float] ) -> CurrentSourceControlByVoltage:
@@ -414,7 +442,6 @@ class CurrentSourceControlByVoltage:
                                               controlNodeOut=params[5], 
                                               Ai=params[6],
                                               name=params[1])
-
 
 class CurrentSourceControlByVoltage(Source):
     
@@ -440,12 +467,20 @@ class CurrentSourceControlByVoltage(Source):
         name (str, optional): The name of the source. Defaults to an empty string.
 
         """
-        Source.__init__(self, nodeIn, nodeOut, name=name)
+        Source.__init__(self, name, nodeIn, nodeOut)
         self.Gm = Gm
         self.controlNodeIn = controlNodeIn
         self.controlNodeOut = controlNodeOut
 
-    def backward(self, A, b, t : float=0, deltaT : float=0, current_branch : int=0):
+    def backward(self, 
+                 A                : np.array, 
+                 b                : np.array, 
+                 x                : np.array,
+                 x_newton_raphson : np.array,
+                 t                : float,
+                 dt               : float,
+                 current_branch   : int, 
+                 ) -> int:
 
         current_branch += 1
         jx = current_branch
@@ -456,7 +491,6 @@ class CurrentSourceControlByVoltage(Source):
         A[jx, self.controlNodeIn ] +=  1
         A[jx, self.controlNodeOut] += -1
         return current_branch
-
 
     @classmethod
     def from_nl( cls, params : Tuple[str, str, int, int, int, int, float] ) -> CurrentSourceControlByVoltage:
@@ -469,7 +503,6 @@ class CurrentSourceControlByVoltage(Source):
                                               controlNodeOut=params[5], 
                                               Gm=params[6],
                                               name=params[1])
-
 
 class VoltageSourceControlByCurrent(Source):
 
@@ -487,14 +520,21 @@ class VoltageSourceControlByCurrent(Source):
      
         """
         
-        Source.__init__(self, nodeIn, nodeOut, name=name)
+        Source.__init__(self, name, nodeIn, nodeOut)
         self.Rm = Rm
         self.controlNodeIn = controlNodeIn
         self.controlNodeOut = controlNodeOut
 
+    def backward(self, 
+                 A                : np.array, 
+                 b                : np.array, 
+                 x                : np.array,
+                 x_newton_raphson : np.array,
+                 t                : float,
+                 dt               : float,
+                 current_branch   : int, 
+                 ) -> int:
 
-    def backward(self, A, b, t : float=0, deltaT : float=0, current_branch : int=0):
-        
         current_branch += 1
         # current main branch
         jx = current_branch
@@ -513,7 +553,6 @@ class VoltageSourceControlByCurrent(Source):
         A[jx,jy]                    += self.Rm
 
         return current_branch
-
 
     @classmethod
     def from_nl( cls, params : Tuple[str, str, int, int, int, int, float] ) -> VoltageSourceControlByCurrent:

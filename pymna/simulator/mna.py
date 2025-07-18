@@ -115,7 +115,8 @@ class Simulator:
 
                         current_branch   = circuit.number_of_nodes
                         for elm in circuit.elements:
-                            current_branch = elm.backward(A,b,t,delta_t,current_branch)
+
+                            current_branch = elm.backward(A,b,x,x_newton_raphson,t,delta_t,current_branch)
 
                         if reshape:
                             max_nodes = current_branch+1
@@ -137,7 +138,7 @@ class Simulator:
                 else:
                     current_branch   = circuit.number_of_nodes
                     for elm in circuit.elements:
-                        current_branch = elm.backward(A,b,t,delta_t,current_branch)
+                        current_branch = elm.backward(A,b,x,x_newton_raphson,t,delta_t,current_branch)
                     if reshape:
                         max_nodes = current_branch+1
                         A = A[0:max_nodes, 0:max_nodes]

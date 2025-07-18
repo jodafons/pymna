@@ -16,7 +16,9 @@ from . import elements
 __all__.extend( elements.__all__ )
 from .elements import *
 
-
+from . import circuit
+__all__.extend( circuit.__all__ )
+from .circuit import *
 
 
 

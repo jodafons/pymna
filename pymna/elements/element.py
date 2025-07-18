@@ -16,13 +16,7 @@ class Element(ABC):
         name (str): The name of the element.
         """
         self.name = name
-    def __init__(self, name : str):
-        """
-
-        """
-        self.name=name
-
-
+ 
     def update( self, b : np.array, x : np.array):
         """
         Updates the internal state of the element based on the provided parameters.
@@ -34,7 +28,6 @@ class Element(ABC):
             The state vector or array that is part of the update operation.
         """
         pass
-
 
     def backward(self, A, b, t : float=0, deltaT : float=0, current_branch : int=0):
             """
@@ -57,7 +50,6 @@ class Element(ABC):
                 Returns 0 as a placeholder for the backward operation result.
             """
             return 0
-
 
     def forward(self, A, b, t : float=0, deltaT : float=0, current_branch : int=0):
             """
@@ -103,7 +95,6 @@ class Element(ABC):
             """
             return 0
 
-
     def gear(self, A, b, t : float=0, deltaT : float=0, current_branch : int=0):
             """
             Computes the backward operation for the given parameters.
@@ -125,7 +116,6 @@ class Element(ABC):
                 Returns 0 as a placeholder for the backward operation result.
             """
             return 0
-
 
     def fourier(self, A, b, t : float=0, deltaT : float=0, current_branch : int=0):
             """
