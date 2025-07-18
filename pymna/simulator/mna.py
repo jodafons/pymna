@@ -31,8 +31,68 @@ class Simulator:
 
     
 
-    def ac(self, circuit : Circuit ) -> List:
-        pass
+    def ac(self, circuit : Circuit ,
+               freqInitial : float,
+               freqEnd     : float,
+               stepsPerDecade : int=10,
+               ) -> (Dict, Dict):
+            """
+            Perform AC analysis on the given circuit over a specified frequency range.
+
+            This function computes the frequency response of the circuit by solving
+            the circuit equations at logarithmically spaced frequencies between 
+            freqInitial and freqEnd. It returns the magnitude and phase of the 
+            circuit's response for each node.
+
+            Parameters:
+            circuit (Circuit): The circuit object containing the elements and nodes.
+            freqInitial (float): The starting frequency for the analysis (in Hz).
+            freqEnd (float): The ending frequency for the analysis (in Hz).
+            stepsPerDecade (int): The number of frequency steps per decade (default is 10).
+
+            Returns:
+            Tuple[Dict[str, np.ndarray], Dict[str, np.ndarray]]:
+                A tuple containing two dictionaries:
+                - mod_result: Magnitude response for each node at the specified frequencies.
+                - phase_result: Phase response for each node at the specified frequencies.
+            """
+            freqs = np.logspace(np.log10(freqInitial), np.log10(freqEnd), num=stepsPerDecade )
+            omegas = 2 * np.pi * freqs
+            reshape = True
+            max_nodes = self.max_nodes
+            e = []
+            
+            for w in omegas:
+
+                A                = np.zeros( (max_nodes, max_nodes) , dtype=np.complex128)
+                b                = np.zeros( (max_nodes, ), dtype=np.complex128)
+
+                current_branch  = circuit.number_of_nodes
+                for elm in circuit.elements:
+                    current_branch = elm.fourier(A, b, w, current_branch)
+
+                if reshape:
+                    max_nodes = current_branch + 1
+                    A = A[0:max_nodes, 0:max_nodes]
+                    b = b[0:max_nodes]
+                    reshape = False
+
+                x = self.solve(A, b)
+                e.append(x)
+
+            e = np.array(e)
+
+            mods = 20*np.log10(np.abs(e))
+            phases = np.degrees(np.angle(e))
+        
+
+            mod_result   = {"freqs":freqs}
+            phase_result = {"freqs":freqs}
+            for node_name, node_idx in circuit.nodes.items():
+                mod_result[ node_name ]   = np.real(mod[ :, node_idx ]) 
+                phase_result[ node_name ] = np.real(phases[ :, node_idx ])
+            
+            return mod_result, phase_result
 
 
 
@@ -46,7 +106,7 @@ class Simulator:
                       max_number_of_newton_raphson : int=20,
                       step_factor                  : float=1e9,
                       
-                       ) -> List:
+                       ) -> Dict
         """
         Simulates the transient response of a circuit over a specified time period.
         Parameters:

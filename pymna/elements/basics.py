@@ -83,6 +83,20 @@ class Resistor(Element):
         A[self.nodeOut, self.nodeOut] +=  G
         return current_branch
 
+    def fourier(self,
+                A : np.array,
+                b : np.array,
+                w : float,
+                current_branch : int,
+                ):
+
+        G = (1/self.R)
+        A[self.nodeIn , self.nodeIn ] +=  G
+        A[self.nodeIn , self.nodeOut] += -G
+        A[self.nodeOut, self.nodeIn ] += -G
+        A[self.nodeOut, self.nodeOut] +=  G
+        return current_branch    
+
     @classmethod
     def from_nl(cls, params: Tuple[str, str, int, int, float]) -> Resistor:
         """
@@ -169,6 +183,23 @@ class Capacitor(Element):
     def update(self, b, x):
         self.ic = x[self.nodeIn] - x[self.nodeOut]
 
+
+    def fourier(self,
+                A : np.array,
+                b : np.array,
+                w : float,
+                current_branch : int,
+                ):
+
+        Z = 1 / 1j * w * self.C 
+        G = 1 / Z  # G = 1 / (j * w * C)
+        A[self.nodeIn , self.nodeIn]  +=  G
+        A[self.nodeIn , self.nodeOut] += -G
+        A[self.nodeOut, self.nodeIn]  += -G
+        A[self.nodeOut, self.nodeOut] +=  G
+        return current_branch
+
+
     @classmethod
     def from_nl(cls, params: Union[Tuple[str, str, int, int, float], Tuple[str, str, int, int, float, float]]) -> Capacitor:
         """
@@ -251,6 +282,22 @@ class Indutor(Element):
     def update(self, b, x):
         self.ic = x[self.jx]
 
+    def fourier(self,
+                A : np.array,
+                b : np.array,
+                w : float,
+                current_branch : int,
+                ):
+        current_branch += 1
+        jx = current_branch
+        Z = 1j * w * self.L  # Z = j * w * L
+        A[self.nodeIn, jx]   +=  1  # current out node a
+        A[self.nodeOut, jx]  += -1  # current in node b
+        A[jx, self.nodeIn]   += -1  # Va
+        A[jx, self.nodeOut]  +=  1  # Vb
+        A[jx, jx]            += Z  # Impedance
+
+
     @classmethod
     def from_nl(cls, params: Union[Tuple[str, str, int, int, float], Tuple[str, str, int, int, float, float]]) -> Indutor:
         """
@@ -294,7 +341,6 @@ class Ampop(Element):
         self.nodeOutPos     = nodeOut
         self.nodeOutNeg     = 0
 
-
     def backward(self, 
                  A                : np.array, 
                  b                : np.array, 
@@ -305,6 +351,20 @@ class Ampop(Element):
                  current_branch   : int, 
                  ) -> int:
  
+        current_branch += 1
+        jx = current_branch
+        A[self.nodeOutPos, jx]     +=  1 
+        A[self.nodeOutNeg, jx]     += -1
+        A[jx, self.controlNodePos] += -1
+        A[jx, self.controlNodeNeg] +=  1
+        return current_branch
+
+    def fourier(                self,
+                A : np.array,
+                b : np.array,
+                w : float,
+                current_branch : int,
+                ):
         current_branch += 1
         jx = current_branch
         A[self.nodeOutPos, jx]     +=  1 
@@ -382,7 +442,6 @@ class NoLinearResistor(Element):
             self.nolinear_current_3 = nolinear_current_3
             self.nolinear_voltage_4 = nolinear_voltage_4
             self.nolinear_current_4 = nolinear_current_4
-
 
     def backward(self, 
                  A                : np.array, 
