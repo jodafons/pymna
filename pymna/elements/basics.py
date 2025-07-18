@@ -98,7 +98,7 @@ class Resistor(Element):
         return current_branch    
 
     @classmethod
-    def from_nl(cls, params: Tuple[str, str, int, int, float]) -> Resistor:
+    def from_nl(cls, params: Tuple[str, str, int, int, float]):
         """
         Creates a Resistor instance from a tuple of parameters.
 
@@ -201,7 +201,7 @@ class Capacitor(Element):
 
 
     @classmethod
-    def from_nl(cls, params: Union[Tuple[str, str, int, int, float], Tuple[str, str, int, int, float, float]]) -> Capacitor:
+    def from_nl(cls, params: Union[Tuple[str, str, int, int, float], Tuple[str, str, int, int, float, float]]):
         """
         Creates a Capacitor instance from a tuple of parameters.
 
@@ -299,7 +299,7 @@ class Indutor(Element):
 
 
     @classmethod
-    def from_nl(cls, params: Union[Tuple[str, str, int, int, float], Tuple[str, str, int, int, float, float]]) -> Indutor:
+    def from_nl(cls, params: Union[Tuple[str, str, int, int, float], Tuple[str, str, int, int, float, float]]):
         """
         Creates an Indutor instance from a tuple of parameters.
 
@@ -374,7 +374,7 @@ class Ampop(Element):
         return current_branch
 
     @classmethod
-    def from_nl(cls, params: Tuple[str, str, int, int, int]) -> Ampop:
+    def from_nl(cls, params: Tuple[str, str, int, int, int]):
         """
         Creates an Ampop instance from a tuple of parameters.
 
@@ -477,7 +477,7 @@ class NoLinearResistor(Element):
 
 
     @classmethod
-    def from_nl(cls, params: Tuple[str, str, int, int, float, float, float, float, float, float, float, float]) -> NoLinearResistor:
+    def from_nl(cls, params: Tuple[str, str, int, int, float, float, float, float, float, float, float, float]):
         """
         Creates a NoLinearResistor instance from a tuple of parameters.
 

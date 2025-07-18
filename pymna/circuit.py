@@ -213,7 +213,7 @@ class Circuit:
                               nolinear_voltage_4,
                               nolinear_current_4,
                               name=name)
-        self.+=R
+        self+=R
         return R
 
 

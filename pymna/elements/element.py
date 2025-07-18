@@ -4,6 +4,8 @@ __all__ = [
             "Element",
         ]
 
+import numpy as np
+
 from typing import Tuple
 from abc import ABC, abstractmethod
 
@@ -30,7 +32,15 @@ class Element(ABC):
         """
         pass
 
-    def backward(self, A, b, t : float=0, deltaT : float=0, current_branch : int=0):
+    def backward(self, 
+                 A                : np.array, 
+                 b                : np.array, 
+                 x                : np.array,
+                 x_newton_raphson : np.array,
+                 t                : float,
+                 dt               : float,
+                 current_branch   : int, 
+                 ) -> int:
             """
             Computes the backward operation for the given parameters.
 
@@ -52,7 +62,15 @@ class Element(ABC):
             """
             return 0
 
-    def forward(self, A, b, t : float=0, deltaT : float=0, current_branch : int=0):
+    def forward(self, 
+                 A                : np.array, 
+                 b                : np.array, 
+                 x                : np.array,
+                 x_newton_raphson : np.array,
+                 t                : float,
+                 dt               : float,
+                 current_branch   : int, 
+                 ) -> int:
             """
             Computes the backward operation for the given parameters.
 
@@ -74,7 +92,15 @@ class Element(ABC):
             """
             return 0
 
-    def trap(self, A, b, t : float=0, deltaT : float=0, current_branch : int=0):
+    def trap(self, 
+                 A                : np.array, 
+                 b                : np.array, 
+                 x                : np.array,
+                 x_newton_raphson : np.array,
+                 t                : float,
+                 dt               : float,
+                 current_branch   : int, 
+                 ) -> int:
             """
             Computes the backward operation for the given parameters.
 
@@ -96,7 +122,15 @@ class Element(ABC):
             """
             return 0
 
-    def gear(self, A, b, t : float=0, deltaT : float=0, current_branch : int=0):
+    def gear(self, 
+                 A                : np.array, 
+                 b                : np.array, 
+                 x                : np.array,
+                 x_newton_raphson : np.array,
+                 t                : float,
+                 dt               : float,
+                 current_branch   : int, 
+                 ) -> int:
             """
             Computes the backward operation for the given parameters.
 
@@ -118,25 +152,25 @@ class Element(ABC):
             """
             return 0
 
-    def fourier(self, A, b, t : float=0, deltaT : float=0, current_branch : int=0):
-            """
-            Computes the backward operation for the given parameters.
+    def fourier(self, 
+                A : np.array, 
+                b : np.array, 
+                w : float) -> int:
+        """
+        Computes the Fourier transform of a given signal.
 
-            Parameters:
-            A : array-like
-                The input matrix or array used in the backward computation.
-            b : array-like
-                The input vector or array that is part of the backward operation.
-            t : float, optional
-                The current time step (default is 0).
-            deltaT : float, optional
-                The time increment (default is 0).
-            current_branch : int, optional
-                The index of the current branch being processed (default is 0).
+        Parameters:
+        A (float): Amplitude of the signal.
+        b (float): Phase shift of the signal.
+        w (float): Frequency of the signal.
 
-            Returns:
-            int
-                Returns 0 as a placeholder for the backward operation result.
-            """
-            return 0
+        Returns:
+        float: The result of the Fourier transform calculation.
+
+        Note:
+        This method currently returns 0 as a placeholder.
+        """
+
+        return 0
+ 
 

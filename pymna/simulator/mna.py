@@ -20,8 +20,8 @@ __all__ = ["Simulator"]
 
 import numpy as np
 
-from typing import List
-from pymna.elements.circuit import Circuit
+from typing import List, Dict
+from pymna.circuit import Circuit
 
 class Simulator:
 
@@ -106,7 +106,7 @@ class Simulator:
                       max_number_of_newton_raphson : int=20,
                       step_factor                  : float=1e9,
                       
-                       ) -> Dict
+                       ) -> Dict:
         """
         Simulates the transient response of a circuit over a specified time period.
         Parameters:
@@ -261,7 +261,7 @@ class Simulator:
                 params = line.split()
                 element = params[0]
                 
-                if elemment == "R"
+                if elemment == "R":
                     circuit += Resitor.from_nl(params)
                 elif element == "C":
                     circuit += Capacitor.from_nl(params)

@@ -25,7 +25,7 @@ __all__ = [
     "PulseVoltageSource",
     "PulseCurrentSource",
     "VoltageSourceControlByVoltage",
-    "CurrentSourceControlByVoltage",
+    "CurrentSourceControlByCurrent",
     "CurrentSourceControlByVoltage",
     "VoltageSourceControlByCurrent"
 ]
@@ -217,7 +217,7 @@ class SinusoidalVoltageSource(Source):
         return current_branch
 
     @classmethod
-    def from_nl(cls, params: Tuple[str, str, int, int, str, float, float, float, float, float, float, int]) -> SinusoidalVoltageSource:
+    def from_nl(cls, params: Tuple[str, str, int, int, str, float, float, float, float, float, float, int]):
         """
         Creates a SinusoidalVoltageSource instance from a parameter tuple.
 
@@ -390,7 +390,7 @@ class PulseVoltageSource(Source):
         return current_branch
 
     @classmethod
-    def from_nl( cls, params : Tuple[str, str, int, int, float, float, int, float, float, float]] ) -> PulseVoltageSource:
+    def from_nl( cls, params : Tuple[str, str, int, int, float, float, int, float, float, float] ):
         # PulseVoltageSource: 'I/V', name, nodeIn, nodeOut, 'PULSE', AMPLITUDE_1, AMPLITUDE_2, DELAY, RISE_TIME, FALL_TIME, TIME_ON, PERIOUD, NUMBER_OF_CYCLES
         if params[0] != 'I' or params[1] != 'V':
             raise InvalidElement(f"Invalid parameters for PulseVoltageSource: expected 'I/V' ({params[0]}) as first element.")
@@ -508,7 +508,7 @@ class VoltageSourceControlByVoltage(Source):
         return current_branch
 
     @classmethod
-    def from_nl( cls, params : Tuple[str, str, int, int, int, int, float] ) -> VoltageSourceControlByVoltage:
+    def from_nl( cls, params : Tuple[str, str, int, int, int, int, float] ):
         # VoltageSourceControlByVoltage: 'E', name, noIn, noOut, control_noIn, control_noOut, Av
         if params[0] != 'E' or len(params) != 7:
             raise InvalidElement(f"Invalid parameters for VoltageSourceControlByVoltage: expected 'E'({params[0]}) as first element and 7 ({len(params)})parameters in total.")
@@ -519,7 +519,7 @@ class VoltageSourceControlByVoltage(Source):
                                               Av=params[6],
                                               name=params[1])
  
-class CurrentSourceControlByVoltage:
+class CurrentSourceControlByCurrent:
    
    # This class represents a current source controlled by a voltage source.
    # The letter if 'F'
@@ -568,11 +568,11 @@ class CurrentSourceControlByVoltage:
         return current_branch
 
     @classmethod
-    def from_nl( cls, params : Tuple[str, str, int, int, int, int, float] ) -> CurrentSourceControlByVoltage:
+    def from_nl( cls, params : Tuple[str, str, int, int, int, int, float] ):
         # CurrentSourceControlByVoltage: 'F', name, noIn, noOut, control_noIn, control_noOut, Ai
         if params[0] != 'F' or len(params) != 7:
-            raise InvalidElement(f"Invalid parameters for CurrentSourceControlByVoltage: expected 'F'({params[0]}) as first element and 7 ({len(params)})parameters in total.")
-        return CurrentSourceControlByVoltage( nodeIn=params[2], 
+            raise InvalidElement(f"Invalid parameters for CurrentSourceControlByCurrent expected 'F'({params[0]}) as first element and 7 ({len(params)})parameters in total.")
+        return CurrentSourceControlByCurrent( nodeIn=params[2], 
                                               nodeOut=params[3], 
                                               controlNodeIn=params[4], 
                                               controlNodeOut=params[5], 
@@ -629,7 +629,7 @@ class CurrentSourceControlByVoltage(Source):
         return current_branch
 
     @classmethod
-    def from_nl( cls, params : Tuple[str, str, int, int, int, int, float] ) -> CurrentSourceControlByVoltage:
+    def from_nl( cls, params : Tuple[str, str, int, int, int, int, float] ):
         # CurrentSourceControlByVoltage: 'G', name, noIn, noOut, control_noIn, control_noOut, Gm
         if params[0] != 'G' or len(params) != 7:
             raise InvalidElement(f"Invalid parameters for CurrentSourceControlByVoltage: expected 'G'({params[0]}) as first element and 7 ({len(params)})parameters in total.")
@@ -691,7 +691,7 @@ class VoltageSourceControlByCurrent(Source):
         return current_branch
 
     @classmethod
-    def from_nl( cls, params : Tuple[str, str, int, int, int, int, float] ) -> VoltageSourceControlByCurrent:
+    def from_nl( cls, params : Tuple[str, str, int, int, int, int, float] ):
         # VoltageSourceControlByCurrent: 'H', name, noIn, noOut, control_noIn, control_noOut, Rm
         if params[0] != 'H' or len(params) != 7:
             raise InvalidElement(f"Invalid parameters for VoltageSourceControlByCurrent: expected 'H'({params[0]}) as first element and 7 ({len(params)})parameters in total.")
