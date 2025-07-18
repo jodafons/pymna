@@ -4,7 +4,13 @@ __all__ = ["Circuit"]
 
 from typing import Union, List
 from pymna.elements import Capacitor, Resistor, NoLinearResistor, Ampop
-from pymna.elements import SinusoidalVoltageSource
+from pymna.elements import SinusoidalVoltageSource, SinusoidalCurrentSource
+from pymna.elements import PulseVoltageSource, PulseCurrentSource
+from pymna.elements import VoltageSourceControlByCurrent
+from pymna.elements import CurrentSourceControlByVoltage
+from pymna.elements import VoltageSourceControlByVoltage
+from pymna.elements import CurrentSourceControlByCurrent
+
 
 
 
@@ -77,6 +83,10 @@ class Circuit:
     @property
     def number_of_nodes(self):
         return self.n_nodes
+
+    #
+    # Elements
+    #
 
     def C(self,
           nodeIn            : Union[int,str],
@@ -237,8 +247,6 @@ class Circuit:
         return A
 
 
-
-
     #
     # sources
     #
@@ -298,10 +306,180 @@ class Circuit:
                            name = name)
         self+=Vsin
 
+    def SinusoidalCurrentSource(self,
+             positive  : Union[int,str],
+             negative  : Union[int,str],
+             amplitude : float,
+             frequency : float,
+             number_of_cycles : int,
+             dc        : float=0,
+             delay     : float=0,
+             angle     : float=0,
+             alpha     : float=0,
+             name      : str=""
+            ):
+        """
+        Creates a sinusoidal current source in the circuit.
+
+        Parameters:
+        positive (Union[int, str]): The positive terminal node of the current source.
+        negative (Union[int, str]): The negative terminal node of the current source.
+        amplitude (float): The peak amplitude of the sinusoidal current.
+        frequency (float): The frequency of the sinusoidal current in Hertz.
+        number_of_cycles (int): The number of cycles to simulate.
+        dc (float, optional): A DC offset added to the sinusoidal current. Default is 0.
+        delay (float, optional): The delay before the sinusoidal current starts. Default is 0.
+        angle (float, optional): The phase angle of the sinusoidal current in degrees. Default is 0.
+        alpha (float, optional): The damping factor for the sinusoidal current. Default is 0.
+        name (str, optional): An optional name for the current source. Default is an empty string.
+
+        Returns:
+        SinusoidalCurrentSource: An instance of the SinusoidalCurrentSource class representing the created current source.
+        """
+        
+        Isin = SinusoidalCurrentSource(self.node(positive), 
+                           self.node(negative), 
+                           amplitude, 
+                           frequency, 
+                           number_of_cycles,
+                           dc = dc,
+                           delay = delay,
+                           angle = angle,
+                           alpha = alpha,
+                           name = name)
+        self+=Isin
+        return Isin
+
+    def PulseVoltageSource(self,
+             nodeIn    : Union[int,str],
+             nodeOut   : Union[int,str],
+             amplitude_1 : float,
+             amplitude_2 : float,
+             T           : float,
+             number_of_cycles : int=1,
+             delay       : float=0,
+             rise_time   : float=0,
+             fall_time   : float=0,
+             time_on     : float=0,
+             angle       : float=0,
+             attenuation       : float=0,
+             name        : str=""
+            ):
+        """
+        Creates a pulse voltage source in the circuit.
+
+        Parameters:
+        nodeIn (Union[int, str]): The input node of the pulse voltage source.
+        nodeOut (Union[int, str]): The output node of the pulse voltage source.
+        amplitude_1 (float): The first amplitude of the pulse.
+        amplitude_2 (float): The second amplitude of the pulse.
+        T (float): The period of the pulse.
+        number_of_cycles (int, optional): The number of cycles for the pulse. Default is 1.
+        delay (float, optional): The delay before the pulse starts. Default is 0.
+        rise_time (float, optional): The rise time of the pulse. Default is 0.
+        fall_time (float, optional): The fall time of the pulse. Default is 0.
+        time_on (float, optional): The duration for which the pulse is on. Default is 0.
+        angle (float, optional): The phase angle of the pulse in degrees. Default is 0.
+        attenuation (float, optional): The attenuation factor for the pulse. Default is 0.
+        name (str, optional): An optional name for the pulse voltage source. Default is an empty string.
+
+        Returns:
+        PulseVoltageSource: An instance of the PulseVoltageSource class representing the created pulse voltage source.
+        """
+
+        Vpulse = PulseVoltageSource(self.node(nodeIn),
+                                    self.node(nodeOut),
+                                    amplitude_1,
+                                    amplitude_2,
+                                    T,
+                                    number_of_cycles=number_of_cycles,
+                                    delay=delay,
+                                    rise_time=rise_time,
+                                    fall_time=fall_time,
+                                    time_on=time_on,
+                                    angle=angle,
+                                    attenuation=attenuation,
+                                    name=name)
+        self+=Vpulse
+        return Vpulse
+
+    def PulseCurrentSource(self,
+             nodeIn    : Union[int,str],
+             nodeOut   : Union[int,str],
+             amplitude_1 : float,
+             amplitude_2 : float,
+             T           : float,
+             number_of_cycles : int=1,
+             delay       : float=0,
+             rise_time   : float=0,
+             fall_time   : float=0,
+             time_on     : float=0,
+             angle       : float=0,
+             attenuation       : float=0,
+             name        : str=""
+            ):
+        """
+        Creates a pulse current source in the circuit.
+
+        Parameters:
+        nodeIn (Union[int, str]): The input node of the pulse current source.
+        nodeOut (Union[int, str]): The output node of the pulse current source.
+        amplitude_1 (float): The first amplitude of the pulse.
+        amplitude_2 (float): The second amplitude of the pulse.
+        T (float): The period of the pulse.
+        number_of_cycles (int, optional): The number of cycles for the pulse. Default is 1.
+        delay (float, optional): The delay before the pulse starts. Default is 0.
+        rise_time (float, optional): The rise time of the pulse. Default is 0.
+        fall_time (float, optional): The fall time of the pulse. Default is 0.
+        time_on (float, optional): The duration for which the pulse is on. Default is 0.
+        angle (float, optional): The phase angle of the pulse in degrees. Default is 0.
+        attenuation (float, optional): The attenuation factor for the pulse. Default is 0.
+        name (str, optional): An optional name for the pulse current source. Default is an empty string.
+
+        Returns:
+        PulseCurrentSource: An instance of the PulseCurrentSource class representing the created pulse current source.
+        """
+        
+        Ipulse = PulseCurrentSource(self.node(nodeIn),
+                                    self.node(nodeOut),
+                                    amplitude_1,
+                                    amplitude_2,
+                                    T,
+                                    number_of_cycles=number_of_cycles,
+                                    delay=delay,
+                                    rise_time=rise_time,
+                                    fall_time=fall_time,
+                                    time_on=time_on,
+                                    angle=angle,
+                                    attenuation=attenuation,
+                                    name=name)
+        self+=Ipulse
+          
 
 
 
 
+
+
+
+
+class PulseVoltageSource(Source):
+
+    def __init__(self,
+             nodeIn    : int,
+             nodeOut    : int,
+             amplitude_1 : float,
+             amplitude_2 : float,
+             T           : float,
+             number_of_cycles : int=1,
+             delay       : float=0,
+             rise_time   : float=0,
+             fall_time   : float=0,
+             time_on     : float=0,
+             angle       : float=0,
+             attenuation       : float=0,
+             name        : str=""
+            ):
 
 if __name__ == "__main__":
     from pymna.units import *
