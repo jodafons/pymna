@@ -431,7 +431,7 @@ class NoLinearResistor(Element):
             nolinear_current_4 (float): The fourth nonlinear current value.
             name (str, optional): The name of the element. Defaults to an empty string.
             """
-            Element.__init__(self,name)
+            Element.__init__(self,name, nolinear_element = True)
             self.nodeIn             = nodeIn  # node 1
             self.nodeOut            = nodeOut # node 2
             self.nolinear_voltage_1 = nolinear_voltage_1

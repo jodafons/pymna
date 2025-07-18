@@ -1,19 +1,34 @@
-
 """
-This module defines various types of voltage sources used in circuit simulations.
-It includes classes for sinusoidal and pulse voltage sources, as well as utility
-functions to calculate their values at a given time.
+This module defines various source elements used in electrical circuit simulations.
+It includes classes for different types of voltage and current sources, such as
+sinusoidal and pulse sources. Each source can be characterized by its parameters
+like amplitude, frequency, and delay. The module provides functions to calculate
+the voltage or current at a given time based on these parameters.
 
 Classes:
-    - Source: Base class for all sources in a circuit.
+    - Source: Base class for all sources.
     - SinusoidalVoltageSource: Represents a sinusoidal voltage source.
-    - PulseVoltageSource: Represents a pulse voltage source.
-
+    - SinusoidalCurrentSource: Represents a sinusoidal current source.
+    
 Functions:
     - sin: Calculates the value of a sinusoidal voltage source at a given time.
     - pulse: Calculates the value of a pulse voltage source at a given time.
     - dc: Returns a constant DC voltage value.
 """
+"""
+
+"""
+
+__all__ = [
+    "SinusoidalVoltageSource",
+    "SinusoidalCurrentSource",
+    "PulseVoltageSource",
+    "PulseCurrentSource",
+    "VoltageSourceControlByVoltage",
+    "CurrentSourceControlByVoltage",
+    "CurrentSourceControlByVoltage",
+    "VoltageSourceControlByCurrent"
+]
 
 import numpy as np
 
@@ -134,6 +149,7 @@ class Source:
         self.nodeOut  = nodeOut
         self.name     = name
 
+
 class SinusoidalVoltageSource(Source):
 
     def __init__(self,
@@ -230,6 +246,74 @@ class SinusoidalVoltageSource(Source):
                                         attenuation=params[9],
                                         name=params[1])
 
+class SinusoidalCurrentSource(SinusoidalVoltageSource):
+    def __init__(self,
+                     nodeIn           : int,
+                     nodeOut          : int,
+                     amplitude        : float,
+                     frequency        : float,
+                     number_of_cycles : int,
+                     dc               : float=0,
+                     delay            : float=0,
+                     angle            : float=0,
+                     attenuation      : float=0,
+                     name             : str=""
+                    ):
+        """
+        Initializes an instance of the SinusoidalCurrentSource class.
+
+        Parameters:
+            nodeIn (int): The input node number.
+            nodeOut (int): The output node number.
+            amplitude (float): The amplitude of the source.
+            frequency (float): The frequency of the source.
+            number_of_cycles (int): The number of cycles for the source.
+            dc (float, optional): The DC offset. Defaults to 0.
+            delay (float, optional): The delay before the source starts. Defaults to 0.
+            angle (float, optional): The phase angle of the source. Defaults to 0.
+            attenuation (float, optional): The attenuation parameter for the source. Defaults to 0.
+            name (str, optional): The name of the source. Defaults to an empty string.
+        """
+        SinusoidalVoltageSource.__init__(self,
+                                            nodeIn=nodeIn,
+                                            nodeOut=nodeOut,
+                                            amplitude=amplitude,
+                                            frequency=frequency,
+                                            number_of_cycles=number_of_cycles,
+                                            dc=dc,
+                                            delay=delay,
+                                            angle=angle,
+                                            attenuation=attenuation,
+                                            name=name)
+
+    def backward(self, 
+                 A                : np.array, 
+                 b                : np.array, 
+                 x                : np.array,
+                 x_newton_raphson : np.array,
+                 t                : float,
+                 dt               : float,
+                 current_branch   : int, 
+                 ) -> int:
+                 
+      
+        I = sin(t, 
+                self.amplitude, 
+                self.frequency, 
+                self.number_of_cycles, 
+                self.dc, 
+                self.angle, 
+                self.attenuation, 
+                self.delay)
+
+        b[self.nodeIn]   += -I
+        b[self.nodeOut] +=  I
+        return current_branch
+
+
+
+
+
 class PulseVoltageSource(Source):
 
     def __init__(self,
@@ -289,7 +373,15 @@ class PulseVoltageSource(Source):
                  current_branch   : int, 
                  ) -> int:
 
-        V = self.pulse(t,...)
+        V = self.pulse(t,
+                        self.amplitude_1,
+                        self.amplitude_2,
+                        self.T,
+                        self.rise_time,
+                        self.fall_time,
+                        self.time_on,
+                        self.delay)
+
         A[self.nodeIn,self.jx]   +=  1
         A[self.nodeOut,self.jx]  += -1
         A[self.jx, self.nodeIn]  += -1
@@ -314,6 +406,50 @@ class PulseVoltageSource(Source):
                                    time_on=params[10],
                                    T=params[11],
                                    number_of_cycles=params[12])
+
+class PulseCurrentSource(PulseVoltageSource):
+    def __init__(self,
+             nodeIn    : int,
+             nodeOut    : int,
+             amplitude_1 : float,
+             amplitude_2 : float,
+             T           : float,
+             number_of_cycles : int=1,
+             delay       : float=0,
+             rise_time   : float=0,
+             fall_time   : float=0,
+             time_on     : float=0,
+             angle       : float=0,
+             attenuation       : float=0,
+             name        : str=""
+            ):
+        """
+        Initializes a PulseCurrentSource object with the given parameters.
+        This class represents a pulse current source in a circuit simulation.
+        """
+        PulseVoltageSource.__init__(self, nodeIn, nodeOut, amplitude_1, amplitude_2, T, number_of_cycles, delay, rise_time, fall_time, time_on, angle, attenuation, name)
+
+    def backward(self, 
+                 A                : np.array, 
+                 b                : np.array, 
+                 x                : np.array,
+                 x_newton_raphson : np.array,
+                 t                : float,
+                 dt               : float,
+                 current_branch   : int, 
+                 ) -> int:
+                 
+        I = self.pulse(t,
+                        self.amplitude_1,
+                        self.amplitude_2,
+                        self.T,
+                        self.rise_time,
+                        self.fall_time,
+                        self.time_on,
+                        self.delay)
+        b[self.nodeIn]   += -I
+        b[self.nodeOut] +=  I
+        return current_branch
 
 
 #

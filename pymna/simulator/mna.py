@@ -235,3 +235,86 @@ class Simulator:
 
 
 
+
+    def run_from_nl( self, nl_path : str ):
+
+        circuit    = Circuit()
+        simulator  = Simulator()
+
+        with open(nl_path, 'r') as f:
+            lines = f.readlines()
+
+            number_of_nodes = int(lines(0).strip())
+            simu_config = lines.pop(0).strip().split()
+
+
+
+            # Process the line to create circuit elements
+            # This part is dependent on the NL file format
+            # You would typically parse the line and create Circuit elements here
+            for line in lines[0::-1]:
+                line = line.strip()
+                # this is to skip comments and empty lines
+                if line.startswith('*'):
+                    continue
+
+                params = line.split()
+                element = params[0]
+                
+                if elemment == "R"
+                    circuit += Resitor.from_nl(params)
+                elif element == "C":
+                    circuit += Capacitor.from_nl(params)
+                elif element == "L":
+                    circuit += Inductor.from_nl(params)
+                elif element == "N":
+                    circuit += NoLinearResistor.from_nl(params)
+                elif element == "O":
+                    circuit += OpAmp.from_nl(params)
+                elif element == "E":
+                    circuit += VoltageSourceControlByVoltage.from_nl(params)
+                elif element == "F":
+                    circuit += CurrentSourceControlByVoltage.from_nl(params)
+                elif element == "G":
+                    circuit += VoltageSourceControlByCurrent.from_nl(params)
+                elif element == "H":
+                    circuit += CurrentSourceControlByCurrent.from_nl(params)
+                elif element == "V":
+                    type_source = params[2]
+                    if type_source == "SIN":
+                        circuit += SinusoidalVoltageSource.from_nl(params)
+                    elif type_source == "PULSE":
+                        circuit += PulseVoltageSource.from_nl(params)
+                elif element == "I":
+                    type_source = params[2]
+                    if type_source == "SIN":
+                        circuit += SinusoidalCurrentSource.from_nl(params)
+                    elif type_source == "PULSE":
+                        circuit += PulseCurrentSource.from_nl(params)
+                else:
+                    raise ValueError(f"Unknown element type: {element}")        
+
+
+            if '.TRAN' in simu_config[0]:
+                # .TRAN
+                end_time = float(simu_config[1])
+                step_time = float(simu_config[2])
+                method = simu_config[3]
+                max_number_of_internal_step = int(simu_config[3])
+                use_ic = True if simu_config[4]=='1' else False
+
+                result = simulator.transient(circuit, end_time, step_time,
+                                             max_number_of_internal_step=max_number_of_internal_step,
+                                             use_ic=use_ic)
+
+            elif '.AC' in simu_config[0]:
+                # .AC LIN/OCT/DEC total_of_steps, freq_start, freq_end 
+                scale = simu_config[0].split()[1]
+                steps = int(simu_config[1])
+                freq_start = float(simu_config[2])
+                freq_end = float(simu_config[3])
+                result = simulator.ac(circuit, freq_start, freq_end, stepsPerDecade=steps)
+
+
+            return result
+

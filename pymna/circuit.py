@@ -70,6 +70,8 @@ class Circuit:
 
     def __add__(self, elm ):
         self.elements.append(elm)
+        if not self.has_nolinear_elements:
+            self.has_nolinear_elements = elm.nolinear_element
         return self
 
     @property

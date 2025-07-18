@@ -8,7 +8,7 @@ from typing import Tuple
 from abc import ABC, abstractmethod
 
 class Element(ABC):
-    def __init__(self, name: str):
+    def __init__(self, name: str, nolinear_element: bool = False):
         """
         Initializes an instance of the Element class.
 
@@ -16,6 +16,7 @@ class Element(ABC):
         name (str): The name of the element.
         """
         self.name = name
+        self.nolinear_element = nolinear_element
  
     def update( self, b : np.array, x : np.array):
         """
