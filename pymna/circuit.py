@@ -56,8 +56,6 @@ class Circuit:
 
     This example sets up a basic Chua circuit with resistors, a capacitor, and a nonlinear resistor (Chua diode) along with a sinusoidal voltage source.
     """
-class Circuit:
-
     def __init__(self, 
                  name : str=""
                  ):
@@ -262,7 +260,7 @@ class Circuit:
              angle     : float=0,
              alpha     : float=0,
              name      : str=""
-            ):
+            ) -> SinusoidalVoltageSource:
         """
         Creates a sinusoidal voltage source in the circuit.
 
@@ -317,7 +315,7 @@ class Circuit:
              angle     : float=0,
              alpha     : float=0,
              name      : str=""
-            ):
+            ) -> SinusoidalCurrentSource:
         """
         Creates a sinusoidal current source in the circuit.
 
@@ -364,7 +362,7 @@ class Circuit:
              angle       : float=0,
              attenuation       : float=0,
              name        : str=""
-            ):
+            ) -> PulseVoltageSource:
         """
         Creates a pulse voltage source in the circuit.
 
@@ -417,7 +415,7 @@ class Circuit:
              angle       : float=0,
              attenuation       : float=0,
              name        : str=""
-            ):
+            ) -> PulseCurrentSource:
         """
         Creates a pulse current source in the circuit.
 
@@ -454,32 +452,9 @@ class Circuit:
                                     attenuation=attenuation,
                                     name=name)
         self+=Ipulse
+        return Ipulse
           
 
-
-
-
-
-
-
-
-class PulseVoltageSource(Source):
-
-    def __init__(self,
-             nodeIn    : int,
-             nodeOut    : int,
-             amplitude_1 : float,
-             amplitude_2 : float,
-             T           : float,
-             number_of_cycles : int=1,
-             delay       : float=0,
-             rise_time   : float=0,
-             fall_time   : float=0,
-             time_on     : float=0,
-             angle       : float=0,
-             attenuation       : float=0,
-             name        : str=""
-            ):
 
 if __name__ == "__main__":
     from pymna.units import *
