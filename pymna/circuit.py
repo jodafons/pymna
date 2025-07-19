@@ -3,7 +3,7 @@
 __all__ = ["Circuit"]
 
 from typing import Union, List
-from pymna.elements import Capacitor, Resistor, NoLinearResistor, Ampop
+from pymna.elements import Capacitor, Resistor, NoLinearResistor, OpAmp
 from pymna.elements import SinusoidalVoltageSource, SinusoidalCurrentSource
 from pymna.elements import PulseVoltageSource, PulseCurrentSource
 from pymna.elements import VoltageSourceControlByCurrent
@@ -217,12 +217,12 @@ class Circuit:
         return R
 
 
-    def Ampop(self,
+    def OpAmp(self,
                nodePositive : Union[int,str],
                nodeNegative : Union[int,str],
                nodeOut      : Union[int,str],
                name         : str="",
-    ) -> Ampop:
+    ) -> OpAmp:
         """
         Creates an operational amplifier (op-amp) in the circuit.
 
@@ -237,7 +237,7 @@ class Circuit:
 
        
         """
-        A = Ampop(self.node(nodePositive), 
+        A = OpAmp(self.node(nodePositive), 
                   self.node(nodeNegative), 
                   self.node(nodeOut), 
                   name=name)

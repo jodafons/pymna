@@ -21,11 +21,24 @@ __all__ = ["Simulator"]
 import numpy as np
 
 from typing import List, Dict
-from pymna.circuit import Circuit
+from pymna.circuit    import Circuit
+from pymna.elements   import Capacitor
+from pymna.elements   import Resistor
+from pymna.elements   import NoLinearResistor
+from pymna.elements   import Inductor
+from pymna.elements   import OpAmp
+from pymna.elements   import SinusoidalVoltageSource, SinusoidalCurrentSource
+from pymna.elements   import PulseVoltageSource, PulseCurrentSource
+from pymna.elements   import VoltageSourceControlByCurrent
+from pymna.elements   import CurrentSourceControlByVoltage
+from pymna.elements   import VoltageSourceControlByVoltage
+from pymna.elements   import CurrentSourceControlByCurrent
+from pymna.exceptions import ImpossibleSolution
+
 
 class Simulator:
 
-    def __init__(self , temperature : float=25, max_nodes : int=1000):
+    def __init__(self , temperature : float=25, max_nodes : int=10):
         self.temperature = temperature
         self.max_nodes = max_nodes
 
@@ -97,16 +110,15 @@ class Simulator:
 
 
     def transient(self, 
-                      circuit                      : Circuit, 
-                      end_time                     : float, 
-                      step_time                    : float,
-                      tolerance                    : float=1,
-                      max_number_of_internal_step  : int=1,
-                      max_number_of_guesses        : int=100,
-                      max_number_of_newton_raphson : int=20,
-                      step_factor                  : float=1e9,
-                      
-                       ) -> Dict:
+                  circuit                      : Circuit, 
+                  end_time                     : float, 
+                  step_time                    : float,
+                  max_tolerance                : float=1,
+                  max_number_of_internal_step  : int=1,
+                  max_number_of_guesses        : int=100,
+                  max_number_of_newton_raphson : int=20,
+                  step_factor                  : float=1e9,
+                ) -> Dict:
         """
         Simulates the transient response of a circuit over a specified time period.
         Parameters:
@@ -141,6 +153,8 @@ class Simulator:
             A                = np.zeros( (max_nodes, max_nodes) )
             b                = np.zeros( (max_nodes, ))
             x_newton_raphson = np.zeros( b.shape )
+            x                = np.zeros( b.shape )
+
 
             if t==0:
                 max_internal_step = 1
@@ -160,36 +174,52 @@ class Simulator:
                 if circuit.has_nolinear_elements:
 
                     stop_newton_raphson = False
-                    x_newton_raphson = np.random.rand( x.shape )
-                    number_of_guesses = 0
+                    x_newton_raphson    = (np.random.rand( x_newton_raphson.shape[0] ) % 100) + 1
+                    number_of_guesses   = 0
                     number_of_execution_newton_raphson = 0
 
                     while not stop_newton_raphson:
                     
-                        if number_of_execution_newton_raphson == self.max_number_of_newton_raphson:
-                            if number_of_guesses > self.max_number_of_guesses:
+                        if number_of_execution_newton_raphson == max_number_of_newton_raphson:
+                            if number_of_guesses > max_number_of_guesses:
                                 raise ImpossibleSolution("Its not possible to found a solution to this problem.")
-                            x_newton_raphson = np.random.rand(x.shape)
+                            x_newton_raphson = (np.random.rand(x.shape[0]) % 100) + 1
                             number_of_guesses+=1
                             number_of_execution_newton_raphson=0
 
                         current_branch   = circuit.number_of_nodes
                         for elm in circuit.elements:
-
                             current_branch = elm.backward(A,b,x,x_newton_raphson,t,delta_t,current_branch)
 
                         if reshape:
-                            max_nodes = current_branch+1
+                            max_nodes = current_branch+1 + 1 # +1 for the ground node
                             A = A[0:max_nodes, 0:max_nodes]
                             b = b[0:max_nodes]
-                            #x = x[0:current_branch+1]
+                            x = x[0:max_nodes]
                             x_newton_raphson = x_newton_raphson[0:max_nodes]
                             reshape=False
 
+                        print("A")
+                        print(A)
+                        print("b")
+                        print(b)
+                        
                         x = self.solve(A,b)
+                        print("x")
+                        print(x)
+                        print("x_newton_raphson")
+                        print(x_newton_raphson)
+
+
+
                         tolerance = np.abs( x - x_newton_raphson ).max()
-                        if tolerance > self.tolerance:
-                            x = x_newton_raphson
+                        print(tolerance)
+
+                        print("------------")
+
+                        #print(tolerance)
+                        if tolerance > max_tolerance:
+                            x = x_newton_raphson.copy()
                             number_of_execution_newton_raphson += 1
                         else:
                             stop_newton_raphson = True
@@ -200,18 +230,20 @@ class Simulator:
                     for elm in circuit.elements:
                         current_branch = elm.backward(A,b,x,x_newton_raphson,t,delta_t,current_branch)
                     if reshape:
-                        max_nodes = current_branch+1
+                        max_nodes = current_branch+1 + 1 # +1 for the ground node
                         A = A[0:max_nodes, 0:max_nodes]
                         b = b[0:max_nodes]
+                        x = x[0:max_nodes]
                         x_newton_raphson = x_newton_raphson[0:max_nodes]
                         reshape=False
-            
-               
+        
                     x = self.solve(A,b)
           
                 # update ICs
                 for elm in circuit.elements:
                     elm.update( b, x )
+                
+                print(x)
 
                 internal_step += 1
 
@@ -239,30 +271,28 @@ class Simulator:
     def run_from_nl( self, nl_path : str ):
 
         circuit    = Circuit()
-        simulator  = Simulator()
 
         with open(nl_path, 'r') as f:
             lines = f.readlines()
 
-            number_of_nodes = int(lines(0).strip())
-            simu_config = lines.pop(0).strip().split()
-
-
+            number_of_nodes = int(lines[0].strip())
+            simu_config = lines.pop().strip().split()
 
             # Process the line to create circuit elements
             # This part is dependent on the NL file format
             # You would typically parse the line and create Circuit elements here
-            for line in lines[0::-1]:
+            for line in lines[1::]:
                 line = line.strip()
                 # this is to skip comments and empty lines
                 if line.startswith('*'):
                     continue
 
+                print(line)
+
                 params = line.split()
-                element = params[0]
-                
-                if elemment == "R":
-                    circuit += Resitor.from_nl(params)
+                element = params[0][0]
+                if element == "R":
+                    circuit += Resistor.from_nl(params)
                 elif element == "C":
                     circuit += Capacitor.from_nl(params)
                 elif element == "L":
@@ -294,18 +324,18 @@ class Simulator:
                 else:
                     raise ValueError(f"Unknown element type: {element}")        
 
-
+            print(simu_config)
             if '.TRAN' in simu_config[0]:
                 # .TRAN
-                end_time = float(simu_config[1])
+                end_time  = float(simu_config[1])
                 step_time = float(simu_config[2])
-                method = simu_config[3]
-                max_number_of_internal_step = int(simu_config[3])
-                use_ic = True if simu_config[4]=='1' else False
+                method    = simu_config[3]
+                max_number_of_internal_step = int(simu_config[4])
+                use_ic = True if simu_config[5]=='UIC' else False
 
-                result = simulator.transient(circuit, end_time, step_time,
-                                             max_number_of_internal_step=max_number_of_internal_step,
-                                             use_ic=use_ic)
+                result = self.transient(circuit, end_time, step_time,
+                                        max_number_of_internal_step=max_number_of_internal_step,
+                                        )
 
             elif '.AC' in simu_config[0]:
                 # .AC LIN/OCT/DEC total_of_steps, freq_start, freq_end 
@@ -313,7 +343,7 @@ class Simulator:
                 steps = int(simu_config[1])
                 freq_start = float(simu_config[2])
                 freq_end = float(simu_config[3])
-                result = simulator.ac(circuit, freq_start, freq_end, stepsPerDecade=steps)
+                result = self.ac(circuit, freq_start, freq_end, stepsPerDecade=steps)
 
 
             return result

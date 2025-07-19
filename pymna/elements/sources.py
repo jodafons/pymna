@@ -217,7 +217,7 @@ class SinusoidalVoltageSource(Source):
         return current_branch
 
     @classmethod
-    def from_nl(cls, params: Tuple[str, str, int, int, str, float, float, float, float, float, float, int]):
+    def from_nl(cls, params: Tuple[str, int, int, str, float, float, float, float, float, float, int]):
         """
         Creates a SinusoidalVoltageSource instance from a parameter tuple.
 
@@ -228,23 +228,23 @@ class SinusoidalVoltageSource(Source):
         Returns:
             SinusoidalVoltageSource: An instance of the SinusoidalVoltageSource class.
         """
-        # Vsin: I/V, name, nodeIn, nodeOut, 'SIN', DC, AMPLITUDE, FREQ, DELAY, ATTENUATION (alpha), ANGLE, NUMBER_OF_CYCLES
-        if params[0] != 'I' or params[1] != 'V':
+        # Vsin: I/Vname, nodeIn, nodeOut, 'SIN', DC, AMPLITUDE, FREQ, DELAY, ATTENUATION (alpha), ANGLE, NUMBER_OF_CYCLES
+        if params[0][0] != 'I' or params[0][0] != 'V':
             raise InvalidElement(f"Invalid parameters for SinusoidalVoltageSource: expected 'V' or 'I' ({params[0]}) as first element.")
         
-        if params[4] != "SIN" and len(params) != 12:
-            raise InvalidElement(f"Invalid parameters for SinusoidalVoltageSource: expected 'SIN' ({params[4]}) as third element and 12 {len(params)} parameters in total.")
+        if params[3] != "SIN" and len(params) != 11:
+            raise InvalidElement(f"Invalid parameters for SinusoidalVoltageSource: expected 'SIN' ({params[3]}) as third element and 11 {len(params)} parameters in total.")
 
-        return SinusoidalVoltageSource(nodeIn=params[2], 
-                                        nodeOut=params[3], 
-                                        amplitude=params[6], 
-                                        frequency=params[7], 
-                                        number_of_cycles=params[11],
-                                        dc=params[5],
-                                        delay=params[8],
-                                        angle=params[10],
-                                        attenuation=params[9],
-                                        name=params[1])
+        return SinusoidalVoltageSource( nodeIn=int(params[1]), 
+                                        nodeOut=int(params[2]), 
+                                        amplitude=float(params[5]), 
+                                        frequency=float(params[6]), 
+                                        number_of_cycles=int(params[10]),
+                                        dc=float(params[4]),
+                                        delay=float(params[7]),
+                                        angle=float(params[9]),
+                                        attenuation=float(params[8]),
+                                        name=params[0])
 
 class SinusoidalCurrentSource(SinusoidalVoltageSource):
     def __init__(self,
@@ -317,8 +317,8 @@ class SinusoidalCurrentSource(SinusoidalVoltageSource):
 class PulseVoltageSource(Source):
 
     def __init__(self,
-             nodeIn    : int,
-             nodeOut    : int,
+             nodeIn      : int,
+             nodeOut     : int,
              amplitude_1 : float,
              amplitude_2 : float,
              T           : float,
@@ -328,7 +328,7 @@ class PulseVoltageSource(Source):
              fall_time   : float=0,
              time_on     : float=0,
              angle       : float=0,
-             attenuation       : float=0,
+             attenuation : float=0,
              name        : str=""
             ):
         """
@@ -390,22 +390,23 @@ class PulseVoltageSource(Source):
         return current_branch
 
     @classmethod
-    def from_nl( cls, params : Tuple[str, str, int, int, float, float, int, float, float, float] ):
-        # PulseVoltageSource: 'I/V', name, nodeIn, nodeOut, 'PULSE', AMPLITUDE_1, AMPLITUDE_2, DELAY, RISE_TIME, FALL_TIME, TIME_ON, PERIOUD, NUMBER_OF_CYCLES
-        if params[0] != 'I' or params[1] != 'V':
+    def from_nl( cls, params : Tuple[str, int, int, str, float, float, float, float, float, float, float, int] ):
+        # PulseVoltageSource: 'I/V'name, nodeIn, nodeOut, 'PULSE', AMPLITUDE_1, AMPLITUDE_2, DELAY, RISE_TIME, FALL_TIME, TIME_ON, PERIOUD, NUMBER_OF_CYCLES
+        if params[0][0] != 'I' or params[0][0] != 'V':
             raise InvalidElement(f"Invalid parameters for PulseVoltageSource: expected 'I/V' ({params[0]}) as first element.")
-        if params[4] != "PULSE" and len(params) != 13:
-            raise InvalidElement(f"Invalid parameters for PulseVoltageSource: expected 'PULSE' ({params[4]}) as third element and 13 ({len(params)}) parameters in total.")
-        return PulseVoltageSource( nodeIn=params[2],
-                                   nodeOut=params[3],
-                                   amplitude_1=params[5],
-                                   amplitude_2=params[6],
-                                   delay=params[7],
-                                   rise_time=params[8],
-                                   fall_time=params[9],
-                                   time_on=params[10],
-                                   T=params[11],
-                                   number_of_cycles=params[12])
+        if params[3] != "PULSE" and len(params) != 12:
+            raise InvalidElement(f"Invalid parameters for PulseVoltageSource: expected 'PULSE' ({params[3]}) as third element and 12 ({len(params)}) parameters in total.")
+        return PulseVoltageSource( nodeIn=int(params[1]),
+                                   nodeOut=int(params[2]),
+                                   amplitude_1=float(params[4]),
+                                   amplitude_2=float(params[5]),
+                                   delay=float(params[6]),
+                                   rise_time=float(params[7]),
+                                   fall_time=float(params[8]),
+                                   time_on=float(params[9]),
+                                   T=float(params[10]),
+                                   number_of_cycles=int(params[11]),
+                                   name=params[0])
 
 class PulseCurrentSource(PulseVoltageSource):
     def __init__(self,
@@ -508,16 +509,16 @@ class VoltageSourceControlByVoltage(Source):
         return current_branch
 
     @classmethod
-    def from_nl( cls, params : Tuple[str, str, int, int, int, int, float] ):
-        # VoltageSourceControlByVoltage: 'E', name, noIn, noOut, control_noIn, control_noOut, Av
-        if params[0] != 'E' or len(params) != 7:
+    def from_nl( cls, params : Tuple[str, int, int, int, int, float] ):
+        # VoltageSourceControlByVoltage: 'E'name, noIn, noOut, control_noIn, control_noOut, Av
+        if params[0][0] != 'E' or len(params) != 6:
             raise InvalidElement(f"Invalid parameters for VoltageSourceControlByVoltage: expected 'E'({params[0]}) as first element and 7 ({len(params)})parameters in total.")
-        return VoltageSourceControlByVoltage( nodeIn=params[2], 
-                                              nodeOut=params[3], 
-                                              controlNodeIn=params[4], 
-                                              controlNodeOut=params[5], 
-                                              Av=params[6],
-                                              name=params[1])
+        return VoltageSourceControlByVoltage( nodeIn=int(params[1]), 
+                                              nodeOut=int(params[2]), 
+                                              controlNodeIn=int(params[3]), 
+                                              controlNodeOut=int(params[4]), 
+                                              Av=float(params[5]),
+                                              name=params[0])
  
 class CurrentSourceControlByCurrent:
    
@@ -568,16 +569,16 @@ class CurrentSourceControlByCurrent:
         return current_branch
 
     @classmethod
-    def from_nl( cls, params : Tuple[str, str, int, int, int, int, float] ):
-        # CurrentSourceControlByVoltage: 'F', name, noIn, noOut, control_noIn, control_noOut, Ai
-        if params[0] != 'F' or len(params) != 7:
+    def from_nl( cls, params : Tuple[str, int, int, int, int, float] ):
+        # CurrentSourceControlByVoltage: 'F'name, noIn, noOut, control_noIn, control_noOut, Ai
+        if params[0][0] != 'F' or len(params) != 6:
             raise InvalidElement(f"Invalid parameters for CurrentSourceControlByCurrent expected 'F'({params[0]}) as first element and 7 ({len(params)})parameters in total.")
-        return CurrentSourceControlByCurrent( nodeIn=params[2], 
-                                              nodeOut=params[3], 
-                                              controlNodeIn=params[4], 
-                                              controlNodeOut=params[5], 
-                                              Ai=params[6],
-                                              name=params[1])
+        return CurrentSourceControlByCurrent( nodeIn=int(params[1]), 
+                                              nodeOut=int(params[2]), 
+                                              controlNodeIn=int(params[3]), 
+                                              controlNodeOut=int(params[4]), 
+                                              Ai=float(params[5]),
+                                              name=params[0])
 
 class CurrentSourceControlByVoltage(Source):
     
@@ -629,16 +630,16 @@ class CurrentSourceControlByVoltage(Source):
         return current_branch
 
     @classmethod
-    def from_nl( cls, params : Tuple[str, str, int, int, int, int, float] ):
-        # CurrentSourceControlByVoltage: 'G', name, noIn, noOut, control_noIn, control_noOut, Gm
-        if params[0] != 'G' or len(params) != 7:
+    def from_nl( cls, params : Tuple[str, int, int, int, int, float] ):
+        # CurrentSourceControlByVoltage: 'G'name, noIn, noOut, control_noIn, control_noOut, Gm
+        if params[0] != 'G' or len(params) != 6:
             raise InvalidElement(f"Invalid parameters for CurrentSourceControlByVoltage: expected 'G'({params[0]}) as first element and 7 ({len(params)})parameters in total.")
-        return CurrentSourceControlByVoltage( nodeIn=params[2], 
-                                              nodeOut=params[3], 
-                                              controlNodeIn=params[4], 
-                                              controlNodeOut=params[5], 
-                                              Gm=params[6],
-                                              name=params[1])
+        return CurrentSourceControlByVoltage( nodeIn=int(params[1]), 
+                                              nodeOut=int(params[2]), 
+                                              controlNodeIn=int(params[3]), 
+                                              controlNodeOut=int(params[4]), 
+                                              Gm=float(params[5]),
+                                              name=params[0])
 
 class VoltageSourceControlByCurrent(Source):
 
@@ -691,13 +692,13 @@ class VoltageSourceControlByCurrent(Source):
         return current_branch
 
     @classmethod
-    def from_nl( cls, params : Tuple[str, str, int, int, int, int, float] ):
-        # VoltageSourceControlByCurrent: 'H', name, noIn, noOut, control_noIn, control_noOut, Rm
-        if params[0] != 'H' or len(params) != 7:
+    def from_nl( cls, params : Tuple[str, int, int, int, int, float] ):
+        # VoltageSourceControlByCurrent: 'H'name, noIn, noOut, control_noIn, control_noOut, Rm
+        if params[0][0] != 'H' or len(params) != 6:
             raise InvalidElement(f"Invalid parameters for VoltageSourceControlByCurrent: expected 'H'({params[0]}) as first element and 7 ({len(params)})parameters in total.")
-        return VoltageSourceControlByCurrent( nodeIn=params[2], 
-                                              nodeOut=params[3], 
-                                              controlNodeIn=params[4], 
-                                              controlNodeOut=params[5], 
-                                              Rm=params[6],
-                                              name=params[1])
+        return VoltageSourceControlByCurrent( nodeIn=int(params[1]), 
+                                              nodeOut=int(params[2]), 
+                                              controlNodeIn=int(params[3]), 
+                                              controlNodeOut=int(params[4]), 
+                                              Rm=float(params[5]),
+                                              name=params[0])

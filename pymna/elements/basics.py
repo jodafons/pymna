@@ -13,8 +13,8 @@ Each class represents a specific element and provides methods for updating circu
 __all__ = [
             "Resistor",
             "Capacitor",
-            "Indutor",
-            "Ampop",
+            "Inductor",
+            "OpAmp",
             "NoLinearResistor"
         ]
 
@@ -75,7 +75,6 @@ class Resistor(Element):
                  dt               : float,
                  current_branch   : int, 
                  ) -> int:
-
         G = (1/self.R)
         A[self.nodeIn , self.nodeIn ] +=  G
         A[self.nodeIn , self.nodeOut] += -G
@@ -98,19 +97,19 @@ class Resistor(Element):
         return current_branch    
 
     @classmethod
-    def from_nl(cls, params: Tuple[str, str, int, int, float]):
+    def from_nl(cls, params: Tuple[str, int, int, float]):
         """
         Creates a Resistor instance from a tuple of parameters.
 
         Parameters:
-        params (Tuple[str, str, int, int, float]): A tuple containing the parameters for the resistor.
+        params (Tuple[str, int, int, float]): A tuple containing the parameters for the resistor.
 
         Returns:
         Resistor: An instance of the Resistor class.
         """
-        if params[0] != "R":
+        if params[0][0] != "R":
             raise InvalidElement("Invalid parameters for Resistor: expected 'R' as first element.")
-        return Resistor(nodeIn=params[2], nodeOut=params[3], resistence=params[4], name=params[1])
+        return Resistor(nodeIn=int(params[1]), nodeOut=int(params[2]), resistence=float(params[3]), name=params[0])
 
 #
 # Capacitor
@@ -201,24 +200,25 @@ class Capacitor(Element):
 
 
     @classmethod
-    def from_nl(cls, params: Union[Tuple[str, str, int, int, float], Tuple[str, str, int, int, float, float]]):
+    def from_nl(cls, params: Union[Tuple[str, int, int, float], Tuple[str, str, int, int, float, float]]):
         """
         Creates a Capacitor instance from a tuple of parameters.
 
         Parameters:
-        params (Union[Tuple[str, str, int, int, float], Tuple[str, str, int, int, float, float]]): A tuple containing the parameters for the capacitor.
+        params (Union[Tuple[str, int, int, float], Tuple[str, str, int, int, float, float]]): A tuple containing the parameters for the capacitor.
 
         Returns:
         Capacitor: An instance of the Capacitor class.
         """
-        if params[0] != "C":
+        if params[0][0] != "C":
             raise InvalidElement("Invalid parameters for Capacitor: expected 'C' as first element.")
-        return Capacitor(nodeIn=params[2], nodeOut=params[3], capacitance=params[4], name=params[1], initial_condition=params[5] if len(params) > 5 else 0)
+        return Capacitor(nodeIn=int(params[1]), nodeOut=int(params[2]), capacitance=float(params[3]), 
+                         name=params[0], initial_condition=float(params[4][3::]) if len(params) > 4 else 0)
 
 #
-# Indutor
+# Inductor
 #
-class Indutor(Element):
+class Inductor(Element):
     """
     Represents an inductor element in a circuit.
 
@@ -251,6 +251,7 @@ class Indutor(Element):
         self.nodeOut = nodeOut  # node 2
         self.L  = inductance  # component value
         self.ic = initial_condition  # initial condition
+        self.jx = -1  # current branch index, initialized to -1
 
     #
     # j(t0+dt) = j(t0) + 1/L \int_{t0}^{t0+dt}v(t)dt
@@ -274,6 +275,7 @@ class Indutor(Element):
         A[jx, self.nodeOut]  +=  1  # Vb
         A[jx, jx]            += R
         b[jx]                += R * self.ic
+        self.jx = jx
         return current_branch
 
     #
@@ -299,24 +301,25 @@ class Indutor(Element):
 
 
     @classmethod
-    def from_nl(cls, params: Union[Tuple[str, str, int, int, float], Tuple[str, str, int, int, float, float]]):
+    def from_nl(cls, params: Union[Tuple[str, int, int, float], Tuple[str, str, int, int, float, float]]):
         """
-        Creates an Indutor instance from a tuple of parameters.
+        Creates an Inductor instance from a tuple of parameters.
 
         Parameters:
-        params (Union[Tuple[str, str, int, int, float], Tuple[str, str, int, int, float, float]]): A tuple containing the parameters for the inductor.
+        params (Union[Tuple[str, int, int, float], Tuple[str, str, int, int, float, float]]): A tuple containing the parameters for the inductor.
 
         Returns:
         Indutor: An instance of the Indutor class.
         """
-        if params[0] != "L":
+        if params[0][0] != "L":
             raise InvalidElement("Invalid parameters for Inductor: expected 'L' as first element.")
-        return Indutor(nodeIn=params[2], nodeOut=params[3], inductance=params[4], name=params[1], initial_condition=params[5] if len(params) > 5 else 0)
+        return Inductor(nodeIn=int(params[1]), nodeOut=int(params[2]), inductance=float(params[3]), 
+                        name=params[0], initial_condition=float(params[4][3::]) if len(params) > 4 else 0)
 
 #
-# Ampop
+# OpAmp
 #
-class Ampop(Element):
+class OpAmp(Element):
 
     # This class represents an operational amplifier element in a circuit.
     # The letter is 'O'.
@@ -374,19 +377,19 @@ class Ampop(Element):
         return current_branch
 
     @classmethod
-    def from_nl(cls, params: Tuple[str, str, int, int, int]):
+    def from_nl(cls, params: Tuple[str, int, int, int]):
         """
         Creates an Ampop instance from a tuple of parameters.
 
         Parameters:
-        params (Tuple[str, str, int, int, int]): A tuple containing the parameters for the operational amplifier.
+        params (Tuple[str, int, int, int]): A tuple containing the parameters for the operational amplifier.
 
         Returns:
         Ampop: An instance of the Ampop class.
         """
-        if params[0] != "O":
+        if params[0][0] != "O":
             raise InvalidElement("Invalid parameters for Operational Amplifier: expected 'O' as first element.")
-        return Ampop(controlNodePos=params[2], controlNodeNeg=params[3], nodeOut=params[4], name=params[1])
+        return Ampop(controlNodePos=int(params[1]), controlNodeNeg=int(params[2]), nodeOut=int(params[3]), name=params[0])
 
 
 class NoLinearResistor(Element):
@@ -453,7 +456,7 @@ class NoLinearResistor(Element):
                  current_branch   : int, 
                  ) -> int:
    
-        ddp = x_newton_raphson[self.noteIn] - x_newton_raphson[self.nodeOut]
+        ddp = x_newton_raphson[self.nodeIn] - x_newton_raphson[self.nodeOut]
         if ddp > self.nolinear_voltage_3:
             # Tangente da reta ou derivada da funcao
             G = (self.nolinear_current_4 - self.nolinear_current_3)/(self.nolinear_voltage_4 - self.nolinear_voltage_3)
@@ -462,37 +465,36 @@ class NoLinearResistor(Element):
             # Tangente da reta ou derivada da funcao
             G = (self.nolinear_current_3 - self.nolinear_current_2)/(self.nolinear_voltage_3 - self.nolinear_voltage_2)
             I = self.nolinear_current_3 - G*self.nolinear_voltage_3
-        else: 
+        elif (ddp <= self.nolinear_voltage_2) :
             # Tangente da reta ou derivada da funcao
             G = (self.nolinear_current_2 - self.nolinear_current_1)/(self.nolinear_voltage_2 - self.nolinear_voltage_1)
             I = self.nolinear_current_2 - G*self.nolinear_voltage_2
-
+       
         A[self.nodeIn, self.nodeIn]   +=  G		# G
         A[self.nodeIn, self.nodeOut]  += -G		# G
         A[self.nodeOut, self.nodeIn]  += -G		# G
         A[self.nodeOut, self.nodeOut] +=  G		# G
-        b[self.nodeIn]  += -I		# Fonte de corrente referente ao modelo do resistor nao linear indo do no 1 para o no 2.
-        b[self.nodeOut] +=  I		# Fonte de corrente referente ao modelo do resistor nao linear indo do no 1 para o no 2.
+        b[self.nodeIn]  += -I # Fonte de corrente referente ao modelo do resistor nao linear indo do no 1 para o no 2.
+        b[self.nodeOut] +=  I # Fonte de corrente referente ao modelo do resistor nao linear indo do no 1 para o no 2.
         return current_branch
 
-
     @classmethod
-    def from_nl(cls, params: Tuple[str, str, int, int, float, float, float, float, float, float, float, float]):
+    def from_nl(cls, params: Tuple[str, int, int, float, float, float, float, float, float, float, float]):
         """
         Creates a NoLinearResistor instance from a tuple of parameters.
 
         Parameters:
-        params (Tuple[str, str, int, int, float, float, float, float, float, float, float, float]): A tuple containing the parameters for the nonlinear resistor.
+        params (Tuple[str, int, int, float, float, float, float, float, float, float, float]): A tuple containing the parameters for the nonlinear resistor.
 
         Returns:
         NoLinearResistor: An instance of the NoLinearResistor class.
         """
-        # N, name, nodeIn, nodeOut, nolinear_voltage_1, nolinear_current_1, 
+        # Nname, nodeIn, nodeOut, nolinear_voltage_1, nolinear_current_1, 
         # nolinear_voltage_2, nolinear_current_2, nolinear_voltage_3, nolinear_current_3, nonlinear_voltage_4, nolinear_current_4 
-        if params[0] != "N":
+        if params[0][0] != "N":
             raise InvalidElement("Invalid parameters for Nonlinear Resistor: expected 'NLR' as first element.")
-        return NoLinearResistor(nodeIn=params[2], nodeOut=params[3], 
-                                nolinear_voltage_1=params[4], nolinear_current_1=params[5],
-                                nolinear_voltage_2=params[6], nolinear_current_2=params[7],
-                                nolinear_voltage_3=params[8], nolinear_current_3=params[9],
-                                nolinear_voltage_4=params[10], nolinear_current_4=params[11], name=params[1])
+        return NoLinearResistor(nodeIn=int(params[1]), nodeOut=int(params[2]), 
+                                nolinear_voltage_1=float(params[3]), nolinear_current_1=float(params[4]),
+                                nolinear_voltage_2=float(params[5]), nolinear_current_2=float(params[6]),
+                                nolinear_voltage_3=float(params[7]), nolinear_current_3=float(params[8]),
+                                nolinear_voltage_4=float(params[9]), nolinear_current_4=float(params[10]), name=params[0])
