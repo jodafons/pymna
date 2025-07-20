@@ -369,11 +369,19 @@ class Simulator:
                 end_time  = float(simu_config[1])
                 step_time = float(simu_config[2])
                 method    = simu_config[3]
+                if method=="BC":
+                    method = Method.BACKWARD_EULER
+                elif method=="TR":
+                    method = Method.TRAPEZOIDAl
+                elif method=="FE":
+                    method = Method.FORWARD_EULER
+                else:
+                    raise ValueError(f"Unknown method: {method}")
                 max_number_of_internal_step = int(simu_config[4])
                 use_ic = True if simu_config[5]=='UIC' else False
-
                 result = self.transient(circuit, end_time, step_time,
                                         max_number_of_internal_step=max_number_of_internal_step,
+                                        method = method
                                         )
 
             elif '.AC' in simu_config[0]:
