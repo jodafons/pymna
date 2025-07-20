@@ -1,27 +1,16 @@
 __all__ = [
-    "Domain",
-    "Integration",
-    "Element"
+    "Method"
 ]
 
 
 import enum 
 
 
-#
-# tasks and jobs
-#
-class Domain(enum.Enum):
-    TIME      = "time"
-    FREQUENCY = "frequency"
-
-class Integration(enum.Enum):
-    BACKWARD_EULER = "backward"
-    FORWARD_EULER  = "forward"
-    TRAP_EULER     = "trap"
-    GEAR           = "gear"
-
-class Element(enum.Enum):
-    RESISTOR  = "R"
-    CAPACITOR = "C"
-    INDUTOR   = "L"
+class Method(enum.Enum):
+    """
+    Enumeration of methods for integration.
+    """
+    TRAPEZOIDAL = "trapezoidal"
+    FORWARD_EULER = "forward_euler"
+    BACKWARD_EULER = "backward_euler"
+    

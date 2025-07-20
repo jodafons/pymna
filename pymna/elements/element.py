@@ -20,13 +20,11 @@ class Element(ABC):
         self.name = name
         self.nolinear_element = nolinear_element
  
-    def update( self, b : np.array, x : np.array):
+    def update( self,  x : np.array):
         """
         Updates the internal state of the element based on the provided parameters.
 
         Parameters:
-        b : np.array
-            The input vector or array that is part of the update operation.
         x : np.array
             The state vector or array that is part of the update operation.
         """

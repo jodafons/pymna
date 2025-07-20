@@ -179,7 +179,7 @@ class Capacitor(Element):
     #
     # Update all initial conditions
     #
-    def update(self, b, x):
+    def update(self, x):
         self.ic = x[self.nodeIn] - x[self.nodeOut]
 
 
@@ -281,7 +281,7 @@ class Inductor(Element):
     #
     # Update all initial conditions
     #
-    def update(self, b, x):
+    def update(self, x):
         self.ic = x[self.jx]
 
     def fourier(self,

@@ -4,6 +4,10 @@ from . import exceptions
 __all__.extend( exceptions.__all__ )
 from .exceptions import *
 
+from . import enumerator
+__all__.extend( enumerator.__all__ )
+from .enumerator import *
+
 from . import units
 __all__.extend( units.__all__ )
 from .units import *

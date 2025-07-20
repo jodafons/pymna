@@ -20,7 +20,7 @@ __all__ = ["Simulator"]
 
 import numpy as np
 
-from typing import List, Dict
+from typing import List, Dict, Tuple
 from pymna.circuit    import Circuit
 from pymna.elements   import Capacitor
 from pymna.elements   import Resistor
@@ -34,7 +34,7 @@ from pymna.elements   import CurrentSourceControlByVoltage
 from pymna.elements   import VoltageSourceControlByVoltage
 from pymna.elements   import CurrentSourceControlByCurrent
 from pymna.exceptions import ImpossibleSolution
-
+from pymna.enumerator import Method
 
 class Simulator:
 
@@ -118,6 +118,7 @@ class Simulator:
                   max_number_of_guesses        : int=100,
                   max_number_of_newton_raphson : int=20,
                   step_factor                  : float=1e9,
+                  method                       : Method=Method.BACKWARD_EULER
                 ) -> Dict:
         """
         Simulates the transient response of a circuit over a specified time period.
@@ -144,17 +145,15 @@ class Simulator:
         e                = []
         times            = []
 
-
         reshape=True
         max_nodes = self.max_nodes
+
+        print(f"Transient simulation started with end_time={end_time}, step_time={step_time}")
+        print(f"max_number_of_internal_step={max_number_of_internal_step}, max_tolerance={max_tolerance}")
+        print(f"Max number of nodes: {circuit.number_of_nodes}")
+        col_names = [f"{node_name+1}" for node_name in range(circuit.number_of_nodes)]
+        
         while t <= end_time:
-
-
-            A                = np.zeros( (max_nodes, max_nodes) )
-            b                = np.zeros( (max_nodes, ))
-            x_newton_raphson = np.zeros( b.shape )
-            x                = np.zeros( b.shape )
-
 
             if t==0:
                 max_internal_step = 1
@@ -174,8 +173,8 @@ class Simulator:
                 if circuit.has_nolinear_elements:
 
                     stop_newton_raphson = False
-                    x_newton_raphson    = (np.random.rand( x_newton_raphson.shape[0] ) % 100) + 1
                     number_of_guesses   = 0
+                    x_newton_raphson    = np.random.rand( max_nodes )%100 + 1
                     number_of_execution_newton_raphson = 0
 
                     while not stop_newton_raphson:
@@ -183,68 +182,28 @@ class Simulator:
                         if number_of_execution_newton_raphson == max_number_of_newton_raphson:
                             if number_of_guesses > max_number_of_guesses:
                                 raise ImpossibleSolution("Its not possible to found a solution to this problem.")
-                            x_newton_raphson = (np.random.rand(x.shape[0]) % 100) + 1
+                            x_newton_raphson    = np.random.rand(max_nodes)%100 + 1
                             number_of_guesses+=1
                             number_of_execution_newton_raphson=0
 
-                        current_branch   = circuit.number_of_nodes
-                        for elm in circuit.elements:
-                            current_branch = elm.backward(A,b,x,x_newton_raphson,t,delta_t,current_branch)
-
-                        if reshape:
-                            max_nodes = current_branch+1 + 1 # +1 for the ground node
-                            A = A[0:max_nodes, 0:max_nodes]
-                            b = b[0:max_nodes]
-                            x = x[0:max_nodes]
-                            x_newton_raphson = x_newton_raphson[0:max_nodes]
-                            reshape=False
-
-                        print("A")
-                        print(A)
-                        print("b")
-                        print(b)
-                        
-                        x = self.solve(A,b)
-                        print("x")
-                        print(x)
-                        print("x_newton_raphson")
-                        print(x_newton_raphson)
-
-
-
+                        x, max_nodes, col_names = self.solve_system_of_equations(circuit, t, delta_t, max_nodes, method, x_newton_raphson, col_names)
+                        x_newton_raphson = x_newton_raphson[0:max_nodes]
                         tolerance = np.abs( x - x_newton_raphson ).max()
-                        print(tolerance)
-
-                        print("------------")
-
-                        #print(tolerance)
                         if tolerance > max_tolerance:
-                            x = x_newton_raphson.copy()
+                            x_newton_raphson = x
                             number_of_execution_newton_raphson += 1
                         else:
                             stop_newton_raphson = True
                     # end of Newton Raphson
 
-                else:
-                    current_branch   = circuit.number_of_nodes
-                    for elm in circuit.elements:
-                        current_branch = elm.backward(A,b,x,x_newton_raphson,t,delta_t,current_branch)
-                    if reshape:
-                        max_nodes = current_branch+1 + 1 # +1 for the ground node
-                        A = A[0:max_nodes, 0:max_nodes]
-                        b = b[0:max_nodes]
-                        x = x[0:max_nodes]
-                        x_newton_raphson = x_newton_raphson[0:max_nodes]
-                        reshape=False
-        
-                    x = self.solve(A,b)
+                # NOTE: if the circuit has no nonlinear elements, we can use the linear solver directly
+                else: # circuit has no nonlinear elements
+                    x, max_nodes, col_names = self.solve_system_of_equations(circuit, t, delta_t, max_nodes, method, [], col_names)
           
                 # update ICs
                 for elm in circuit.elements:
-                    elm.update( b, x )
+                    elm.update( x )
                 
-                print(x)
-
                 internal_step += 1
 
             # end of internal step
@@ -256,8 +215,9 @@ class Simulator:
 
         e = np.array(e)
         result = {"t":times}
-        for node_name, node_idx in circuit.nodes.items():
-            result[ node_name ] = e[ :, node_idx ] 
+        for col_idx, col_name in enumerate(col_names):            
+            result[ col_name ] = e[ :, col_idx+1 ]
+
         return result
 
 
@@ -265,6 +225,83 @@ class Simulator:
         x = np.linalg.solve(A[1::, 1::],b[1::])
         return np.concatenate(([0],x))
 
+
+    def solve_system_of_equations( self, 
+                                       circuit : Circuit, 
+                                       t       : float, 
+                                       delta_t : float,
+                                       max_nodes : int,
+                                       method    : Method,
+                                       x_newton_raphson : np.array,
+                                       col_names : List[str],
+                                    ) -> Tuple[np.array, int]:
+            """
+            Solves a system of equations for the given circuit using the specified numerical method.
+
+            This method constructs the system of equations based on the circuit elements and 
+            applies the chosen numerical method (Backward Euler, Trapezoidal, or Forward Euler) 
+            to compute the solution.
+
+            Parameters:
+            ----------
+            circuit : Circuit
+                The circuit object containing elements and node information.
+            t : float
+                The current time at which the system is being solved.
+            delta_t : float
+                The time step for the numerical method.
+            max_nodes : int
+                The maximum number of nodes in the circuit.
+            method : Method
+                The numerical method to be used for solving the equations.
+            x_newton_raphson : np.array
+                The initial guess for the Newton-Raphson method.
+            col_names : List[str]
+                A list to store the names of the columns in the resulting matrix.
+
+            Returns:
+            -------
+            Tuple[np.array, int]
+                A tuple containing:
+                - The solution vector `x` as a NumPy array.
+                - The updated number of nodes after processing the circuit elements.
+                - The updated list of column names.
+
+            Raises:
+            ------
+            ValueError
+                If the specified method is not recognized.
+            """
+            A                = np.zeros( (max_nodes, max_nodes) )
+            b                = np.zeros( (max_nodes, ))
+            x                = np.zeros( (max_nodes, ) )
+            current_branch   = circuit.number_of_nodes
+            for elm in circuit.elements:
+                last_branch = current_branch
+
+                if method == Method.BACKWARD_EULER:
+                    # NOTE: the backward method of each element returns the current branch
+                    current_branch = elm.backward(A,b,x,x_newton_raphson,t,delta_t,current_branch)
+                elif method == Method.TRAPEZOIDAl:
+                    # NOTE: the trapezoidal method of each element returns the current branch
+                    current_branch = elm.trapezoidal(A,b,x,x_newton_raphson,t,delta_t,current_branch)
+                elif method == Method.FORWARD_EULER:
+                    # NOTE: the forward method of each element returns the current branch
+                    current_branch = elm.forward(A,b,x,x_newton_raphson,t,delta_t,current_branch)
+                else:
+                    # NOTE: if the method is not recognized, raise an error
+                    raise ValueError(f"Unknown method: {method}")            
+                
+                if current_branch > last_branch:
+                    col_name = f"J{current_branch}{elm.name}"
+                    if not col_name in col_names:
+                        col_names.append(col_name)
+
+            max_nodes = current_branch+1
+            A = A[0:max_nodes, 0:max_nodes]
+            b = b[0:max_nodes]
+            x = self.solve(A,b)
+            return x, max_nodes, col_names
 
 
 
@@ -276,6 +313,8 @@ class Simulator:
             lines = f.readlines()
 
             number_of_nodes = int(lines[0].strip())
+
+            [circuit.node(n+1) for n in range(number_of_nodes)]
             simu_config = lines.pop().strip().split()
 
             # Process the line to create circuit elements
