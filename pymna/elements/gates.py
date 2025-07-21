@@ -378,18 +378,18 @@ class TwoInputsGate(Element):
         ddp_b = x_newton_raphson[self.control_nodeIn_b] - x_newton_raphson[self.gnd]
 
         # input A
-        Ca = Capacitor( self.control_nodeIn_a, self.gnd, self.C, ic = self.ic_a )
+        Ca = Capacitor( self.control_nodeIn_a, self.gnd, self.C, initial_condition = self.ic_a )
         current_branch = Ca.backward(A, b, x, x_newton_raphson, t, dt, current_branch)
 
         # input B
-        Cb = Capacitor( self.control_nodeIn_b, self.gnd, self.C, ic = self.ic_b )
+        Cb = Capacitor( self.control_nodeIn_b, self.gnd, self.C, initial_condition = self.ic_b )
         current_branch = Cb.backward(A, b, x, x_newton_raphson, t, dt, current_branch)
         
         # get G and V given the gate type and inputs
         Go, Vo, control_node = get_gate_params(self.gate_name, self.V, self.A, ddp_a, ddp_b, self.control_nodeIn_a, self.control_nodeIn_b)
 
         # transconductance from control_node to gnd
-        Ic = CurrentSourceControlByVoltage( self.gnd, self.nodeOut, control_node, self.gnd, Go)
+        Ic = CurrentSourceControlByVoltage( self.gnd, self.nodeOut, control_node, self.gnd, Go/self.R)
         current_branch = Ic.backward(A, b, x, x_newton_raphson, t, dt, current_branch)  
 
         # current source from nodeOut to gnd 
@@ -404,7 +404,7 @@ class TwoInputsGate(Element):
         return current_branch			
 				
     def update(self, x : np.array):
-        self.ic_a = x[self.control_nodeIn] - x[self.gnd]
+        self.ic_a = x[self.control_nodeIn_a] - x[self.gnd]
         self.ic_b = x[self.control_nodeIn_b] - x[self.gnd]
 
 class AND(TwoInputsGate):
@@ -497,7 +497,9 @@ class NAND(TwoInputsGate):
         """
         if params[0][0] != "(":
             raise InvalidElement("Invalid parameters for NAND gate: expected 'N' as first element.")
-        return NAND(nodeIn_a=int(params[1]), nodeIn_b=int(params[2]), nodeOut=int(params[3]), V=params[4], R=params[5], C=params[6], A=params[7], name=params[0])
+        return NAND(nodeIn_a=int(params[1]), nodeIn_b=int(params[2]), nodeOut=int(params[3]), 
+                   V=float(params[4]), R=float(params[5]), C=float(params[6]), 
+                   A=float(params[7]), name=params[0])
 
 class OR(TwoInputsGate):
 
@@ -542,7 +544,9 @@ class OR(TwoInputsGate):
         """
         if params[0][0] != "}":
             raise InvalidElement("Invalid parameters for OR gate: expected 'O' as first element.")
-        return OR(nodeIn_a=int(params[1]), nodeIn_b=int(params[2]), nodeOut=int(params[3]), V=params[4], R=params[5], C=params[6], A=params[7], name=params[0])
+        return OR(nodeIn_a=int(params[1]), nodeIn_b=int(params[2]), nodeOut=int(params[3]), 
+                   V=float(params[4]), R=float(params[5]), C=float(params[6]), 
+                   A=float(params[7]), name=params[0])
 
 class NOR(TwoInputsGate):
 
@@ -587,7 +591,9 @@ class NOR(TwoInputsGate):
         """
         if params[0][0] != "{":
             raise InvalidElement("Invalid parameters for NOR gate: expected 'N' as first element.")
-        return NOR(nodeIn_a=int(params[1]), nodeIn_b=int(params[2]), nodeOut=int(params[3]), V=params[4], R=params[5], C=params[6], A=params[7], name=params[0])
+        return NOR(nodeIn_a=int(params[1]), nodeIn_b=int(params[2]), nodeOut=int(params[3]), 
+                   V=float(params[4]), R=float(params[5]), C=float(params[6]), 
+                   A=float(params[7]), name=params[0])
 
 class XOR(TwoInputsGate):
 
@@ -631,7 +637,9 @@ class XOR(TwoInputsGate):
         """
         if params[0][0] != "]":
             raise InvalidElement("Invalid parameters for XOR gate: expected 'X' as first element.")
-        return XOR(nodeIn_a=int(params[1]), nodeIn_b=int(params[2]), nodeOut=int(params[3]), V=params[4], R=params[5], C=params[6], A=params[7], name=params[0])
+        return XOR(nodeIn_a=int(params[1]), nodeIn_b=int(params[2]), nodeOut=int(params[3]), 
+                   V=float(params[4]), R=float(params[5]), C=float(params[6]), 
+                   A=float(params[7]), name=params[0])
 
 class XNOR(TwoInputsGate):
 
@@ -675,4 +683,6 @@ class XNOR(TwoInputsGate):
         """
         if params[0][0] != "[":
             raise InvalidElement("Invalid parameters for XNOR gate: expected 'X' as first element.")
-        return XNOR(nodeIn_a=int(params[1]), nodeIn_b=int(params[2]), nodeOut=int(params[3]), V=params[4], R=params[5], C=params[6], A=params[7], name=params[0])
+        return XNOR(nodeIn_a=int(params[1]), nodeIn_b=int(params[2]), nodeOut=int(params[3]), 
+                   V=float(params[4]), R=float(params[5]), C=float(params[6]), 
+                   A=float(params[7]), name=params[0])

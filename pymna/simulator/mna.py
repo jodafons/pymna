@@ -55,7 +55,7 @@ class Method(enum.Enum):
 
 class Simulator:
 
-    def __init__(self , temperature : float=25, max_nodes : int=10):
+    def __init__(self , temperature : float=25, max_nodes : int=1000):
         self.temperature = temperature
         self.max_nodes = max_nodes
 
