@@ -12,7 +12,7 @@ Classes:
     XNOR: Represents an XNOR logic gate.
     
 Functions:
-    get_G_and_V: Calculates the output voltage and transconductance for a given logic gate.
+    get_gate_params: Calculates the output voltage and transconductance for a given logic gate.
 
 The module imports necessary types and classes from the pymna.elements package and uses NumPy for numerical operations.
 """
@@ -35,7 +35,7 @@ from pymna.elements import CurrentSource
 import numpy as np
 
 
-def get_G_and_V( gate : str, 
+def get_gate_params( gate : str, 
                  V: float, 
                  A: float, 
                  ddp_a: float, 
@@ -195,8 +195,7 @@ def get_G_and_V( gate : str,
             if Vx <= VIL:
                 Go = 0
                 Vo = V_partOne
-								
-						
+												
         elif gate == "XNOR":
 
             # VA >= VB e VA + VB > V
@@ -214,8 +213,7 @@ def get_G_and_V( gate : str,
                 V_partOne = 0
                 derived_partTwo = A
                 V_partThree = V
-	
-							
+					
 			# VA >= VB e VA + VB < V
             if ((ddp_a >= ddp_b) and ((ddp_a + ddp_b) < V)):
                 Vx = ddp_a
@@ -231,9 +229,7 @@ def get_G_and_V( gate : str,
                 V_partOne = V
                 derived_partTwo = -A
                 V_partThree = 0
-
-							
-					
+		
             if Vx > VIH:
                 Go = 0
                 Vo = V_partThree
@@ -307,7 +303,7 @@ class NOT(Element):
         current_branch = Ca.backward(A, b, x, x_newton_raphson, t, dt, current_branch)
 
         # get G and V given the gate type and inputs
-        Go, Vo, control_node = get_G_and_V("NOT", self.V, self.A, ddp, 0, self.control_nodeIn, o)
+        Go, Vo, control_node = get_gate_params("NOT", self.V, self.A, ddp, 0, self.control_nodeIn, o)
 
         # output
         A[self.gnd, control_node ]    +=  Go  # G
@@ -329,6 +325,21 @@ class NOT(Element):
     def update(self, x : np.array)
         self.ic_a = x[self.control_nodeIn] - x[self.gnd]
 
+    @classmethod
+    def from_nl(cls, params: Tuple[str, int, int, float, float, float, float]):
+        """
+        Creates a NOT instance from a tuple of parameters.
+
+        Parameters:
+        params (Tuple[str, int, int, float, float, float, float]): A tuple containing the parameters for the NOT gate.
+
+        Returns:
+        NOT: An instance of the NOT class.
+        """
+        if params[0][0] != ">":
+            raise InvalidElement("Invalid parameters for NOT gate: expected 'N' as first element.")
+        return NOT(nodeIn=int(params[1]), nodeOut=int(params[2]), V=params[3], R=params[4], C=params[5], A=params[6], name=params[0])
+	
 class TwoInputsGate(Element):
 
     def __init__(self, 
@@ -378,7 +389,7 @@ class TwoInputsGate(Element):
         current_branch = Cb.backward(A, b, x, x_newton_raphson, t, dt, current_branch)
         
         # get G and V given the gate type and inputs
-        Go, Vo, control_node = get_G_and_V(self.gate_name, self.V, self.A, ddp_a, ddp_b, self.control_nodeIn_a, self.control_nodeIn_b)
+        Go, Vo, control_node = get_gate_params(self.gate_name, self.V, self.A, ddp_a, ddp_b, self.control_nodeIn_a, self.control_nodeIn_b)
 
         # output
         A[self.gnd, control_node ]    +=  Go  # G
@@ -400,8 +411,6 @@ class TwoInputsGate(Element):
     def update(self, x : np.array)
         self.ic_a = x[self.control_nodeIn] - x[self.gnd]
         self.ic_b = x[self.control_nodeIn_b] - x[self.gnd]
-
-
 
 class AND(TwoInputsGate):
 
@@ -433,6 +442,21 @@ class AND(TwoInputsGate):
             """
             TwoInputsGate.__init__(self, nodeIn_a, nodeIn_b, nodeOut, V, C, A, R, "AND", name)
 
+    @classmethod
+    def from_nl(cls, params: Tuple[str, int, int, float, float, float, float]):
+        """
+        Creates an AND instance from a tuple of parameters.
+
+        Parameters:
+        params (Tuple[str, int, int, float, float, float, float]): A tuple containing the parameters for the AND gate.
+
+        Returns:
+        AND: An instance of the AND class.
+        """
+        if params[0][0] != ")":
+            raise InvalidElement("Invalid parameters for AND gate: expected 'A' as first element.")
+        return AND(nodeIn_a=int(params[1]), nodeIn_b=int(params[2]), nodeOut=int(params[3]), V=params[4], R=params[5], C=params[6], A=params[7], name=params[0])
+
 class NAND(TwoInputsGate):
 
     def __init__(self, 
@@ -462,6 +486,21 @@ class NAND(TwoInputsGate):
             with the specified parameters and sets the gate type to "NAND".
             """
             TwoInputsGate.__init__(self, nodeIn_a, nodeIn_b, nodeOut, V, C, A, R, "NAND", name)
+
+    @classmethod
+    def from_nl(cls, params: Tuple[str, int, int, float, float, float, float]):
+        """
+        Creates a NAND instance from a tuple of parameters.
+
+        Parameters:
+        params (Tuple[str, int, int, float, float, float, float]): A tuple containing the parameters for the NAND gate.
+
+        Returns:
+        NAND: An instance of the NAND class.
+        """
+        if params[0][0] != "(":
+            raise InvalidElement("Invalid parameters for NAND gate: expected 'N' as first element.")
+        return NAND(nodeIn_a=int(params[1]), nodeIn_b=int(params[2]), nodeOut=int(params[3]), V=params[4], R=params[5], C=params[6], A=params[7], name=params[0])
 
 class OR(TwoInputsGate):
 
@@ -493,6 +532,21 @@ class OR(TwoInputsGate):
             """
             TwoInputsGate.__init__(self, nodeIn_a, nodeIn_b, nodeOut, V, C, A, R, "OR", name)
 
+    @classmethod
+    def from_nl(cls, params: Tuple[str, int, int, float, float, float, float]):
+        """
+        Creates an OR instance from a tuple of parameters.
+
+        Parameters:
+        params (Tuple[str, int, int, float, float, float, float]): A tuple containing the parameters for the OR gate.
+
+        Returns:
+        OR: An instance of the OR class.
+        """
+        if params[0][0] != "}":
+            raise InvalidElement("Invalid parameters for OR gate: expected 'O' as first element.")
+        return OR(nodeIn_a=int(params[1]), nodeIn_b=int(params[2]), nodeOut=int(params[3]), V=params[4], R=params[5], C=params[6], A=params[7], name=params[0])
+
 class NOR(TwoInputsGate):
 
     def __init__(self, 
@@ -523,6 +577,21 @@ class NOR(TwoInputsGate):
             """
             TwoInputsGate.__init__(self, nodeIn_a, nodeIn_b, nodeOut, V, C, A, R, "NOR", name)
 
+    @classmethod
+    def from_nl(cls, params: Tuple[str, int, int, float, float, float, float]):
+        """
+        Creates a NOR instance from a tuple of parameters.
+
+        Parameters:
+        params (Tuple[str, int, int, float, float, float, float]): A tuple containing the parameters for the NOR gate.
+
+        Returns:
+        NOR: An instance of the NOR class.
+        """
+        if params[0][0] != "{":
+            raise InvalidElement("Invalid parameters for NOR gate: expected 'N' as first element.")
+        return NOR(nodeIn_a=int(params[1]), nodeIn_b=int(params[2]), nodeOut=int(params[3]), V=params[4], R=params[5], C=params[6], A=params[7], name=params[0])
+
 class XOR(TwoInputsGate):
 
     def __init__(self, 
@@ -552,6 +621,21 @@ class XOR(TwoInputsGate):
             """
             TwoInputsGate.__init__(self, nodeIn_a, nodeIn_b, nodeOut, V, C, A, R, "XOR", name)
 
+    @classmethod
+    def from_nl(cls, params: Tuple[str, int, int, float, float, float, float]):
+        """
+        Creates an XOR instance from a tuple of parameters.
+
+        Parameters:
+        params (Tuple[str, int, int, float, float, float, float]): A tuple containing the parameters for the XOR gate.
+
+        Returns:
+        XOR: An instance of the XOR class.
+        """
+        if params[0][0] != "]":
+            raise InvalidElement("Invalid parameters for XOR gate: expected 'X' as first element.")
+        return XOR(nodeIn_a=int(params[1]), nodeIn_b=int(params[2]), nodeOut=int(params[3]), V=params[4], R=params[5], C=params[6], A=params[7], name=params[0])
+
 class XNOR(TwoInputsGate):
 
     def __init__(self, 
@@ -580,3 +664,18 @@ class XNOR(TwoInputsGate):
             Inherits from TwoInputsGate and initializes it with the type "XNOR".
             """
             TwoInputsGate.__init__(self, nodeIn_a, nodeIn_b, nodeOut, V, C, A, R, "XNOR", name)
+
+    @classmethod
+    def from_nl(cls, params: Tuple[str, int, int, float, float, float, float]):
+        """
+        Creates an XNOR instance from a tuple of parameters.
+
+        Parameters:
+        params (Tuple[str, int, int, float, float, float, float]): A tuple containing the parameters for the XNOR gate.
+
+        Returns:
+        XNOR: An instance of the XNOR class.
+        """
+        if params[0][0] != "[":
+            raise InvalidElement("Invalid parameters for XNOR gate: expected 'X' as first element.")
+        return XNOR(nodeIn_a=int(params[1]), nodeIn_b=int(params[2]), nodeOut=int(params[3]), V=params[4], R=params[5], C=params[6], A=params[7], name=params[0])
