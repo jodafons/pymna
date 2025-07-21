@@ -19,8 +19,6 @@ __all__ = [
         ]
 
 import numpy as np
-
-from pymna import enumerator as en1um
 from pymna.elements import Element
 from pymna.exceptions import InvalidElement
 from typing import Tuple, Union

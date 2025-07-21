@@ -31,7 +31,7 @@ from typing import Tuple, List
 from pymna.elements import Element
 from pymna.elements import Resistor
 from pymna.elements import Capacitor
-from pymna.elements import CurrentSource
+from pymna.elements import CurrentSource, CurrentSourceControlByVoltage
 import numpy as np
 
 
@@ -245,8 +245,6 @@ def get_gate_params( gate : str,
 
     return Go, Vo, control_node
 
-
-
 class NOT(Element):
 
     def __init__(self, 
@@ -273,7 +271,7 @@ class NOT(Element):
             This constructor initializes the gate element with the provided parameters
             and sets the ground and initial current values.
             """
-            Element.__init__(self, name)
+            Element.__init__(self, name, nolinear_element=True) 
             self.control_nodeIn = nodeIn
             self.nodeOut        = nodeOut
             self.R              = R 
@@ -299,14 +297,14 @@ class NOT(Element):
         # input A
         # Capacitor from control_nodeIn to gnd in parallel with 
         # a current source from gnd to control_nodeIn (initial condition)
-        Ca = Capacitor( self.control_nodeIn, self.gnd, self.C, ic = self.ic_a )
+        Ca = Capacitor( self.control_nodeIn, self.gnd, self.C, initial_condition = self.ic_a )
         current_branch = Ca.backward(A, b, x, x_newton_raphson, t, dt, current_branch)
 
         # get G and V given the gate type and inputs
-        Go, Vo, control_node = get_gate_params("NOT", self.V, self.A, ddp, 0, self.control_nodeIn, o)
+        Go, Vo, control_node = get_gate_params("NOT", self.V, self.A, ddp, 0, self.control_nodeIn, 0)
 
         # transconductance from control_node to gnd
-        Ic = CurrentSourceControlByVoltage( self.gnd, self.nodeOut, control_node, self.gnd, Go)
+        Ic = CurrentSourceControlByVoltage( self.gnd, self.nodeOut, control_node, self.gnd, Go/self.R)
         current_branch = Ic.backward(A, b, x, x_newton_raphson, t, dt, current_branch)  
 
         # current source from nodeOut to gnd 
@@ -336,7 +334,8 @@ class NOT(Element):
         """
         if params[0][0] != ">":
             raise InvalidElement("Invalid parameters for NOT gate: expected 'N' as first element.")
-        return NOT(nodeIn=int(params[1]), nodeOut=int(params[2]), V=params[3], R=params[4], C=params[5], A=params[6], name=params[0])
+        return NOT(nodeIn=int(params[1]), nodeOut=int(params[2]), V=float(params[3]), R=float(params[4]), 
+                   C=float(params[5]), A=float(params[6]), name=params[0])
 	
 class TwoInputsGate(Element):
 
@@ -352,7 +351,7 @@ class TwoInputsGate(Element):
                      name      : str = ""
                      ):
 
-        Element.__init__(self, name)
+        Element.__init__(self, name, nolinear_element=True)
         self.control_nodeIn_a = nodeIn_a
         self.control_nodeIn_b = nodeIn_b
         self.nodeOut          = nodeOut
@@ -451,7 +450,9 @@ class AND(TwoInputsGate):
         """
         if params[0][0] != ")":
             raise InvalidElement("Invalid parameters for AND gate: expected 'A' as first element.")
-        return AND(nodeIn_a=int(params[1]), nodeIn_b=int(params[2]), nodeOut=int(params[3]), V=params[4], R=params[5], C=params[6], A=params[7], name=params[0])
+        return AND(nodeIn_a=int(params[1]), nodeIn_b=int(params[2]), nodeOut=int(params[3]), 
+                   V=float(params[4]), R=float(params[5]), C=float(params[6]), 
+                   A=float(params[7]), name=params[0])
 
 class NAND(TwoInputsGate):
 

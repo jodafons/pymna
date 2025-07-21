@@ -35,7 +35,6 @@ __all__ = [
 
 import numpy as np
 
-from pymna import enumerator as enum
 from pymna.exceptions import InvalidElement
 from typing import Tuple
 from abc import ABC

@@ -16,8 +16,13 @@ Methods:
 
 """
 
-__all__ = ["Simulator"]
+__all__ = [
+    "Simulator",
+    "Method"
+]
 
+
+import enum 
 import numpy as np
 
 from typing           import List, Dict, Tuple
@@ -36,7 +41,17 @@ from pymna.elements   import CurrentSourceControlByCurrent
 from pymna.elements   import VoltageSource, CurrentSource
 from pymna.elements   import NOT, AND, NAND, OR, NOR, XOR, XNOR
 from pymna.exceptions import ImpossibleSolution
-from pymna.enumerator import Method
+
+
+class Method(enum.Enum):
+    """
+    Enumeration of methods for integration.
+    """
+    TRAPEZOIDAL = "trapezoidal"
+    FORWARD_EULER = "forward_euler"
+    BACKWARD_EULER = "backward_euler"
+    
+
 
 class Simulator:
 
@@ -343,19 +358,19 @@ class Simulator:
                 elif element == "H":
                     circuit += CurrentSourceControlByCurrent.from_nl(params)
                 elif element == '>':
-                    circuit += Not.from_nl(params)
+                    circuit += NOT.from_nl(params)
                 elif element == ')':
-                    circuit += And.from_nl(params)
+                    circuit += AND.from_nl(params)
                 elif element == '(':
-                    circuit += Nand.from_nl(params)
+                    circuit += NAND.from_nl(params)
                 elif element == '}':
-                    circuit += Or.from_nl(params)
+                    circuit += OR.from_nl(params)
                 elif element == '{':
-                    circuit += Nor.from_nl(params)
+                    circuit += NOR.from_nl(params)
                 elif element == ']':
-                    circuit += Xor.from_nl(params)
+                    circuit += XOR.from_nl(params)
                 elif element == '[':
-                    circuit += NXor.from_nl(params)
+                    circuit += XNOR.from_nl(params)
                 elif element == "V":
                     type_source = params[2]
                     if type_source == "SIN":
@@ -381,7 +396,7 @@ class Simulator:
                 end_time  = float(simu_config[1])
                 step_time = float(simu_config[2])
                 method    = simu_config[3]
-                if method=="BC":
+                if method=="BE":
                     method = Method.BACKWARD_EULER
                 elif method=="TR":
                     method = Method.TRAPEZOIDAl
