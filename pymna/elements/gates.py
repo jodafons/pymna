@@ -305,11 +305,9 @@ class NOT(Element):
         # get G and V given the gate type and inputs
         Go, Vo, control_node = get_gate_params("NOT", self.V, self.A, ddp, 0, self.control_nodeIn, o)
 
-        # output
-        A[self.gnd, control_node ]    +=  Go  # G
-        A[self.gnd, self.gnd]         += -Go  # G
-        A[self.nodeOut, control_node] += -Go  # G
-        A[self.nodeOut, self.gnd]     +=  Go  # G
+        # transconductance from control_node to gnd
+        Ic = CurrentSourceControlByVoltage( self.gnd, self.nodeOut, control_node, self.gnd, Go)
+        current_branch = Ic.backward(A, b, x, x_newton_raphson, t, dt, current_branch)  
 
         # current source from nodeOut to gnd 
         Iout = CurrentSource( self.gnd, self.nodeOut,  Vo/self.R )   
@@ -391,11 +389,9 @@ class TwoInputsGate(Element):
         # get G and V given the gate type and inputs
         Go, Vo, control_node = get_gate_params(self.gate_name, self.V, self.A, ddp_a, ddp_b, self.control_nodeIn_a, self.control_nodeIn_b)
 
-        # output
-        A[self.gnd, control_node ]    +=  Go  # G
-        A[self.gnd, self.gnd]         += -Go  # G
-        A[self.nodeOut, control_node] += -Go  # G
-        A[self.nodeOut, self.gnd]     +=  Go  # G
+        # transconductance from control_node to gnd
+        Ic = CurrentSourceControlByVoltage( self.gnd, self.nodeOut, control_node, self.gnd, Go)
+        current_branch = Ic.backward(A, b, x, x_newton_raphson, t, dt, current_branch)  
 
         # current source from nodeOut to gnd 
         Iout = CurrentSource( self.gnd, self.nodeOut,  Vo/self.R )   

@@ -554,7 +554,7 @@ class VoltageSourceControlByVoltage(Source):
         A[self.nodeIn , jx]        +=  1
         A[self.nodeOut , jx]       += -1
         A[jx, self.nodeIn]         += -1
-        A[jx, self.nodeOut]        += 1
+        A[jx, self.nodeOut]        +=  1
         A[jx, self.controlNodeIn]  += self.Av
         A[jx, self.controlNodeOut] += -self.Av 
         return current_branch
@@ -631,6 +631,7 @@ class CurrentSourceControlByCurrent:
                                               Ai=float(params[5]),
                                               name=params[0])
 
+# Trancondutance
 class CurrentSourceControlByVoltage(Source):
     
     # This class represents a current source controlled by a voltage source.
@@ -670,14 +671,10 @@ class CurrentSourceControlByVoltage(Source):
                  current_branch   : int, 
                  ) -> int:
 
-        current_branch += 1
-        jx = current_branch
-        A[self.nodeIn , jx       ] +=  self.Gm
-        A[self.nodeOut , jx      ] += -self.Gm
-        A[jx, self.nodeIn        ] += -1
-        A[jx, self.nodeOut       ] +=  1
-        A[jx, self.controlNodeIn ] +=  1
-        A[jx, self.controlNodeOut] += -1
+        A[self.nodeIn, self.controlNodeIn   ] +=  self.Gm
+        A[self.nodeIn, self.controlNodeOut  ] += -self.Gm
+        A[self.nodeOut, self.controlNodeIn  ] += -self.Gm
+        A[self.nodeOut, self.controlNodeOut ] +=  self.Gm
         return current_branch
 
     @classmethod

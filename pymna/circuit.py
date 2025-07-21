@@ -11,6 +11,7 @@ from pymna.elements import CurrentSourceControlByVoltage
 from pymna.elements import VoltageSourceControlByVoltage
 from pymna.elements import CurrentSourceControlByCurrent
 from pymna.elements import AND, OR, NOT, NAND, NOR, XOR, XNOR
+from pymna.elements import BJT
 
 
 
@@ -695,7 +696,59 @@ class Circuit:
         self+=xnor_gate
         return xnor_gate
 
+    def bjt_npn(self,
+                collector : Union[int,str],
+                base      : Union[int,str],
+                emitter   : Union[int,str],
+                alpha     : float=0.99,
+                alpha_R   : float=0.5,
+                name      : str=""
+               ) -> BJT:
+        """
+        Creates an NPN bipolar junction transistor (BJT) in the circuit.
 
+        Parameters:
+        collector (Union[int, str]): The collector node of the BJT.
+        base (Union[int, str]): The base node of the BJT.
+        emitter (Union[int, str]): The emitter node of the BJT.
+        alpha (float, optional): The forward current gain of the BJT. Default is 0.99.
+        alpha_R (float, optional): The reverse current gain of the BJT. Default is 0.5.
+        name (str, optional): An optional name for the BJT. Default is an empty string.
+
+        Returns:
+        BJT: An instance of the BJT class representing the created NPN transistor.
+        """
+        
+        bjt = BJT("N", self.node(collector), self.node(base), self.node(emitter), alpha, alpha_R, name)
+        self+=bjt
+        return bjt
+
+    def bjt_pnp(self,
+                collector : Union[int,str],
+                base      : Union[int,str],
+                emitter   : Union[int,str],
+                alpha     : float=0.99,
+                alpha_R   : float=0.5,
+                name      : str=""
+               ) -> BJT:
+        """
+        Creates a PNP bipolar junction transistor (BJT) in the circuit.
+
+        Parameters:
+        collector (Union[int, str]): The collector node of the BJT.
+        base (Union[int, str]): The base node of the BJT.
+        emitter (Union[int, str]): The emitter node of the BJT.
+        alpha (float, optional): The forward current gain of the BJT. Default is 0.99.
+        alpha_R (float, optional): The reverse current gain of the BJT. Default is 0.5.
+        name (str, optional): An optional name for the BJT. Default is an empty string.
+
+        Returns:
+        BJT: An instance of the BJT class representing the created PNP transistor.
+        """
+        
+        bjt = BJT("P", self.node(collector), self.node(base), self.node(emitter), alpha, alpha_R, name)
+        self+=bjt
+        return bjt
 
 if __name__ == "__main__":
     from pymna.units import *
