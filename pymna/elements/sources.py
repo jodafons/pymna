@@ -20,6 +20,8 @@ Functions:
 """
 
 __all__ = [
+    "VoltageSource",
+    "CurrentSource",
     "SinusoidalVoltageSource",
     "SinusoidalCurrentSource",
     "PulseVoltageSource",
@@ -28,8 +30,7 @@ __all__ = [
     "CurrentSourceControlByCurrent",
     "CurrentSourceControlByVoltage",
     "VoltageSourceControlByCurrent",
-    "DCVoltageSource",
-    "DCCurrentSource",
+
 ]
 
 import numpy as np
@@ -151,6 +152,76 @@ class Source:
         self.nodeOut  = nodeOut
         self.name     = name
 
+class VoltageSource(Source):
+    def __init__(self, 
+                 nodeIn  : int,
+                 nodeOut : int,
+                 V       : float=0,
+                 name    : str=""
+            ):
+        """
+        Initializes a DCVoltageSource object with the given parameters.
+        This class represents a DC voltage source in a circuit simulation.
+
+        Parameters:
+            nodeIn (int): The input node of the source.
+            nodeOut (int): The output node of the source.
+            dc (float, optional): The DC voltage value. Defaults to 0.
+            name (str, optional): The name of the source. Defaults to an empty string.
+        """
+        Source.__init__(self, name, nodeIn, nodeOut)
+        self.V = V
+
+    def backward(self, 
+                 A                : np.array, 
+                 b                : np.array, 
+                 x                : np.array,
+                 x_newton_raphson : np.array,
+                 t                : float,
+                 dt               : float,
+                 current_branch   : int, 
+                 ) -> int:
+
+        A[self.nodeIn,self.jx]   +=  1
+        A[self.nodeOut,self.jx]  += -1
+        A[self.jx, self.nodeIn]  += -1
+        A[self.jx, self.nodeOut] +=  1
+        b[self.jx] += -self.V
+        return current_branch
+
+class CurrentSource(Source):
+    def __init__(self, 
+                 nodeIn  : int,
+                 nodeOut : int,
+                 I       : float=0,
+                 name    : str=""
+            ):
+        """
+        Initializes a DCCurrentSource object with the given parameters.
+        This class represents a DC current source in a circuit simulation.
+
+        Parameters:
+            nodeIn (int): The input node of the source.
+            nodeOut (int): The output node of the source.
+            dc (float, optional): The DC current value. Defaults to 0.
+            name (str, optional): The name of the source. Defaults to an empty string.
+        """
+        Source.__init__(self, name, nodeIn, nodeOut)
+        self.I = I
+
+    def backward(self, 
+                 A                : np.array, 
+                 b                : np.array, 
+                 x                : np.array,
+                 x_newton_raphson : np.array,
+                 t                : float,
+                 dt               : float,
+                 current_branch   : int, 
+                 ) -> int:
+        I = self.I
+        b[self.nodeIn]   += -I
+        b[self.nodeOut]  +=  I
+        return current_branch
 
 class SinusoidalVoltageSource(Source):
 
@@ -200,8 +271,6 @@ class SinusoidalVoltageSource(Source):
                  current_branch   : int, 
                  ) -> int:
                  
-        current_branch += 1
-        jx = current_branch
         V = self.sin(t, self.amplitude, 
                         self.frequency, 
                         self.number_of_cycles, 
@@ -209,14 +278,8 @@ class SinusoidalVoltageSource(Source):
                         self.angle, 
                         self.attenuation, 
                         self.delay)
-
-        # Update the matrix A and vector b for the voltage source
-        A[self.nodeIn, jx]  +=  1
-        A[self.nodeOut, jx] += -1
-        A[jx, self.nodeIn]  += -1
-        A[jx, self.nodeOut] +=  1
-        b[jx] += V
-        return current_branch
+        Vs = VoltageSource(self.nodeIn, self.nodeOut, V)
+        return Vs.backward(A, b, x, x_newton_raphson, t, dt, current_branch)
 
     @classmethod
     def from_nl(cls, params: Tuple[str, int, int, str, float, float, float, float, float, float, int]):
@@ -298,7 +361,6 @@ class SinusoidalCurrentSource(SinusoidalVoltageSource):
                  current_branch   : int, 
                  ) -> int:
                  
-      
         I = sin(t, 
                 self.amplitude, 
                 self.frequency, 
@@ -307,10 +369,8 @@ class SinusoidalCurrentSource(SinusoidalVoltageSource):
                 self.angle, 
                 self.attenuation, 
                 self.delay)
-
-        b[self.nodeIn]  += -I
-        b[self.nodeOut] +=  I
-        return current_branch
+        Is = CurrentSource(self.nodeIn, self.nodeOut, I)
+        return Is.backward(A, b, x, x_newton_raphson, t, dt, current_branch)
 
 class PulseVoltageSource(Source):
 
@@ -380,12 +440,8 @@ class PulseVoltageSource(Source):
                         self.time_on,
                         self.delay)
 
-        A[self.nodeIn,self.jx]   +=  1
-        A[self.nodeOut,self.jx]  += -1
-        A[self.jx, self.nodeIn]  += -1
-        A[self.jx, self.nodeOut] +=  1
-        b[self.jx] += -V
-        return current_branch
+        Vs = VoltageSource(self.nodeIn, self.nodeOut, V)
+        return Vs.backward(A, b, x, x_newton_raphson, t, dt, current_branch)
 
     @classmethod
     def from_nl( cls, params : Tuple[str, int, int, str, float, float, float, float, float, float, float, int] ):
@@ -446,88 +502,12 @@ class PulseCurrentSource(PulseVoltageSource):
                         self.fall_time,
                         self.time_on,
                         self.delay)
-        b[self.nodeIn]  += -I
-        b[self.nodeOut] +=  I
-        return current_branch
-
-class DCVoltageSource(Source):
-    def __init__(self, 
-                 nodeIn  : int,
-                 nodeOut : int,
-                 dc      : float=0,
-                 name    : str=""
-            ):
-        """
-        Initializes a DCVoltageSource object with the given parameters.
-        This class represents a DC voltage source in a circuit simulation.
-
-        Parameters:
-            nodeIn (int): The input node of the source.
-            nodeOut (int): The output node of the source.
-            dc (float, optional): The DC voltage value. Defaults to 0.
-            name (str, optional): The name of the source. Defaults to an empty string.
-        """
-        Source.__init__(self, name, nodeIn, nodeOut)
-        self.dc = dc
-
-    def backward(self, 
-                 A                : np.array, 
-                 b                : np.array, 
-                 x                : np.array,
-                 x_newton_raphson : np.array,
-                 t                : float,
-                 dt               : float,
-                 current_branch   : int, 
-                 ) -> int:
-
-  
-        V = self.dc
-        A[self.nodeIn,self.jx]   +=  1
-        A[self.nodeOut,self.jx]  += -1
-        A[self.jx, self.nodeIn]  += -1
-        A[self.jx, self.nodeOut] +=  1
-        b[self.jx] += -V
-        return current_branch
-
-
-class DCCurrentSource(Source):
-    def __init__(self, 
-                 nodeIn  : int,
-                 nodeOut : int,
-                 dc      : float=0,
-                 name    : str=""
-            ):
-        """
-        Initializes a DCCurrentSource object with the given parameters.
-        This class represents a DC current source in a circuit simulation.
-
-        Parameters:
-            nodeIn (int): The input node of the source.
-            nodeOut (int): The output node of the source.
-            dc (float, optional): The DC current value. Defaults to 0.
-            name (str, optional): The name of the source. Defaults to an empty string.
-        """
-        Source.__init__(self, name, nodeIn, nodeOut)
-        self.dc = dc
-
-    def backward(self, 
-                 A                : np.array, 
-                 b                : np.array, 
-                 x                : np.array,
-                 x_newton_raphson : np.array,
-                 t                : float,
-                 dt               : float,
-                 current_branch   : int, 
-                 ) -> int:
-        I = self.dc
-        b[self.nodeIn]   += -I
-        b[self.nodeOut]  +=  I
-        return current_branch
+        Is = CurrentSource(self.nodeIn, self.nodeOut, I)
+        return Is.backward(A, b, x, x_newton_raphson, t, dt, current_branch)
 
 #
 # Voltage and current source gains
 #
-
 
 class VoltageSourceControlByVoltage(Source):
 
@@ -536,10 +516,10 @@ class VoltageSourceControlByVoltage(Source):
     def __init__(self, 
                  nodeIn          : int,
                  nodeOut         : int,
-                 controlNodeIn  : int,
-                 controlNodeOut : int,
-                 Av               : float,
-                 name             : str=""
+                 controlNodeIn   : int,
+                 controlNodeOut  : int,
+                 Av              : float,
+                 name            : str=""
             ):
         """
         Initializes a Source object.
@@ -596,12 +576,12 @@ class CurrentSourceControlByCurrent:
    # This class represents a current source controlled by a voltage source.
    # The letter if 'F'
     def __init__(self, 
-             nodeIn  : int,
-             nodeOut : int,
+             nodeIn         : int,
+             nodeOut        : int,
              controlNodeIn  : int,
              controlNodeOut : int,
-             Ai       : float,
-             name : str=""
+             Ai             : float,
+             name           : str=""
             ):
         """
         Initializes a Source object.
@@ -759,7 +739,6 @@ class VoltageSourceControlByCurrent(Source):
         A[jx, self.controlNodeIn  ] += -1 # V
         A[jx, self.controlNodeOut ] +=  1 # V
         A[jx,jy]                    += self.Rm
-
         return current_branch
 
     @classmethod

@@ -33,7 +33,7 @@ from pymna.elements   import VoltageSourceControlByCurrent
 from pymna.elements   import CurrentSourceControlByVoltage
 from pymna.elements   import VoltageSourceControlByVoltage
 from pymna.elements   import CurrentSourceControlByCurrent
-from pymna.elements   import DCVoltageSource, DCCurrentSource
+from pymna.elements   import VoltageSource, CurrentSource
 from pymna.elements   import Not, And, Nand, Or, Nor, Xor, NXor
 from pymna.exceptions import ImpossibleSolution
 from pymna.enumerator import Method
@@ -363,7 +363,7 @@ class Simulator:
                     elif type_source == "PULSE":
                         circuit += PulseVoltageSource.from_nl(params)
                     elif type_source == "DC":
-                        circuit += DCVoltageSource.from_nl(params)
+                        circuit += VoltageSource.from_nl(params)
                 elif element == "I":
                     type_source = params[2]
                     if type_source == "SIN":
@@ -371,7 +371,7 @@ class Simulator:
                     elif type_source == "PULSE":
                         circuit += PulseCurrentSource.from_nl(params)
                     elif type_source == "DC":
-                        circuit += DCCurrentSource.from_nl(params)
+                        circuit += CurrentSource.from_nl(params)
                 else:
                     raise ValueError(f"Unknown element type: {element}")
 
