@@ -20,7 +20,7 @@ __all__ = ["Simulator"]
 
 import numpy as np
 
-from typing import List, Dict, Tuple
+from typing           import List, Dict, Tuple
 from pymna.circuit    import Circuit
 from pymna.elements   import Capacitor
 from pymna.elements   import Resistor
@@ -33,6 +33,8 @@ from pymna.elements   import VoltageSourceControlByCurrent
 from pymna.elements   import CurrentSourceControlByVoltage
 from pymna.elements   import VoltageSourceControlByVoltage
 from pymna.elements   import CurrentSourceControlByCurrent
+from pymna.elements   import DCVoltageSource, DCCurrentSource
+from pymna.elements   import Not, And, Nand, Or, Nor, Xor, NXor
 from pymna.exceptions import ImpossibleSolution
 from pymna.enumerator import Method
 
@@ -41,8 +43,6 @@ class Simulator:
     def __init__(self , temperature : float=25, max_nodes : int=10):
         self.temperature = temperature
         self.max_nodes = max_nodes
-
-    
 
     def ac(self, circuit : Circuit ,
                freqInitial : float,
@@ -106,8 +106,6 @@ class Simulator:
                 phase_result[ node_name ] = np.real(phases[ :, node_idx ])
             
             return mod_result, phase_result
-
-
 
     def transient(self, 
                   circuit                      : Circuit, 
@@ -220,11 +218,9 @@ class Simulator:
 
         return result
 
-
     def solve( self, A, b) -> np.array:
         x = np.linalg.solve(A[1::, 1::],b[1::])
         return np.concatenate(([0],x))
-
 
     def solve_system_of_equations( self, 
                                        circuit : Circuit, 
@@ -303,8 +299,6 @@ class Simulator:
             x = self.solve(A,b)
             return x, max_nodes, col_names
 
-
-
     def run_from_nl( self, nl_path : str ):
 
         circuit    = Circuit()
@@ -348,20 +342,38 @@ class Simulator:
                     circuit += VoltageSourceControlByCurrent.from_nl(params)
                 elif element == "H":
                     circuit += CurrentSourceControlByCurrent.from_nl(params)
+                elif element == '>':
+                    circuit += Not.from_nl(params)
+                elif element == ')':
+                    circuit += And.from_nl(params)
+                elif element == '(':
+                    circuit += Nand.from_nl(params)
+                elif element == '}':
+                    circuit += Or.from_nl(params)
+                elif element == '{':
+                    circuit += Nor.from_nl(params)
+                elif element == ']':
+                    circuit += Xor.from_nl(params)
+                elif element == '[':
+                    circuit += NXor.from_nl(params)
                 elif element == "V":
                     type_source = params[2]
                     if type_source == "SIN":
                         circuit += SinusoidalVoltageSource.from_nl(params)
                     elif type_source == "PULSE":
                         circuit += PulseVoltageSource.from_nl(params)
+                    elif type_source == "DC":
+                        circuit += DCVoltageSource.from_nl(params)
                 elif element == "I":
                     type_source = params[2]
                     if type_source == "SIN":
                         circuit += SinusoidalCurrentSource.from_nl(params)
                     elif type_source == "PULSE":
                         circuit += PulseCurrentSource.from_nl(params)
+                    elif type_source == "DC":
+                        circuit += DCCurrentSource.from_nl(params)
                 else:
-                    raise ValueError(f"Unknown element type: {element}")        
+                    raise ValueError(f"Unknown element type: {element}")
 
             print(simu_config)
             if '.TRAN' in simu_config[0]:
