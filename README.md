@@ -68,11 +68,21 @@ N0200 2 0 -2 1.1 -1 0.7 1 -0.7 2 -1.1
 
 ```python
 from pymna.simulator import Simulator
+import matplotlib.pyplot as plt
+
 path = f"mna/netlists/Chua.net"
 simulator = Simulator()
 results = simulator.run_from_nl(path)
+
+# plot figure
+plt.style.use('dark_background')
+fig, ax = plt.subplots()
+plt.plot( results['1'], results['2'] )
+ax.set_xlabel('Node 1 (V)')
+ax.set_ylabel('Node 2 (V)')
+ax.set_title("Chua")
+plt.show()
 ```
 
 ![Figure Description](examples/x.png)
 
-### Display:
