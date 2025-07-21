@@ -10,6 +10,7 @@ from pymna.elements import VoltageSourceControlByCurrent
 from pymna.elements import CurrentSourceControlByVoltage
 from pymna.elements import VoltageSourceControlByVoltage
 from pymna.elements import CurrentSourceControlByCurrent
+from pymna.elements import AND, OR, NOT, NAND, NOR, XOR, XNOR
 
 
 
@@ -454,6 +455,246 @@ class Circuit:
         self+=Ipulse
         return Ipulse
           
+
+    #
+    # Logic gates
+    #
+
+    def NOT( self, 
+            nodeIn  : Union[int,str],
+            nodeOut : Union[int,str],
+            V       : float,
+            C       : float,
+            A       : float,
+            R       : float,
+            name    : str=""
+           ) -> NOT:
+        """
+        Creates a NOT logic gate in the circuit.
+
+        Parameters:
+        nodeIn (Union[int, str]): The input node of the NOT gate.
+        nodeOut (Union[int, str]): The output node of the NOT gate.
+        V (float): The voltage level for the NOT gate.
+        C (float): The capacitance value for the NOT gate.
+        A (float): The area factor for the NOT gate.
+        R (float): The resistance value for the NOT gate.
+        name (str, optional): An optional name for the NOT gate. Default is an empty string.
+
+        Returns:
+        NOT: An instance of the NOT class representing the created NOT gate.
+        """
+        
+        not_gate = NOT(self.node(nodeIn), 
+                       self.node(nodeOut), 
+                       V, C, A, R, name)
+        self+=not_gate
+        return not_gate
+
+    def AND( self, 
+             nodeIn_a : Union[int,str],
+             nodeIn_b : Union[int,str],
+             nodeOut  : Union[int,str],
+             V        : float,
+             C        : float,
+             A        : float,
+             R        : float,
+             name     : str=""
+            ) -> AND:
+        """
+        Creates an AND logic gate in the circuit.
+
+        Parameters:
+        nodeIn_a (Union[int, str]): The first input node of the AND gate.
+        nodeIn_b (Union[int, str]): The second input node of the AND gate.
+        nodeOut (Union[int, str]): The output node of the AND gate.
+        V (float): The voltage level for the AND gate.
+        C (float): The capacitance value for the AND gate.
+        A (float): The area factor for the AND gate.
+        R (float): The resistance value for the AND gate.
+        name (str, optional): An optional name for the AND gate. Default is an empty string.
+
+        Returns:
+        AND: An instance of the AND class representing the created AND gate.
+        """
+        
+        and_gate = AND(self.node(nodeIn_a), 
+                       self.node(nodeIn_b), 
+                       self.node(nodeOut), 
+                       V, C, A, R, name)
+        self+=and_gate
+        return and_gate
+
+    def OR( self, 
+            nodeIn_a : Union[int,str],
+            nodeIn_b : Union[int,str],
+            nodeOut  : Union[int,str],
+            V        : float,
+            C        : float,
+            A        : float,
+            R        : float,
+            name     : str=""
+           ) -> OR:
+        """
+        Creates an OR logic gate in the circuit.
+
+        Parameters:
+        nodeIn_a (Union[int, str]): The first input node of the OR gate.
+        nodeIn_b (Union[int, str]): The second input node of the OR gate.
+        nodeOut (Union[int, str]): The output node of the OR gate.
+        V (float): The voltage level for the OR gate.
+        C (float): The capacitance value for the OR gate.
+        A (float): The area factor for the OR gate.
+        R (float): The resistance value for the OR gate.
+        name (str, optional): An optional name for the OR gate. Default is an empty string.
+
+        Returns:
+        OR: An instance of the OR class representing the created OR gate.
+        """
+        
+        or_gate = OR(self.node(nodeIn_a), 
+                     self.node(nodeIn_b), 
+                     self.node(nodeOut), 
+                     V, C, A, R, name)
+        self+=or_gate
+        return or_gate
+
+    def NOR( self, 
+            nodeIn_a : Union[int,str],
+            nodeIn_b : Union[int,str],
+            nodeOut  : Union[int,str],
+            V        : float,
+            C        : float,
+            A        : float,
+            R        : float,
+            name     : str=""
+           ) -> NOR:
+        """
+        Creates a NOR logic gate in the circuit.
+
+        Parameters:
+        nodeIn_a (Union[int, str]): The first input node of the NOR gate.
+        nodeIn_b (Union[int, str]): The second input node of the NOR gate.
+        nodeOut (Union[int, str]): The output node of the NOR gate.
+        V (float): The voltage level for the NOR gate.
+        C (float): The capacitance value for the NOR gate.
+        A (float): The area factor for the NOR gate.
+        R (float): The resistance value for the NOR gate.
+        name (str, optional): An optional name for the NOR gate. Default is an empty string.
+
+        Returns:
+        NOR: An instance of the NOR class representing the created NOR gate.
+        """
+        
+        nor_gate = NOR(self.node(nodeIn_a), 
+                       self.node(nodeIn_b), 
+                       self.node(nodeOut), 
+                       V, C, A, R, name)
+        self+=nor_gate
+        return nor_gate
+
+    def NAND( self, 
+             nodeIn_a : Union[int,str],
+             nodeIn_b : Union[int,str],
+             nodeOut  : Union[int,str],
+             V        : float,
+             C        : float,
+             A        : float,
+             R        : float,
+             name     : str=""
+            ) -> NAND:
+        """
+        Creates a NAND logic gate in the circuit.
+
+        Parameters:
+        nodeIn_a (Union[int, str]): The first input node of the NAND gate.
+        nodeIn_b (Union[int, str]): The second input node of the NAND gate.
+        nodeOut (Union[int, str]): The output node of the NAND gate.
+        V (float): The voltage level for the NAND gate.
+        C (float): The capacitance value for the NAND gate.
+        A (float): The area factor for the NAND gate.
+        R (float): The resistance value for the NAND gate.
+        name (str, optional): An optional name for the NAND gate. Default is an empty string.
+
+        Returns:
+        NAND: An instance of the NAND class representing the created NAND gate.
+        """
+        
+        nand_gate = NAND(self.node(nodeIn_a), 
+                         self.node(nodeIn_b), 
+                         self.node(nodeOut), 
+                         V, C, A, R, name)
+        self+=nand_gate
+        return nand_gate
+
+    def XOR( self, 
+            nodeIn_a : Union[int,str],
+            nodeIn_b : Union[int,str],
+            nodeOut  : Union[int,str],
+            V        : float,
+            C        : float,
+            A        : float,
+            R        : float,
+            name     : str=""
+           ) -> XOR:
+        """
+        Creates a XOR logic gate in the circuit.
+
+        Parameters:
+        nodeIn_a (Union[int, str]): The first input node of the XOR gate.
+        nodeIn_b (Union[int, str]): The second input node of the XOR gate.
+        nodeOut (Union[int, str]): The output node of the XOR gate.
+        V (float): The voltage level for the XOR gate.
+        C (float): The capacitance value for the XOR gate.
+        A (float): The area factor for the XOR gate.
+        R (float): The resistance value for the XOR gate.
+        name (str, optional): An optional name for the XOR gate. Default is an empty string.
+
+        Returns:
+        XOR: An instance of the XOR class representing the created XOR gate.
+        """
+        
+        xor_gate = XOR(self.node(nodeIn_a), 
+                       self.node(nodeIn_b), 
+                       self.node(nodeOut), 
+                       V, C, A, R, name)
+        self+=xor_gate
+        return xor_gate
+
+    def XNOR( self, 
+             nodeIn_a : Union[int,str],
+             nodeIn_b : Union[int,str],
+             nodeOut  : Union[int,str],
+             V        : float,
+             C        : float,
+             A        : float,
+             R        : float,
+             name     : str=""
+            ) -> XNOR:
+        """
+        Creates a XNOR logic gate in the circuit.
+
+        Parameters:
+        nodeIn_a (Union[int, str]): The first input node of the XNOR gate.
+        nodeIn_b (Union[int, str]): The second input node of the XNOR gate.
+        nodeOut (Union[int, str]): The output node of the XNOR gate.
+        V (float): The voltage level for the XNOR gate.
+        C (float): The capacitance value for the XNOR gate.
+        A (float): The area factor for the XNOR gate.
+        R (float): The resistance value for the XNOR gate.
+        name (str, optional): An optional name for the XNOR gate. Default is an empty string.
+
+        Returns:
+        XNOR: An instance of the XNOR class representing the created XNOR gate.
+        """
+        
+        xnor_gate = XNOR(self.node(nodeIn_a), 
+                         self.node(nodeIn_b), 
+                         self.node(nodeOut), 
+                         V, C, A, R, name)
+        self+=xnor_gate
+        return xnor_gate
+
 
 
 if __name__ == "__main__":
