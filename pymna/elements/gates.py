@@ -1,6 +1,6 @@
 __all__ = ['Not']
 
-
+from typing import Tuple, List
 from pymna.elements import Element
 from pymna.elements import Resistor
 from pymna.elements import Capacitor
@@ -82,27 +82,20 @@ class Not(Element):
             V = self.V
 
         # output
-        Gout = G/self.Rout
-        I1out = CurrentSourceControlByVoltage( self.nodeOut, self.gnd, self.control_nodeIn, self.gnd, G/self.Rout )
-        I2out = DCCurrentSource( self.nodeOut, self.gnd, V/self.Rout )
-        Rout  = Resistor( self.nodeOut, self.gnd, self.Rout )
+        I1out = CurrentSourceControlByVoltage( self.nodeOut, self.gnd, self.control_nodeIn, self.gnd, G/self.R )
+        I2out = DCCurrentSource( self.nodeOut, self.gnd, V/self.R )
+        Rout  = Resistor( self.nodeOut, self.gnd, self.R )
 
         # backward pass
         current_branch = Ca.backward(A, b, x, x_newton_raphson, t, dt, current_branch)
         current_branch = Ia.backward(A, b, x, x_newton_raphson, t, dt, current_branch)
         current_branch = I1out.backward(A, b, x, x_newton_raphson, t, dt, current_branch)
         current_branch = I2out.backward(A, b, x, x_newton_raphson, t, dt, current_branch)
+        current_branch = Rout.backward(A, b, x, x_newton_raphson, t, dt, current_branch)
         return current_branch			
 				
     def update(self, x : np.array)
         self.ic_a = x[self.control_nodeIn] - x[self.gnd]
-
-    @classmethod
-    def from_nl(cls)
-
-
-
-
 
 
 class And(Element):
@@ -203,3 +196,16 @@ class And(Element):
         current_branch = I1out.backward(A, b, x, x_newton_raphson, t, dt, current_branch)
         current_branch = I2out.backward(A, b, x, x_newton_raphson, t, dt, current_branch)
         return current_branch
+
+
+    @classmethod
+    def from_nl( cls, params : Tuple[str, int, int, int, int, float] ):
+        # VoltageSourceControlByCurrent: 'H'name, noIn, noOut, control_noIn, control_noOut, Rm
+        if params[0][0] != 'H' or len(params) != 6:
+            raise InvalidElement(f"Invalid parameters for VoltageSourceControlByCurrent: expected 'H'({params[0]}) as first element and 7 ({len(params)})parameters in total.")
+        return VoltageSourceControlByCurrent( nodeIn=int(params[1]), 
+                                              nodeOut=int(params[2]), 
+                                              controlNodeIn=int(params[3]), 
+                                              controlNodeOut=int(params[4]), 
+                                              Rm=float(params[5]),
+                                              name=params[0])
