@@ -42,3 +42,35 @@ circuit.NoLinearResistor('node1', 'node2',
 circuit.SinusoidalVoltageSource('node1', 'gnd', amplitude=5, frequency=1000, number_of_cycles=10, name='V1')
 ```
 
+## Circuit Simulation from Netlist
+
+Pymna allows users to read circuit configurations directly from a netlist file, making it easy to simulate complex circuits without manually defining each component in the code. A netlist is a textual representation of the circuit, listing all components and their connections. By importing a netlist, users can quickly set up simulations, enabling rapid testing and analysis of various circuit designs. This feature is particularly useful for engineers and researchers who work with large and intricate circuits, as it streamlines the simulation process and enhances productivity.
+
+### Chua example:
+
+The netlist defines a circuit with various components and their connections.
+It includes two resistors (R0102), an inductor (L0100), and two capacitors (C0200, C0100).
+The nonlinear element (N0200) is specified with its parameters, indicating its behavior.
+The .TRAN command sets up a transient analysis with a time step of 1000 and a total time of 0.1 seconds.
+The UIC option ensures that the initial conditions are considered during the simulation.
+
+```
+2
+R0102 1 2 1.9
+L0100 1 0 1
+C0200 2 0 0.31 IC=1
+C0100 1 0 1 IC=1
+N0200 2 0 -2 1.1 -1 0.7 1 -0.7 2 -1.1
+.TRAN 1000 0.1 BE 1 UIC
+```
+
+### How to run?
+
+```python
+from pymna.simulator import Simulator
+path = f"mna/netlists/Chua.net"
+simulator = Simulator()
+results = simulator.run_from_nl(path)
+```
+
+### Display:
