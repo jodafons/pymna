@@ -34,7 +34,7 @@ from pymna.elements   import CurrentSourceControlByVoltage
 from pymna.elements   import VoltageSourceControlByVoltage
 from pymna.elements   import CurrentSourceControlByCurrent
 from pymna.elements   import VoltageSource, CurrentSource
-from pymna.elements   import Not, And, Nand, Or, Nor, Xor, NXor
+from pymna.elements   import NOT, AND, NAND, OR, NOR, XOR, XNOR
 from pymna.exceptions import ImpossibleSolution
 from pymna.enumerator import Method
 

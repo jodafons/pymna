@@ -1,6 +1,3 @@
-
-
-
 __all__ = [
             "Diode",
             "BJT",
@@ -62,10 +59,9 @@ class Diode(Element):
 
         self.g  = (IS/VT)*np.exp( ddp )
         self.Id = IS * (np.exp(ddp/VT) - 1) - self.g * ddp
-        A[self.nodeIn , self.nodeIn ] +=  self.g
-        A[self.nodeIn , self.nodeOut] += -self.g
-        A[self.nodeOut, self.nodeIn ] += -self.g
-        A[self.nodeOut, self.nodeOut] +=  self.g
+        # condutance
+        R = Resistor(self.nodeIn, self.nodeOut, 1/self.g)
+        current_branch = R.backward(A, b, x, x_newton_raphson, t, dt, current_branch)
         I = CurrentSource(self.nodeIn, self.nodeOut, self.Id)
         current_branch = I.backward(A, b, x, x_newton_raphson, t, dt, current_branch)
         return current_branch
@@ -162,3 +158,4 @@ class BJT(Element):
         if params[0][0] != "Q":
             raise InvalidElement("Invalid parameters for BJT: expected 'Q' as first element.")
         return BJT(bjt_type=params[4], collector=int(params[1]), base=int(params[2]), emitter=int(params[3]), name=params[0])
+

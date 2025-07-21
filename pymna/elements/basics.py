@@ -165,7 +165,9 @@ class Capacitor(Element):
                  dt               : float,
                  current_branch   : int, 
                  ) -> int:
-    
+        """
+        Updates the circuit matrices for the capacitor element in backward time step.
+        """
         R = dt/self.C # dt/C
         G = (1/R) # C/dt
         A[self.nodeIn , self.nodeIn]  +=  G

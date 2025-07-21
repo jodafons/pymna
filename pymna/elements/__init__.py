@@ -13,7 +13,13 @@ from . import sources
 __all__.extend( sources.__all__ )
 from .sources import *
 
+from . import gates
+__all__.extend( gates.__all__ )
+from .gates import *
 
+from . import semiconductors
+__all__.extend( semiconductors.__all__ )
+from .semiconductors import *
 
 
 

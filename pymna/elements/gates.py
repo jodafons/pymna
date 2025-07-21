@@ -18,7 +18,7 @@ The module imports necessary types and classes from the pymna.elements package a
 """
 
 
-__all__ = ['Not',
+__all__ = ['NOT',
            'AND',
            'NAND',
            'OR',
@@ -120,7 +120,7 @@ def get_gate_params( gate : str,
             if ddp_a > ddp_b:
                 Vx = ddp_b
                 control_node = control_node_b
-            if ddp_b >= ddp_a
+            if ddp_b >= ddp_a:
                 Vx = ddp_a
                 control_node = control_node_a
 
@@ -138,7 +138,7 @@ def get_gate_params( gate : str,
             if ddp_a > ddp_b:
                 Vx = ddp_a
                 control_node = control_node_a
-            if ddp_b >= ddp_a
+            if ddp_b >= ddp_a:
                 Vx = ddp_b
                 control_node = control_node_b
 
@@ -185,8 +185,8 @@ def get_gate_params( gate : str,
                 V_partOne = 0
                 derived_partTwo = A
                 V_partThree = V
-	
-			if Vx > VIH:
+	        
+            if Vx > VIH:
                 Go = 0
                 Vo = V_partThree
             if Vx <= VIH and Vx > VIL:
@@ -233,7 +233,7 @@ def get_gate_params( gate : str,
             if Vx > VIH:
                 Go = 0
                 Vo = V_partThree
-			if (Vx <= VIH) and (Vx > VIL):
+            if (Vx <= VIH) and (Vx > VIL):
                 Go = derived_partTwo
                 Vo = V/2 - Go * V/2
             if (Vx <= VIL):
@@ -320,7 +320,7 @@ class NOT(Element):
         # backward pass
         return current_branch			
 				
-    def update(self, x : np.array)
+    def update(self, x : np.array):
         self.ic_a = x[self.control_nodeIn] - x[self.gnd]
 
     @classmethod
@@ -404,7 +404,7 @@ class TwoInputsGate(Element):
         # backward pass
         return current_branch			
 				
-    def update(self, x : np.array)
+    def update(self, x : np.array):
         self.ic_a = x[self.control_nodeIn] - x[self.gnd]
         self.ic_b = x[self.control_nodeIn_b] - x[self.gnd]
 

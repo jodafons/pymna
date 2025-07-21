@@ -1,0 +1,356 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pymna.simulator package &mdash; pymna  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            pymna
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">pymna.simulator package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-pymna.simulator.mna">pymna.simulator.mna module</a><ul>
+<li><a class="reference internal" href="#pymna.simulator.mna.Simulator"><code class="docutils literal notranslate"><span class="pre">Simulator</span></code></a><ul>
+<li><a class="reference internal" href="#pymna.simulator.mna.Simulator.ac"><code class="docutils literal notranslate"><span class="pre">Simulator.ac()</span></code></a></li>
+<li><a class="reference internal" href="#pymna.simulator.mna.Simulator.run_from_nl"><code class="docutils literal notranslate"><span class="pre">Simulator.run_from_nl()</span></code></a></li>
+<li><a class="reference internal" href="#pymna.simulator.mna.Simulator.solve"><code class="docutils literal notranslate"><span class="pre">Simulator.solve()</span></code></a></li>
+<li><a class="reference internal" href="#pymna.simulator.mna.Simulator.solve_system_of_equations"><code class="docutils literal notranslate"><span class="pre">Simulator.solve_system_of_equations()</span></code></a></li>
+<li><a class="reference internal" href="#pymna.simulator.mna.Simulator.transient"><code class="docutils literal notranslate"><span class="pre">Simulator.transient()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-pymna.simulator">Module contents</a><ul>
+<li><a class="reference internal" href="#pymna.simulator.Simulator"><code class="docutils literal notranslate"><span class="pre">Simulator</span></code></a><ul>
+<li><a class="reference internal" href="#pymna.simulator.Simulator.ac"><code class="docutils literal notranslate"><span class="pre">Simulator.ac()</span></code></a></li>
+<li><a class="reference internal" href="#pymna.simulator.Simulator.run_from_nl"><code class="docutils literal notranslate"><span class="pre">Simulator.run_from_nl()</span></code></a></li>
+<li><a class="reference internal" href="#pymna.simulator.Simulator.solve"><code class="docutils literal notranslate"><span class="pre">Simulator.solve()</span></code></a></li>
+<li><a class="reference internal" href="#pymna.simulator.Simulator.solve_system_of_equations"><code class="docutils literal notranslate"><span class="pre">Simulator.solve_system_of_equations()</span></code></a></li>
+<li><a class="reference internal" href="#pymna.simulator.Simulator.transient"><code class="docutils literal notranslate"><span class="pre">Simulator.transient()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pymna</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">pymna.simulator package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/pymna.simulator.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="pymna-simulator-package">
+<h1>pymna.simulator package<a class="headerlink" href="#pymna-simulator-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-pymna.simulator.mna">
+<span id="pymna-simulator-mna-module"></span><h2>pymna.simulator.mna module<a class="headerlink" href="#module-pymna.simulator.mna" title="Link to this heading"></a></h2>
+<p>This module contains the Simulator class, which is responsible for simulating electrical circuits.
+The Simulator can perform both AC analysis and transient analysis of circuits defined by the Circuit class.
+It utilizes numerical methods, including the Newton-Raphson method, to solve nonlinear equations that arise during the simulation.</p>
+<p>Classes:
+- Simulator: A class that simulates the behavior of electrical circuits.</p>
+<p>Methods:
+- __init__: Initializes the Simulator with temperature and maximum nodes.
+- ac: Performs AC analysis on a given circuit (not yet implemented).
+- transient: Simulates the transient response of a circuit over a specified time period.
+- solve: Solves the linear equation Ax = b using NumPy’s linear algebra solver.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pymna.simulator.mna.Simulator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymna.simulator.mna.</span></span><span class="sig-name descname"><span class="pre">Simulator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_nodes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymna.simulator.mna.Simulator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymna.simulator.mna.Simulator.ac">
+<span class="sig-name descname"><span class="pre">ac</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pymna.html#pymna.circuit.Circuit" title="pymna.circuit.Circuit"><span class="pre">Circuit</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqInitial</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqEnd</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stepsPerDecade</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymna.simulator.mna.Simulator.ac" title="Link to this definition"></a></dt>
+<dd><p>Perform AC analysis on the given circuit over a specified frequency range.</p>
+<p>This function computes the frequency response of the circuit by solving
+the circuit equations at logarithmically spaced frequencies between
+freqInitial and freqEnd. It returns the magnitude and phase of the
+circuit’s response for each node.</p>
+<p>Parameters:
+circuit (Circuit): The circuit object containing the elements and nodes.
+freqInitial (float): The starting frequency for the analysis (in Hz).
+freqEnd (float): The ending frequency for the analysis (in Hz).
+stepsPerDecade (int): The number of frequency steps per decade (default is 10).</p>
+<p>Returns:
+Tuple[Dict[str, np.ndarray], Dict[str, np.ndarray]]:</p>
+<blockquote>
+<div><p>A tuple containing two dictionaries:
+- mod_result: Magnitude response for each node at the specified frequencies.
+- phase_result: Phase response for each node at the specified frequencies.</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymna.simulator.mna.Simulator.run_from_nl">
+<span class="sig-name descname"><span class="pre">run_from_nl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nl_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymna.simulator.mna.Simulator.run_from_nl" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymna.simulator.mna.Simulator.solve">
+<span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">array</span></span></span><a class="headerlink" href="#pymna.simulator.mna.Simulator.solve" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymna.simulator.mna.Simulator.solve_system_of_equations">
+<span class="sig-name descname"><span class="pre">solve_system_of_equations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pymna.html#pymna.circuit.Circuit" title="pymna.circuit.Circuit"><span class="pre">Circuit</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_nodes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pymna.html#pymna.enumerator.Method" title="pymna.enumerator.Method"><span class="pre">Method</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_newton_raphson</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">array</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymna.simulator.mna.Simulator.solve_system_of_equations" title="Link to this definition"></a></dt>
+<dd><p>Solves a system of equations for the given circuit using the specified numerical method.</p>
+<p>This method constructs the system of equations based on the circuit elements and
+applies the chosen numerical method (Backward Euler, Trapezoidal, or Forward Euler)
+to compute the solution.</p>
+<section id="parameters">
+<h3>Parameters:<a class="headerlink" href="#parameters" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>circuit<span class="classifier">Circuit</span></dt><dd><p>The circuit object containing elements and node information.</p>
+</dd>
+<dt>t<span class="classifier">float</span></dt><dd><p>The current time at which the system is being solved.</p>
+</dd>
+<dt>delta_t<span class="classifier">float</span></dt><dd><p>The time step for the numerical method.</p>
+</dd>
+<dt>max_nodes<span class="classifier">int</span></dt><dd><p>The maximum number of nodes in the circuit.</p>
+</dd>
+<dt>method<span class="classifier">Method</span></dt><dd><p>The numerical method to be used for solving the equations.</p>
+</dd>
+<dt>x_newton_raphson<span class="classifier">np.array</span></dt><dd><p>The initial guess for the Newton-Raphson method.</p>
+</dd>
+<dt>col_names<span class="classifier">List[str]</span></dt><dd><p>A list to store the names of the columns in the resulting matrix.</p>
+</dd>
+</dl>
+</section>
+<section id="returns">
+<h3>Returns:<a class="headerlink" href="#returns" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>Tuple[np.array, int]</dt><dd><p>A tuple containing:
+- The solution vector <cite>x</cite> as a NumPy array.
+- The updated number of nodes after processing the circuit elements.
+- The updated list of column names.</p>
+</dd>
+</dl>
+</section>
+<section id="raises">
+<h3>Raises:<a class="headerlink" href="#raises" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>ValueError</dt><dd><p>If the specified method is not recognized.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymna.simulator.mna.Simulator.transient">
+<span class="sig-name descname"><span class="pre">transient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pymna.html#pymna.circuit.Circuit" title="pymna.circuit.Circuit"><span class="pre">Circuit</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_tolerance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_number_of_internal_step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_number_of_guesses</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_number_of_newton_raphson</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000000000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pymna.html#pymna.enumerator.Method" title="pymna.enumerator.Method"><span class="pre">Method</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Method.BACKWARD_EULER</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="headerlink" href="#pymna.simulator.mna.Simulator.transient" title="Link to this definition"></a></dt>
+<dd><p>Simulates the transient response of a circuit over a specified time period.
+Parameters:
+- circuit (Circuit): The circuit to be simulated.
+- end_time (float): The time at which the simulation ends.
+- step_time (float): The time increment for each simulation step.
+- tolerance (float, optional): The tolerance for convergence in Newton-Raphson method. Default is 1.
+- max_number_of_internal_step (int, optional): Maximum number of internal steps per time increment. Default is 1.
+- max_number_of_guesses (int, optional): Maximum number of guesses for Newton-Raphson method. Default is 100.
+- max_number_of_newton_raphson (int, optional): Maximum iterations for Newton-Raphson method. Default is 20.
+- step_factor (float, optional): Factor to adjust the step size. Default is 1e9.</p>
+<p>Returns:
+- List: A list containing the time points and corresponding node voltages.</p>
+<p>Notes:
+- The method uses the Newton-Raphson method for solving nonlinear equations.
+- If the solution does not converge within the specified number of iterations or guesses, an exception is raised.
+- The circuit’s elements are updated at each internal step based on the computed voltages.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pymna.simulator">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pymna.simulator" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pymna.simulator.Simulator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymna.simulator.</span></span><span class="sig-name descname"><span class="pre">Simulator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_nodes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymna.simulator.Simulator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymna.simulator.Simulator.ac">
+<span class="sig-name descname"><span class="pre">ac</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pymna.html#pymna.circuit.Circuit" title="pymna.circuit.Circuit"><span class="pre">Circuit</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqInitial</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqEnd</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stepsPerDecade</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymna.simulator.Simulator.ac" title="Link to this definition"></a></dt>
+<dd><p>Perform AC analysis on the given circuit over a specified frequency range.</p>
+<p>This function computes the frequency response of the circuit by solving
+the circuit equations at logarithmically spaced frequencies between
+freqInitial and freqEnd. It returns the magnitude and phase of the
+circuit’s response for each node.</p>
+<p>Parameters:
+circuit (Circuit): The circuit object containing the elements and nodes.
+freqInitial (float): The starting frequency for the analysis (in Hz).
+freqEnd (float): The ending frequency for the analysis (in Hz).
+stepsPerDecade (int): The number of frequency steps per decade (default is 10).</p>
+<p>Returns:
+Tuple[Dict[str, np.ndarray], Dict[str, np.ndarray]]:</p>
+<blockquote>
+<div><p>A tuple containing two dictionaries:
+- mod_result: Magnitude response for each node at the specified frequencies.
+- phase_result: Phase response for each node at the specified frequencies.</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymna.simulator.Simulator.run_from_nl">
+<span class="sig-name descname"><span class="pre">run_from_nl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nl_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymna.simulator.Simulator.run_from_nl" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymna.simulator.Simulator.solve">
+<span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">array</span></span></span><a class="headerlink" href="#pymna.simulator.Simulator.solve" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymna.simulator.Simulator.solve_system_of_equations">
+<span class="sig-name descname"><span class="pre">solve_system_of_equations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pymna.html#pymna.circuit.Circuit" title="pymna.circuit.Circuit"><span class="pre">Circuit</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_nodes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pymna.html#pymna.enumerator.Method" title="pymna.enumerator.Method"><span class="pre">Method</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_newton_raphson</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">array</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymna.simulator.Simulator.solve_system_of_equations" title="Link to this definition"></a></dt>
+<dd><p>Solves a system of equations for the given circuit using the specified numerical method.</p>
+<p>This method constructs the system of equations based on the circuit elements and
+applies the chosen numerical method (Backward Euler, Trapezoidal, or Forward Euler)
+to compute the solution.</p>
+<section id="id1">
+<h3>Parameters:<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>circuit<span class="classifier">Circuit</span></dt><dd><p>The circuit object containing elements and node information.</p>
+</dd>
+<dt>t<span class="classifier">float</span></dt><dd><p>The current time at which the system is being solved.</p>
+</dd>
+<dt>delta_t<span class="classifier">float</span></dt><dd><p>The time step for the numerical method.</p>
+</dd>
+<dt>max_nodes<span class="classifier">int</span></dt><dd><p>The maximum number of nodes in the circuit.</p>
+</dd>
+<dt>method<span class="classifier">Method</span></dt><dd><p>The numerical method to be used for solving the equations.</p>
+</dd>
+<dt>x_newton_raphson<span class="classifier">np.array</span></dt><dd><p>The initial guess for the Newton-Raphson method.</p>
+</dd>
+<dt>col_names<span class="classifier">List[str]</span></dt><dd><p>A list to store the names of the columns in the resulting matrix.</p>
+</dd>
+</dl>
+</section>
+<section id="id2">
+<h3>Returns:<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>Tuple[np.array, int]</dt><dd><p>A tuple containing:
+- The solution vector <cite>x</cite> as a NumPy array.
+- The updated number of nodes after processing the circuit elements.
+- The updated list of column names.</p>
+</dd>
+</dl>
+</section>
+<section id="id3">
+<h3>Raises:<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>ValueError</dt><dd><p>If the specified method is not recognized.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymna.simulator.Simulator.transient">
+<span class="sig-name descname"><span class="pre">transient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pymna.html#pymna.circuit.Circuit" title="pymna.circuit.Circuit"><span class="pre">Circuit</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_tolerance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_number_of_internal_step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_number_of_guesses</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_number_of_newton_raphson</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000000000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pymna.html#pymna.enumerator.Method" title="pymna.enumerator.Method"><span class="pre">Method</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Method.BACKWARD_EULER</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="headerlink" href="#pymna.simulator.Simulator.transient" title="Link to this definition"></a></dt>
+<dd><p>Simulates the transient response of a circuit over a specified time period.
+Parameters:
+- circuit (Circuit): The circuit to be simulated.
+- end_time (float): The time at which the simulation ends.
+- step_time (float): The time increment for each simulation step.
+- tolerance (float, optional): The tolerance for convergence in Newton-Raphson method. Default is 1.
+- max_number_of_internal_step (int, optional): Maximum number of internal steps per time increment. Default is 1.
+- max_number_of_guesses (int, optional): Maximum number of guesses for Newton-Raphson method. Default is 100.
+- max_number_of_newton_raphson (int, optional): Maximum iterations for Newton-Raphson method. Default is 20.
+- step_factor (float, optional): Factor to adjust the step size. Default is 1e9.</p>
+<p>Returns:
+- List: A list containing the time points and corresponding node voltages.</p>
+<p>Notes:
+- The method uses the Newton-Raphson method for solving nonlinear equations.
+- If the solution does not converge within the specified number of iterations or guesses, an exception is raised.
+- The circuit’s elements are updated at each internal step based on the computed voltages.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Joao Victor da Fonseca Pinto.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

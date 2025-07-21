@@ -17,50 +17,55 @@ from pymna.elements import BJT
 
 
 class Circuit:
-    """
-    Represents an electrical circuit that can contain various elements such as resistors, capacitors, and voltage sources.
 
-    This class allows the user to create a circuit by adding components and defining their connections. 
-    It manages nodes and elements within the circuit and provides methods to create common circuit elements.
-
-    Attributes:
-    name (str): The name of the circuit.
-    elements (list): A list of elements in the circuit.
-    gnd (int): The ground node, default is 0.
-    nodes (dict): A dictionary mapping node identifiers to their corresponding indices.
-    n_nodes (int): The total number of nodes in the circuit.
-    has_nolinear_elements (bool): A flag indicating if the circuit contains nonlinear elements.
-
-    Example:
-    To create a Chua circuit, you can use the following code:
-
-    ```python
-    # Create a circuit
-    circuit = Circuit(name="Chua Circuit")
-
-    # Add components to the circuit
-    circuit.R('node1', 'node2', 1e3, name='R1')  # Resistor R1
-    circuit.R('node2', 'node3', 1e3, name='R2')  # Resistor R2
-    circuit.C('node3', 'gnd', 1e-6, name='C1')   # Capacitor C1
-    circuit.NoLinearResistor('node1', 'node2', 
-                             nolinear_voltage_1=0.5, 
-                             nolinear_current_1=0.1, 
-                             nolinear_voltage_2=-0.5, 
-                             nolinear_current_2=-0.1, 
-                             nolinear_voltage_3=0.0, 
-                             nolinear_current_3=0.0, 
-                             nolinear_voltage_4=0.0, 
-                             nolinear_current_4=0.0, 
-                             name='Chua Diode')
-
-    circuit.SinusoidalVoltageSource('node1', 'gnd', amplitude=5, frequency=1000, number_of_cycles=10, name='V1')
-    ```
-
-    This example sets up a basic Chua circuit with resistors, a capacitor, and a nonlinear resistor (Chua diode) along with a sinusoidal voltage source.
-    """
+    
     def __init__(self, 
                  name : str=""
                  ):
+
+        """
+        Represents an electrical circuit that can contain various elements such as resistors, capacitors, and voltage sources.
+    
+        This class allows the user to create a circuit by adding components and defining their connections. 
+        It manages nodes and elements within the circuit and provides methods to create common circuit elements.
+    
+        Attributes:
+    
+        name (str): The name of the circuit.
+        elements (list): A list of elements in the circuit.
+        gnd (int): The ground node, default is 0.
+        nodes (dict): A dictionary mapping node identifiers to their corresponding indices.
+        n_nodes (int): The total number of nodes in the circuit.
+        has_nolinear_elements (bool): A flag indicating if the circuit contains nonlinear elements.
+    
+        Example:
+    
+        To create a Chua circuit, you can use the following code:
+    
+        ```python
+        # Create a circuit
+        circuit = Circuit(name="Chua Circuit")
+    
+        # Add components to the circuit
+        circuit.R('node1', 'node2', 1e3, name='R1')  # Resistor R1
+        circuit.R('node2', 'node3', 1e3, name='R2')  # Resistor R2
+        circuit.C('node3', 'gnd', 1e-6, name='C1')   # Capacitor C1
+        circuit.NoLinearResistor('node1', 'node2', 
+                                 nolinear_voltage_1=0.5, 
+                                 nolinear_current_1=0.1, 
+                                 nolinear_voltage_2=-0.5, 
+                                 nolinear_current_2=-0.1, 
+                                 nolinear_voltage_3=0.0, 
+                                 nolinear_current_3=0.0, 
+                                 nolinear_voltage_4=0.0, 
+                                 nolinear_current_4=0.0, 
+                                 name='Chua Diode')
+    
+        circuit.SinusoidalVoltageSource('node1', 'gnd', amplitude=5, frequency=1000, number_of_cycles=10, name='V1')
+        ```
+    
+        This example sets up a basic Chua circuit with resistors, a capacitor, and a nonlinear resistor (Chua diode) along with a sinusoidal voltage source.
+        """
         self.name       = name
         self.elements   = []
         self.gnd        = 0
