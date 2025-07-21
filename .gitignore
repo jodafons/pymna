@@ -24,4 +24,5 @@ pymna-env
 # vscode
 ./.vscode/*
 .pytest_cache
+*.egg-info
 

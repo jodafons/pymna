@@ -1,8 +1,0 @@
-sphinx
-tqdm
-prettytable
-numpy
-schemdraw
-matplotlib
-loguru
-jupyterlab

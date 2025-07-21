@@ -11,7 +11,7 @@
 
 
 // Essa funcao abre o arquivo NetList e monta a estrutura Elements com
-// todos os paramentros para simulação.
+// todos os paramentros para simulaï¿½ï¿½o.
 void ClearNetList(Element *NetList, int NumberOfElements){
 		NetList[NumberOfElements].Node_1 = NOT_USER;
 		NetList[NumberOfElements].Node_2 = NOT_USER;
@@ -77,8 +77,8 @@ int MakeNetList(string NetListName, Element *NetList, Simulation *PSPICE){
 	getline(NetListFile,NetListLine);
 	stringstream(NetListLine) >> NumberOfNodes;
 
-	// Teste de tamanho do circuito. Se o número de nos for maior que o 
-	// permitido, o programa é interrompido.
+	// Teste de tamanho do circuito. Se o nï¿½mero de nos for maior que o 
+	// permitido, o programa ï¿½ interrompido.
 	if (NumberOfNodes > NUMBER_MAX_OF_NODES){
 		cout << "Too many nodes" << endl;
 		system("Pause");
@@ -100,7 +100,7 @@ int MakeNetList(string NetListName, Element *NetList, Simulation *PSPICE){
 	
 	// Construindo a NetList
 	while(getline(NetListFile,NetListLine)){
-		// Aqui eu leio o primeiro espaço
+		// Aqui eu leio o primeiro espaï¿½o
 		stringstream LineStream(NetListLine);
 		LineStream >> Buffer;
 
@@ -131,7 +131,7 @@ int MakeNetList(string NetListName, Element *NetList, Simulation *PSPICE){
 				LineStream >> NetList[NumberOfElements].Node_2;
 				LineStream >> NetList[NumberOfElements].ElementValue;
 				
-				// Verifica se existe condicão inicial
+				// Verifica se existe condicï¿½o inicial
 				if((LineStream >> Auxiliar).fail())
 					NetList[NumberOfElements].InitialCondition[REATIVE_IC] = 0;
 				else
@@ -154,7 +154,7 @@ int MakeNetList(string NetListName, Element *NetList, Simulation *PSPICE){
 				LineStream >> NetList[NumberOfElements].Node_2;
 				LineStream >> NetList[NumberOfElements].ElementValue;
 				
-				// Verifica se existe condicão inicial
+				// Verifica se existe condicï¿½o inicial
 				if((LineStream >> Auxiliar).fail())
 					NetList[NumberOfElements].InitialCondition[REATIVE_IC] = 0;
 				else
@@ -306,10 +306,10 @@ int MakeNetList(string NetListName, Element *NetList, Simulation *PSPICE){
 			}
 
 
-		// Os parâmetros para as portas lógicas são: <V> <R> <C> <A>
-		// A tensão V é a tensão de saída máxima, R a resistência da saída, C a capacitância de entrada, para cada entrada,
-		// e o ganho A é a derivada da tensão de saída em aberto em relação à variação da tensão em qualquer entrada,
-		// antes da saturação da saída.
+		// Os parï¿½metros para as portas lï¿½gicas sï¿½o: <V> <R> <C> <A>
+		// A tensï¿½o V ï¿½ a tensï¿½o de saï¿½da mï¿½xima, R a resistï¿½ncia da saï¿½da, C a capacitï¿½ncia de entrada, para cada entrada,
+		// e o ganho A ï¿½ a derivada da tensï¿½o de saï¿½da em aberto em relaï¿½ï¿½o ï¿½ variaï¿½ï¿½o da tensï¿½o em qualquer entrada,
+		// antes da saturaï¿½ï¿½o da saï¿½da.
 		
 		// Inversor: >Nome NoIN NoOUT Parameters
 		case '>':
@@ -345,7 +345,7 @@ int MakeNetList(string NetListName, Element *NetList, Simulation *PSPICE){
 				break;
 			}
 		
-		// Resistor não Linear
+		// Resistor nï¿½o Linear
 		case 'N':
 			{
 				PSPICE[0].NoLinearCircuit = 1;		// Habilita o laco do Newton Raphson	
@@ -625,7 +625,7 @@ void IndependentSourceControlByTime(double t, double *out, Element NetList, doub
 // Funcao nao utilizada no programa
 void NoLinearSourceOfLogicGate(double  in_A, double in_B, double *out, Element NetList){
 
-int Control_No_Source,	// No de controle da fonte não linear
+int Control_No_Source,	// No de controle da fonte nï¿½o linear
 	Control_No_1,		// Entrada A
 	Control_No_2,		// Entrada B
 	No_2,				// Saida
@@ -634,9 +634,9 @@ int Control_No_Source,	// No de controle da fonte não linear
 	VIL;
 
 
-double VoltageControlSource,	// Tensão no nó de controle
+double VoltageControlSource,	// Tensï¿½o no nï¿½ de controle
        G,						// Derivada da fonte controlada
-	   V_NoLinear;				// Tenão da fonte independente
+	   V_NoLinear;				// Tenï¿½o da fonte independente
 
 
 Control_No_1 = NetList.Control_Node_1;
@@ -649,12 +649,12 @@ VIL = VM - VM/NetList.ParametersValue[A_LOGIC];
 switch (NetList.ElementName[FIRST_CARACTER])
 	{
 
-		// NOT: Curva da fonte de corrente controlada não linear
+		// NOT: Curva da fonte de corrente controlada nï¿½o linear
 		case '>':
 			{
 			VoltageControlSource = in_A;
 			Control_No_Source = Control_No_1;
-			// Aqui, G é a derivada da equacao da reta
+			// Aqui, G ï¿½ a derivada da equacao da reta
 			if(VoltageControlSource > VIH){
 				G = 0;		
 				V_NoLinear = 0;
@@ -670,7 +670,7 @@ switch (NetList.ElementName[FIRST_CARACTER])
 			break;
 			}
 				
-		// AND: Curva da fonte de corrente controlada não linear
+		// AND: Curva da fonte de corrente controlada nï¿½o linear
 		case ')':
 			{
 				
@@ -683,7 +683,7 @@ switch (NetList.ElementName[FIRST_CARACTER])
 				Control_No_Source = Control_No_1;
 			}
 
-			// Aqui, G é a derivada da equacao da reta
+			// Aqui, G ï¿½ a derivada da equacao da reta
 			if(VoltageControlSource > VIH){
 				G = 0;		
 				V_NoLinear = NetList.ParametersValue[V_LOGIC];
@@ -701,7 +701,7 @@ switch (NetList.ElementName[FIRST_CARACTER])
 			}
 
 				
-		// NAND: Curva da fonte de corrente controlada não linear OK
+		// NAND: Curva da fonte de corrente controlada nï¿½o linear OK
 		case '(':
 			{
 					
@@ -713,7 +713,7 @@ switch (NetList.ElementName[FIRST_CARACTER])
 				VoltageControlSource = in_A;
 				Control_No_Source = Control_No_1;
 			}
-		// Aqui, G é a derivada da equacao da reta
+		// Aqui, G ï¿½ a derivada da equacao da reta
 			if(VoltageControlSource > VIH){
 				G = 0;
 				V_NoLinear = 0;
@@ -730,7 +730,7 @@ switch (NetList.ElementName[FIRST_CARACTER])
 			break;
 			}
 
-		// OR: Curva da fonte de corrente controlada não linear OK
+		// OR: Curva da fonte de corrente controlada nï¿½o linear OK
 		case '}':
 			{
 						
@@ -742,7 +742,7 @@ switch (NetList.ElementName[FIRST_CARACTER])
 				VoltageControlSource = in_B;
 				Control_No_Source = Control_No_2;
 			}
-			// Aqui, G é a derivada da equacao da reta
+			// Aqui, G ï¿½ a derivada da equacao da reta
 			if(VoltageControlSource > VIH){
 				G = 0;		
 				V_NoLinear = NetList.ParametersValue[V_LOGIC];
@@ -759,7 +759,7 @@ switch (NetList.ElementName[FIRST_CARACTER])
 			break;
 			}
 
-		// NOR: Curva da fonte de corrente controlada não linear OK
+		// NOR: Curva da fonte de corrente controlada nï¿½o linear OK
 		case '{':
 			{
 						
@@ -771,7 +771,7 @@ switch (NetList.ElementName[FIRST_CARACTER])
 				VoltageControlSource = in_B;
 				Control_No_Source = Control_No_2;
 			}
-			// Aqui, G é a derivada da equacao da reta
+			// Aqui, G ï¿½ a derivada da equacao da reta
 			if(VoltageControlSource > VIH){
 				G = 0;		
 				V_NoLinear = 0;
@@ -798,7 +798,7 @@ switch (NetList.ElementName[FIRST_CARACTER])
 
 
 // Costroi o sistema Ax = B da MNA
-// Usaremos o método de backward de Euler para a solucao no tempo
+// Usaremos o mï¿½todo de backward de Euler para a solucao no tempo
 // Backward:
 //			y(t + deltaT) = y(t) + deltaT*x(t + deltaT)
 //			Ax(t + deltaT) = B
@@ -818,9 +818,9 @@ void SystemOfEquationBackward(Element *NetList, double *A_Externo, double *x, do
 	double G = 0,					// Condutancia
 		   R = 0,					// Resistencia
 		   V_Linear,				// Fonte de tensao 
-		   // Parametros para componentes lógicos
+		   // Parametros para componentes lï¿½gicos
 		   I_Linear,				// Fonte de corrente	
-		   I_NoLinear,				// Fonte de corrente dependente do resistor não linear 
+		   I_NoLinear,				// Fonte de corrente dependente do resistor nï¿½o linear 
 		   V_NoLinear,				// No de controle e fonte de tensao da saida da porta logica 
 		   VoltagePartOne,
 		   derivedPartTwo,
@@ -891,8 +891,8 @@ void SystemOfEquationBackward(Element *NetList, double *A_Externo, double *x, do
 				A[No_2][No_2] +=  G;		// G
 				
 				// CVc(to)/dt
-				B[No_1] +=  NetList[NumberOfElements].ElementValue*(NetList[NumberOfElements].InitialCondition[REATIVE_IC]/deltaT);	// Entra no nó 1
-				B[No_2] += -NetList[NumberOfElements].ElementValue*(NetList[NumberOfElements].InitialCondition[REATIVE_IC]/deltaT);	// Sai do nó 2
+				B[No_1] +=  NetList[NumberOfElements].ElementValue*(NetList[NumberOfElements].InitialCondition[REATIVE_IC]/deltaT);	// Entra no nï¿½ 1
+				B[No_2] += -NetList[NumberOfElements].ElementValue*(NetList[NumberOfElements].InitialCondition[REATIVE_IC]/deltaT);	// Sai do nï¿½ 2
 				
 				NumberOfElements++;
 				break;
@@ -962,7 +962,7 @@ void SystemOfEquationBackward(Element *NetList, double *A_Externo, double *x, do
 				break;
 			}
 		
-		// Resistor Não Linear (por partes)
+		// Resistor Nï¿½o Linear (por partes)
 		case 'N':
 			{
 				// Escolha do segmento
@@ -1041,7 +1041,7 @@ void SystemOfEquationBackward(Element *NetList, double *A_Externo, double *x, do
 		// Objetos nao lineares
 		// Modelo demostrado no manual
 		// Entrada: Um capacitor em serie indo do no de entrada para o terra com uma fonte de corrente para simular 
-		// condição inicial
+		// condiï¿½ï¿½o inicial
 		// Saida: Uma fonte de corrente independente, Uma fonte de corrente controlada por tensao e um
 		// Resistor, tudo em paralelo indo do terra para a saida.
 		case '>': case ')': case '(': case '}': case '{': case ']': case '[':
@@ -1055,13 +1055,13 @@ void SystemOfEquationBackward(Element *NetList, double *A_Externo, double *x, do
 				A[0][Control_No_1]            += -G;		// G
 				A[0][0]                       +=  G;		// G
 
-				// Fonte de corrente (simulação da condição inicial do capacitor) CVc(to)/dt
-				B[Control_No_1]  +=  NetList[NumberOfElements].ParametersValue[C_LOGIC]*(NetList[NumberOfElements].InitialCondition[LOGIC_IC_A]/deltaT);	// Entra no nó 1
-				B[0] += -NetList[NumberOfElements].ParametersValue[C_LOGIC]*(NetList[NumberOfElements].InitialCondition[LOGIC_IC_A]/deltaT);	// Sai do nó 2
+				// Fonte de corrente (simulaï¿½ï¿½o da condiï¿½ï¿½o inicial do capacitor) CVc(to)/dt
+				B[Control_No_1]  +=  NetList[NumberOfElements].ParametersValue[C_LOGIC]*(NetList[NumberOfElements].InitialCondition[LOGIC_IC_A]/deltaT);	// Entra no nï¿½ 1
+				B[0] += -NetList[NumberOfElements].ParametersValue[C_LOGIC]*(NetList[NumberOfElements].InitialCondition[LOGIC_IC_A]/deltaT);	// Sai do nï¿½ 2
 
 
 
-				// Se não for um NOT
+				// Se nï¿½o for um NOT
 				if(NetList[NumberOfElements].ElementName[FIRST_CARACTER] != '>'){
 					// Entrada B:
 					// Capacitor ligado da entrada B para o terra
@@ -1070,9 +1070,9 @@ void SystemOfEquationBackward(Element *NetList, double *A_Externo, double *x, do
 					A[0][Control_No_2]            += -G;		// G
 					A[0][0]                       +=  G;		// G
 
-					// Fonte de corrente (simulação da condição inicial do capacitor) CVc(to)/dt
-					B[Control_No_2]  +=  NetList[NumberOfElements].ParametersValue[C_LOGIC]*(NetList[NumberOfElements].InitialCondition[LOGIC_IC_B]/deltaT);	// Entra no nó 1
-					B[0] += -NetList[NumberOfElements].ParametersValue[C_LOGIC]*(NetList[NumberOfElements].InitialCondition[LOGIC_IC_B]/deltaT);	// Sai do nó 
+					// Fonte de corrente (simulaï¿½ï¿½o da condiï¿½ï¿½o inicial do capacitor) CVc(to)/dt
+					B[Control_No_2]  +=  NetList[NumberOfElements].ParametersValue[C_LOGIC]*(NetList[NumberOfElements].InitialCondition[LOGIC_IC_B]/deltaT);	// Entra no nï¿½ 1
+					B[0] += -NetList[NumberOfElements].ParametersValue[C_LOGIC]*(NetList[NumberOfElements].InitialCondition[LOGIC_IC_B]/deltaT);	// Sai do nï¿½ 
 				}
 				
 
@@ -1082,12 +1082,12 @@ void SystemOfEquationBackward(Element *NetList, double *A_Externo, double *x, do
 	
 				switch (NetList[NumberOfElements].ElementName[FIRST_CARACTER])
 				{
-				// NOT: Curva da fonte de corrente controlada não linear
+				// NOT: Curva da fonte de corrente controlada nï¿½o linear
 					case '>':
 						{
 							VoltageControlSource = (xNewtonRaphsonInterno[Control_No_1] - xNewtonRaphsonInterno[0]);
 							Control_No_Source = Control_No_1;
-							// Aqui, G é a derivada da equacao da reta
+							// Aqui, G ï¿½ a derivada da equacao da reta
 							if(VoltageControlSource > VIH){
 								G = 0;		
 								V_NoLinear = 0;
@@ -1103,7 +1103,7 @@ void SystemOfEquationBackward(Element *NetList, double *A_Externo, double *x, do
 							break;
 						}
 				
-					// AND: Curva da fonte de corrente controlada não linear
+					// AND: Curva da fonte de corrente controlada nï¿½o linear
 					case ')':
 						{
 							
@@ -1116,7 +1116,7 @@ void SystemOfEquationBackward(Element *NetList, double *A_Externo, double *x, do
 								Control_No_Source = Control_No_1;
 							}
 	
-							// Aqui, G é a derivada da equacao da reta
+							// Aqui, G ï¿½ a derivada da equacao da reta
 							if(VoltageControlSource > VIH){
 								G = 0;		
 								V_NoLinear = NetList[NumberOfElements].ParametersValue[V_LOGIC];
@@ -1134,7 +1134,7 @@ void SystemOfEquationBackward(Element *NetList, double *A_Externo, double *x, do
 						}
 	
 						
-					// NAND: Curva da fonte de corrente controlada não linear OK
+					// NAND: Curva da fonte de corrente controlada nï¿½o linear OK
 					case '(':
 						{
 							
@@ -1147,7 +1147,7 @@ void SystemOfEquationBackward(Element *NetList, double *A_Externo, double *x, do
 								Control_No_Source = Control_No_1;
 							}
 	
-							// Aqui, G é a derivada da equacao da reta
+							// Aqui, G ï¿½ a derivada da equacao da reta
 							if(VoltageControlSource > VIH){
 								G = 0;
 								V_NoLinear = 0;
@@ -1164,7 +1164,7 @@ void SystemOfEquationBackward(Element *NetList, double *A_Externo, double *x, do
 							break;
 						}
 
-					// OR: Curva da fonte de corrente controlada não linear OK
+					// OR: Curva da fonte de corrente controlada nï¿½o linear OK
 					case '}':
 						{
 							
@@ -1177,7 +1177,7 @@ void SystemOfEquationBackward(Element *NetList, double *A_Externo, double *x, do
 								Control_No_Source = Control_No_2;
 							}
 
-							// Aqui, G é a derivada da equacao da reta
+							// Aqui, G ï¿½ a derivada da equacao da reta
 							if(VoltageControlSource > VIH){
 								G = 0;		
 								V_NoLinear = NetList[NumberOfElements].ParametersValue[V_LOGIC];
@@ -1194,7 +1194,7 @@ void SystemOfEquationBackward(Element *NetList, double *A_Externo, double *x, do
 							break;
 						}
 
-					// NOR: Curva da fonte de corrente controlada não linear OK
+					// NOR: Curva da fonte de corrente controlada nï¿½o linear OK
 					case '{':
 						{
 							
@@ -1207,7 +1207,7 @@ void SystemOfEquationBackward(Element *NetList, double *A_Externo, double *x, do
 								Control_No_Source = Control_No_2;
 							}
 	
-							// Aqui, G é a derivada da equacao da reta
+							// Aqui, G ï¿½ a derivada da equacao da reta
 							if(VoltageControlSource > VIH){
 								G = 0;		
 								V_NoLinear = 0;
@@ -1224,7 +1224,7 @@ void SystemOfEquationBackward(Element *NetList, double *A_Externo, double *x, do
 							break;
 						}
 
-					// XOR: Curva da fonte de corrente controlada não linear
+					// XOR: Curva da fonte de corrente controlada nï¿½o linear
 					case ']':
 						{
 
@@ -1265,7 +1265,7 @@ void SystemOfEquationBackward(Element *NetList, double *A_Externo, double *x, do
 							}
 	
 
-							// Aqui, G é a derivada da equacao da reta
+							// Aqui, G ï¿½ a derivada da equacao da reta
 							if(VoltageControlSource > VIH){
 								G = 0;		
 								V_NoLinear = VoltagePartThree;
@@ -1282,7 +1282,7 @@ void SystemOfEquationBackward(Element *NetList, double *A_Externo, double *x, do
 							break;
 						}
 
-					// XNOR: Curva da fonte de corrente controlada não linear
+					// XNOR: Curva da fonte de corrente controlada nï¿½o linear
 					case '[':
 						{
 
@@ -1324,7 +1324,7 @@ void SystemOfEquationBackward(Element *NetList, double *A_Externo, double *x, do
 	
 
 
-							// Aqui, G é a derivada da equacao da reta
+							// Aqui, G ï¿½ a derivada da equacao da reta
 							if(VoltageControlSource > VIH){
 								G = 0;		
 								V_NoLinear = VoltagePartThree;
@@ -1351,11 +1351,11 @@ void SystemOfEquationBackward(Element *NetList, double *A_Externo, double *x, do
 				A[0][0]					   += -G;	// G
 				A[No_2][Control_No_Source] += -G;	// G
 				A[No_2][0]				   +=  G;	// G
-				
+			
 				
 				// Fonte de corrente indo do terra para a saida do inversor
-				B[0]    += -(V_NoLinear/NetList[NumberOfElements].ParametersValue[R_LOGIC]);	// Sai do nó 1
-				B[No_2] +=  (V_NoLinear/NetList[NumberOfElements].ParametersValue[R_LOGIC]);	// Entra no nó 2
+				B[0]    += -(V_NoLinear/NetList[NumberOfElements].ParametersValue[R_LOGIC]);	// Sai do nï¿½ 1
+				B[No_2] +=  (V_NoLinear/NetList[NumberOfElements].ParametersValue[R_LOGIC]);	// Entra no nï¿½ 2
 
 				
 				// Resistor de saida em paralelo com a saida
@@ -1431,7 +1431,7 @@ void ShowMatriz(double *A_Externo, double *X, double *B, int NumberOfVariables, 
 }
 
 
-// Método Gauss Jordan 
+// Mï¿½todo Gauss Jordan 
 void GaussJordan(double *A_Externo, double *B, double *x, int NumberOfVariables){
 		
 int i,j,l, a;
