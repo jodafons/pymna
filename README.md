@@ -73,4 +73,6 @@ simulator = Simulator()
 results = simulator.run_from_nl(path)
 ```
 
+![Figure Description](examples/x.pdf)
+
 ### Display:
