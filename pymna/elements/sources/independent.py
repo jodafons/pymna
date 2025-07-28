@@ -10,7 +10,6 @@ from pymna.exceptions import InvalidElement
 from typing import Tuple
 from abc import ABC
 
-
 class VoltageSource(Source):
     def __init__(self, 
                  nodeIn  : int,

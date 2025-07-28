@@ -214,8 +214,6 @@ def condutance( A : np.array,
     transcondutance(A, nodeIn, nodeOut, nodeIn, nodeOut, G)    
 
 
-
-
 from . import sources
 __all__.extend( sources.__all__ )
 from .sources import *
