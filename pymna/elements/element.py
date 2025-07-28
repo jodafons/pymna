@@ -1,5 +1,6 @@
 
 __all__ = [
+            "Step",
             "Element",
         ]
 
@@ -7,6 +8,37 @@ import numpy as np
 
 from typing import Tuple
 from abc import ABC, abstractmethod
+
+
+class Step(ABC):
+    def __init__(self, 
+                 max_nodes: int,
+                 x_newton_raphson: np.array,
+                 t: float,
+                 dt: float,
+                 current_branch: int,
+                 internal_step: int = 0,
+                 omega = 0,
+
+            ):
+        self.A = np.zeros( (max_nodes, max_nodes) )
+        self.b = np.zeros( (max_nodes, ))
+        self.dt = dt
+        self.internal_step = internal_step
+        self.t = t
+        self.current_branch = current_branch
+        self.x_newton_raphson = x_newton_raphson
+        self.omega = omega
+  
+             
+    def solve( self, A, b) -> np.array:
+        max_nodes = self.current_branch+1    
+        self.A = self.A[0:max_nodes, 0:max_nodes]
+        self.b = self.b[0:max_nodes]
+        x = np.linalg.solve(self.A[1::, 1::],self.b[1::])
+        return np.concatenate(([0],x))
+
+
 
 class Element(ABC):
     def __init__(self, name: str, nolinear_element: bool = False):
@@ -20,155 +52,19 @@ class Element(ABC):
         self.nolinear_element = nolinear_element
  
     def update( self,  x : np.array):
-        """
-        Updates the internal state of the element based on the provided parameters.
-
-        Parameters:
-        x : np.array
-            The state vector or array that is part of the update operation.
-        """
         pass
 
-    def backward(self, 
-                 A                : np.array, 
-                 b                : np.array, 
-                 x                : np.array,
-                 x_newton_raphson : np.array,
-                 t                : float,
-                 dt               : float,
-                 current_branch   : int, 
-                 ) -> int:
-            """
-            Computes the backward operation for the given parameters.
+    def backward(self, step : Step ):
+        pass
 
-            Parameters:
-            A : array-like
-                The input matrix or array used in the backward computation.
-            b : array-like
-                The input vector or array that is part of the backward operation.
-            t : float, optional
-                The current time step (default is 0).
-            deltaT : float, optional
-                The time increment (default is 0).
-            current_branch : int, optional
-                The index of the current branch being processed (default is 0).
+    def forward(self, step : Step ):
+        pass
 
-            Returns:
-            int
-                Returns 0 as a placeholder for the backward operation result.
-            """
-            return 0
+    def trap(self, step : Step ):
+        pass
 
-    def forward(self, 
-                 A                : np.array, 
-                 b                : np.array, 
-                 x                : np.array,
-                 x_newton_raphson : np.array,
-                 t                : float,
-                 dt               : float,
-                 current_branch   : int, 
-                 ) -> int:
-            """
-            Computes the backward operation for the given parameters.
-
-            Parameters:
-            A : array-like
-                The input matrix or array used in the backward computation.
-            b : array-like
-                The input vector or array that is part of the backward operation.
-            t : float, optional
-                The current time step (default is 0).
-            deltaT : float, optional
-                The time increment (default is 0).
-            current_branch : int, optional
-                The index of the current branch being processed (default is 0).
-
-            Returns:
-            int
-                Returns 0 as a placeholder for the backward operation result.
-            """
-            return 0
-
-    def trap(self, 
-                 A                : np.array, 
-                 b                : np.array, 
-                 x                : np.array,
-                 x_newton_raphson : np.array,
-                 t                : float,
-                 dt               : float,
-                 current_branch   : int, 
-                 ) -> int:
-            """
-            Computes the backward operation for the given parameters.
-
-            Parameters:
-            A : array-like
-                The input matrix or array used in the backward computation.
-            b : array-like
-                The input vector or array that is part of the backward operation.
-            t : float, optional
-                The current time step (default is 0).
-            deltaT : float, optional
-                The time increment (default is 0).
-            current_branch : int, optional
-                The index of the current branch being processed (default is 0).
-
-            Returns:
-            int
-                Returns 0 as a placeholder for the backward operation result.
-            """
-            return 0
-
-    def gear(self, 
-                 A                : np.array, 
-                 b                : np.array, 
-                 x                : np.array,
-                 x_newton_raphson : np.array,
-                 t                : float,
-                 dt               : float,
-                 current_branch   : int, 
-                 ) -> int:
-            """
-            Computes the backward operation for the given parameters.
-
-            Parameters:
-            A : array-like
-                The input matrix or array used in the backward computation.
-            b : array-like
-                The input vector or array that is part of the backward operation.
-            t : float, optional
-                The current time step (default is 0).
-            deltaT : float, optional
-                The time increment (default is 0).
-            current_branch : int, optional
-                The index of the current branch being processed (default is 0).
-
-            Returns:
-            int
-                Returns 0 as a placeholder for the backward operation result.
-            """
-            return 0
-
-    def fourier(self, 
-                A : np.array, 
-                b : np.array, 
-                w : float) -> int:
-        """
-        Computes the Fourier transform of a given signal.
-
-        Parameters:
-        A (float): Amplitude of the signal.
-        b (float): Phase shift of the signal.
-        w (float): Frequency of the signal.
-
-        Returns:
-        float: The result of the Fourier transform calculation.
-
-        Note:
-        This method currently returns 0 as a placeholder.
-        """
-
-        return 0
+    def fourier(self, step : Step ):
+        pass
  
 
 

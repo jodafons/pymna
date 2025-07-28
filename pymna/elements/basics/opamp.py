@@ -3,7 +3,7 @@ __all__ = [
         ]
 
 import numpy as np
-from pymna.elements import Element
+from pymna.elements import Element, Step
 from pymna.exceptions import InvalidElement
 from typing import Tuple, Union
 
@@ -37,37 +37,26 @@ class OpAmp(Element):
         self.nodeOutNeg     = 0
 
     def backward(self, 
-                 A                : np.array, 
-                 b                : np.array, 
-                 x                : np.array,
-                 x_newton_raphson : np.array,
-                 t                : float,
-                 dt               : float,
-                 current_branch   : int, 
-                 ) -> int:
+                 step : Step,
+                 ):
  
-        current_branch += 1
-        jx = current_branch
-        A[self.nodeOutPos, jx]     +=  1 
-        A[self.nodeOutNeg, jx]     += -1
-        A[jx, self.controlNodePos] += -1
-        A[jx, self.controlNodeNeg] +=  1
-        return current_branch
-
-    def fourier(                self,
-                A : np.array,
-                b : np.array,
-                w : float,
-                current_branch : int,
+        step.current_branch += 1
+        jx = step.current_branch
+        step.A[self.nodeOutPos, jx]     +=  1 
+        step.A[self.nodeOutNeg, jx]     += -1
+        step.A[jx, self.controlNodePos] += -1
+        step.A[jx, self.controlNodeNeg] +=  1
+        
+    def fourier(self,
+                step : Step,
                 ):
-        current_branch += 1
-        jx = current_branch
-        A[self.nodeOutPos, jx]     +=  1 
-        A[self.nodeOutNeg, jx]     += -1
-        A[jx, self.controlNodePos] += -1
-        A[jx, self.controlNodeNeg] +=  1
-        return current_branch
-
+        step.current_branch += 1
+        jx = step.current_branch
+        step.A[self.nodeOutPos, jx]     +=  1 
+        step.A[self.nodeOutNeg, jx]     += -1
+        step.A[jx, self.controlNodePos] += -1
+        step.A[jx, self.controlNodeNeg] +=  1
+        
     @classmethod
     def from_nl(cls, params: Tuple[str, int, int, int]):
         """

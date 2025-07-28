@@ -4,7 +4,7 @@ __all__ = [
 
 import numpy as np
 
-from pymna.elements import Element
+from pymna.elements import Element, Step
 from pymna.exceptions import InvalidElement
 from typing import Tuple, Union
 
@@ -40,19 +40,13 @@ class Diode(Element):
             self.g=0
 
     def backward(self, 
-                 A                : np.array, 
-                 b                : np.array, 
-                 x                : np.array,
-                 x_newton_raphson : np.array,
-                 t                : float,
-                 dt               : float,
-                 current_branch   : int, 
-                 ) -> int:
+                 step : Step
+                 ):
 
         if t==0:
             ddp=0.6
         else:
-            ddp = x[self.nodeIn] - x[self.nodeOut]
+            ddp = step.x_newton_raphson[self.nodeIn] - step.x_newton_raphson[self.nodeOut]
             ddp = 0.9 if ddp > 0.9 else ddp
 
         self.g  = (IS/VT)*np.exp( ddp )
@@ -60,9 +54,8 @@ class Diode(Element):
         # condutance
         condutance( A, self.nodeIn, self.nodeOut, self.g)
         I = CurrentSource(self.nodeIn, self.nodeOut, self.Id)
-        current_branch = I.backward(A, b, x, x_newton_raphson, t, dt, current_branch)
-        return current_branch
-
+        I.backward(step)
+        
     @classmethod
     def from_nl(cls, params: Tuple[str, int, int, ]):
         """

@@ -6,7 +6,7 @@ __all__ = [
         ]
 
 import numpy as np
-from pymna.elements import Element
+from pymna.elements import Element, Step
 from pymna.elements.element import condutance
 from pymna.elements.sources import CurrentSource
 from pymna.exceptions import InvalidElement
@@ -53,28 +53,17 @@ class Resistor(Element):
     # Backward method
     #
     def backward(self, 
-                 A                : np.array, 
-                 b                : np.array, 
-                 x                : np.array,
-                 x_newton_raphson : np.array,
-                 t                : float,
-                 dt               : float,
-                 current_branch   : int, 
-                 ) -> int:
+                 step : Step,
+                 ):
         G = (1/self.R)
-        condutance(A, self.nodeIn, self.nodeOut, G)
-        return current_branch
+        condutance(step.A, self.nodeIn, self.nodeOut, G)
 
     def fourier(self,
-                A : np.array,
-                b : np.array,
-                w : float,
-                current_branch : int,
+                step : Step,
                 ):
 
         G = (1/self.R)
-        condutance(A, self.nodeIn, self.nodeOut, G)
-        return current_branch    
+        condutance(step.A, self.nodeIn, self.nodeOut, G)
 
     @classmethod
     def from_nl(cls, params: Tuple[str, int, int, float]):
@@ -137,22 +126,15 @@ class Capacitor(Element):
         self.ic = initial_condition
 
     def backward(self, 
-                 A                : np.array, 
-                 b                : np.array, 
-                 x                : np.array,
-                 x_newton_raphson : np.array,
-                 t                : float,
-                 dt               : float,
-                 current_branch   : int, 
-                 ) -> int:
+                 step : Step,
+                 ):
         """
         Updates the circuit matrices for the capacitor element in backward time step.
         """
-        R = dt/self.C # dt/C
-        condutance(A, self.nodeIn, self.nodeOut, 1/R)
+        R = step.dt/self.C # dt/C
+        condutance(step.A, self.nodeIn, self.nodeOut, 1/R)
         Ic = CurrentSource( self.nodeOut, self.nodeIn, self.ic/R)  
-        current_branch = Ic.backward(A, b, x, x_newton_raphson, t, dt, current_branch)
-        return current_branch
+        Ic.backward(step)
 
     #
     # Update all initial conditions
@@ -162,16 +144,12 @@ class Capacitor(Element):
 
 
     def fourier(self,
-                A : np.array,
-                b : np.array,
-                w : float,
-                current_branch : int,
+                step : Step
                 ):
 
         Z = 1 / 1j * w * self.C 
         G = 1 / Z  # G = 1 / (j * w * C)
-        condutance(A, self.nodeIn, self.nodeOut, G)
-        return current_branch
+        condutance(step.A, self.nodeIn, self.nodeOut, G)
 
 
     @classmethod
@@ -232,47 +210,37 @@ class Inductor(Element):
     # j(t0+dt) = j(t0) + 1/L \int_{t0}^{t0+dt}v(t)dt
     #
     def backward(self, 
-                 A                : np.array, 
-                 b                : np.array, 
-                 x                : np.array,
-                 x_newton_raphson : np.array,
-                 t                : float,
-                 dt               : float,
-                 current_branch   : int, 
-                 ) -> int:
+                 step : Step,
+                 ):
 
-        current_branch += 1
-        jx = current_branch
-        R = self.L / dt  # L/dt
-        A[self.nodeIn, jx]   +=  1  # current out node a
-        A[self.nodeOut, jx]  += -1  # current in node b
-        A[jx, self.nodeIn]   += -1  # Va
-        A[jx, self.nodeOut]  +=  1  # Vb
-        A[jx, jx]            += R
-        b[jx]                += R * self.ic
+        step.current_branch += 1
+        jx = step.current_branch
+        R  = self.L / step.dt  # L/dt
+        step.A[self.nodeIn, jx]   +=  1  # current out node a
+        step.A[self.nodeOut, jx]  += -1  # current in node b
+        step.A[jx, self.nodeIn]   += -1  # Va
+        step.A[jx, self.nodeOut]  +=  1  # Vb
+        step.A[jx, jx]            += R
+        step.b[jx]                += R * self.ic
         self.jx = jx
-        return current_branch
-
+        
     #
     # Update all initial conditions
     #
-    def update(self, x):
+    def update(self, x : np.ndarray): ):
         self.ic = x[self.jx]
 
     def fourier(self,
-                A : np.array,
-                b : np.array,
-                w : float,
-                current_branch : int,
+                step : Step,
                 ):
-        current_branch += 1
-        jx = current_branch
-        Z = 1j * w * self.L  # Z = j * w * L
-        A[self.nodeIn, jx]   +=  1  # current out node a
-        A[self.nodeOut, jx]  += -1  # current in node b
-        A[jx, self.nodeIn]   += -1  # Va
-        A[jx, self.nodeOut]  +=  1  # Vb
-        A[jx, jx]            += Z  # Impedance
+        step.current_branch += 1
+        jx = step.current_branch
+        Z = 1j * step.w * self.L  # Z = j * w * L
+        step.A[self.nodeIn, jx]   +=  1  # current out node a
+        step.A[self.nodeOut, jx]  += -1  # current in node b
+        step.A[jx, self.nodeIn]   += -1  # Va
+        step.A[jx, self.nodeOut]  +=  1  # Vb
+        step.A[jx, jx]            += Z  # Impedance
 
 
     @classmethod
@@ -347,16 +315,10 @@ class NoLinearResistor(Element):
             self.nolinear_current_4 = nolinear_current_4
 
     def backward(self, 
-                 A                : np.array, 
-                 b                : np.array, 
-                 x                : np.array,
-                 x_newton_raphson : np.array,
-                 t                : float,
-                 dt               : float,
-                 current_branch   : int, 
-                 ) -> int:
+                 step : Step,
+                 ):
    
-        ddp = x_newton_raphson[self.nodeIn] - x_newton_raphson[self.nodeOut]
+        ddp = step.x_newton_raphson[self.nodeIn] - step.x_newton_raphson[self.nodeOut]
         if ddp > self.nolinear_voltage_3:
             # Tangente da reta ou derivada da funcao
             G = (self.nolinear_current_4 - self.nolinear_current_3)/(self.nolinear_voltage_4 - self.nolinear_voltage_3)
@@ -370,10 +332,9 @@ class NoLinearResistor(Element):
             G = (self.nolinear_current_2 - self.nolinear_current_1)/(self.nolinear_voltage_2 - self.nolinear_voltage_1)
             I = self.nolinear_current_2 - G*self.nolinear_voltage_2
        
-        condutance(A, self.nodeIn, self.nodeOut, G)  # Condutance matrix
+        condutance(step.A, self.nodeIn, self.nodeOut, G)  # Condutance matrix
         I = CurrentSource(self.nodeIn, self.nodeOut, I)  # Current source
-        current_branch = I.backward(A, b, x, x_newton_raphson, t, dt, current_branch)  # Update current branch
-        return current_branch
+        I.backward(step)  # Update current branch
 
     @classmethod
     def from_nl(cls, params: Tuple[str, int, int, float, float, float, float, float, float, float, float]):

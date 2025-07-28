@@ -5,7 +5,7 @@ __all__ = [
 
 import numpy as np
 
-from pymna.elements import Element
+from pymna.elements import Element, Step
 from pymna.elements.extended.diode import Diode
 from pymna.exceptions import InvalidElement
 from typing import Tuple, Union
@@ -40,45 +40,39 @@ class MOSFET(Element):
         self.mosfet_type = bjt_type
 
     def backward(self, 
-                 A                : np.array, 
-                 b                : np.array, 
-                 x                : np.array,
-                 x_newton_raphson : np.array,
-                 t                : float,
-                 dt               : float,
-                 current_branch   : int, 
-                 ) -> int:
+                 step : Step
+                 ):
 
     
         gate = self.gate 
 
         # ACMQ's book, pag. 93 and 94
         if self.mosfet_type == "N": # is N-channel MOSFET
-            if x[self.drain] > x[self.source]:
+            if step.x_newton_raphson[self.drain] > step.x_newton_raphson[self.source]:
                 drain = self.drain 
                 source = self.source
             else:
                 drain = self.source
                 source = self.drain
             
-            vgs = 2 if (t==0 & inter==0) else x[gate] - x[source]
-            vds = x[drain] - x[source]
+            vgs = 2 if (t==0 & inter==0) else step.x_newton_raphson[gate] - step.x_newton_raphson[source]
+            vds = step.x_newton_raphson[drain] - step.x_newton_raphson[source]
 
         else: # 'P' is P-channel MOSFET
-            if x[self.drain] < x[self.source]:
+            if step.x_newton_raphson[self.drain] < step.x_newton_raphson[self.source]:
                 drain = self.drain 
                 source = self.source
             else:
                 drain = self.source
                 source = self.drain 
             
-            vgs = 2 if (t==0 & inter==0) else -1*(x[gate] - x[source])
-            vds = -1*(x[drain] - x[source])
+            vgs = 2 if (t==0 & inter==0) else -1*(step.x_newton_raphson[gate] - step.x_newton_raphson[source])
+            vds = -1*(step.x_newton_raphson[drain] - step.x_newton_raphson[source])
 
 
         # Parameters for the MOSFET model
         if vgs > self.Vth:
-            vds = x[drain] - x[source]
+            vds = step.x_newton_raphson[drain] - step.x_newton_raphson[source]
             # saturation region
             if vds > vgs - self.Vth:
                 # Gm = (K * (W/L)) * (2*(vgs - Vth) * (1+Lambda * vds))
@@ -101,8 +95,7 @@ class MOSFET(Element):
         condutance( A, drain, source, Gds)
         transcondutance( A, drain, source, gate, source, Gm)
         ID = CurrentSource(drain, source, iD)
-        current_branch = ID.backward(A, b, x, x_newton_raphson, t, dt, current_branch)
-        return current_branch
+        ID.backward(step)
 
     @classmethod
     def from_nl(cls, params: Tuple[str, int, int, int, str]):

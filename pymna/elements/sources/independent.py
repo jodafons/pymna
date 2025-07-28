@@ -5,7 +5,7 @@ __all__ = [
 ]
 
 import numpy as np
-from pymna.elements import Element
+from pymna.elements import Element, Step
 from pymna.exceptions import InvalidElement
 from typing import Tuple
 from abc import ABC
@@ -34,22 +34,16 @@ class VoltageSource(Element):
         self.V = V
 
     def backward(self, 
-                 A                : np.array, 
-                 b                : np.array, 
-                 x                : np.array,
-                 x_newton_raphson : np.array,
-                 t                : float,
-                 dt               : float,
-                 current_branch   : int, 
-                 ) -> int:
-
-        A[self.nodeIn,self.jx]   +=  1
-        A[self.nodeOut,self.jx]  += -1
-        A[self.jx, self.nodeIn]  += -1
-        A[self.jx, self.nodeOut] +=  1
-        b[self.jx] += -self.V
-        return current_branch
-
+                 step              : Step,
+                 ):
+        step.current_branch += 1
+        jx = step.current_branch
+        step.A[self.nodeIn,jx]   +=  1
+        step.A[self.nodeOut,jx]  += -1
+        step.A[jx, self.nodeIn]  += -1
+        step.A[jx, self.nodeOut] +=  1
+        step.b[jx] += -self.V
+        
 class CurrentSource(Element):
     def __init__(self, 
                  nodeIn  : int,
@@ -73,15 +67,9 @@ class CurrentSource(Element):
         self.I = I
 
     def backward(self, 
-                 A                : np.array, 
-                 b                : np.array, 
-                 x                : np.array,
-                 x_newton_raphson : np.array,
-                 t                : float,
-                 dt               : float,
-                 current_branch   : int, 
-                 ) -> int:
+                 step              : Step,
+                 ):
         I = self.I
-        b[self.nodeIn]   += -I
-        b[self.nodeOut]  +=  I
-        return current_branch
+        step.b[self.nodeIn]   += -I
+        step.b[self.nodeOut]  +=  I
+        

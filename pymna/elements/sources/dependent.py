@@ -8,7 +8,7 @@ __all__ = [
 ]
 
 import numpy as np
-from pymna.elements import Element
+from pymna.elements import Element, Step
 from pymna.elements.element import condutance, transcondutance
 from pymna.exceptions import InvalidElement
 from typing import Tuple
@@ -49,24 +49,17 @@ class VoltageSourceControlByVoltage(Element):
         self.controlNodeOut = controlNodeOut
 
     def backward(self, 
-                 A                : np.array, 
-                 b                : np.array, 
-                 x                : np.array,
-                 x_newton_raphson : np.array,
-                 t                : float,
-                 dt               : float,
-                 current_branch   : int, 
-                 ) -> int:
+                 step : Step
+                 ):
 
-        current_branch += 1
-        jx = current_branch
-        A[self.nodeIn , jx]        +=  1
-        A[self.nodeOut , jx]       += -1
-        A[jx, self.nodeIn]         += -1
-        A[jx, self.nodeOut]        +=  1
-        A[jx, self.controlNodeIn]  += self.Av
-        A[jx, self.controlNodeOut] += -self.Av 
-        return current_branch
+        step.current_branch += 1
+        jx = step.current_branch
+        step.A[self.nodeIn , jx]        +=  1
+        step.A[self.nodeOut , jx]       += -1
+        step.A[jx, self.nodeIn]         += -1
+        step.A[jx, self.nodeOut]        +=  1
+        step.A[jx, self.controlNodeIn]  += self.Av
+        step.A[jx, self.controlNodeOut] += -self.Av 
 
     @classmethod
     def from_nl( cls, params : Tuple[str, int, int, int, int, float] ):
@@ -111,24 +104,17 @@ class CurrentSourceControlByCurrent(Element):
         self.controlNodeOut = controlNodeOut
 
     def backward(self, 
-                 A                : np.array, 
-                 b                : np.array, 
-                 x                : np.array,
-                 x_newton_raphson : np.array,
-                 t                : float,
-                 dt               : float,
-                 current_branch   : int, 
-                 ) -> int:
+                 step : Step
+                 ):
 
-        current_branch += 1
-        jx = current_branch
-        A[self.controlNodeIn , jx]   +=  1
-        A[self.controlNodeOut, jx]   += -1
-        A[jx, self.controlNodeIn]    += -1
-        A[jx, self.controlNodeOut]   +=  1
-        A[self.nodeIn , jx]          +=  self.Ai
-        A[self.nodeOut , jx]         += -self.Ai
-        return current_branch
+        step.current_branch += 1
+        jx = step.current_branch
+        step.A[self.controlNodeIn , jx]   +=  1
+        step.A[self.controlNodeOut, jx]   += -1
+        step.A[jx, self.controlNodeIn]    += -1
+        step.A[jx, self.controlNodeOut]   +=  1
+        step.A[self.nodeIn , jx]          +=  self.Ai
+        step.A[self.nodeOut , jx]         += -self.Ai
 
     @classmethod
     def from_nl( cls, params : Tuple[str, int, int, int, int, float] ):
@@ -175,17 +161,10 @@ class CurrentSourceControlByVoltage(Element):
         self.controlNodeOut = controlNodeOut
 
     def backward(self, 
-                 A                : np.array, 
-                 b                : np.array, 
-                 x                : np.array,
-                 x_newton_raphson : np.array,
-                 t                : float,
-                 dt               : float,
-                 current_branch   : int, 
-                 ) -> int:
+                 step : Step
+                 ):
 
-        transcondutance(A, self.nodeIn, self.nodeOut, self.controlNodeIn, self.controlNodeOut, self.Gm)
-        return current_branch
+        transcondutance(step.A, self.nodeIn, self.nodeOut, self.controlNodeIn, self.controlNodeOut, self.Gm)
 
     @classmethod
     def from_nl( cls, params : Tuple[str, int, int, int, int, float] ):
@@ -223,33 +202,26 @@ class VoltageSourceControlByCurrent(Element):
         self.controlNodeOut = controlNodeOut
 
     def backward(self, 
-                 A                : np.array, 
-                 b                : np.array, 
-                 x                : np.array,
-                 x_newton_raphson : np.array,
-                 t                : float,
-                 dt               : float,
-                 current_branch   : int, 
-                 ) -> int:
+                 step : Step
+                 ):
 
-        current_branch += 1
+        step.current_branch += 1
         # current main branch
-        jx = current_branch
-        current_branch += 1
+        jx = step.current_branch
+        step.current_branch += 1
         # current control branch
-        jy = current_branch
+        jy = step.current_branch
 
-        A[self.nodeIn  , jx       ] +=  1 # I
-        A[self.nodeOut , jx       ] += -1 # I
-        A[self.controlNodeIn  , jy] +=  1 # I
-        A[self.controlNodeOut, jy ] += -1 # I
-        A[jx, self.controlNodeIn  ] += -1 # V
-        A[jx, self.controlNodeOut ] +=  1 # V
-        A[jy, self.controlNodeIn  ] += -1 # V
-        A[jy, self.controlNodeOut ] +=  1 # V
-        A[jx,jy]                    += self.Rm
-        return current_branch
-
+        step.A[self.nodeIn  , jx       ] +=  1 # I
+        step.A[self.nodeOut , jx       ] += -1 # I
+        step.A[self.controlNodeIn  , jy] +=  1 # I
+        step.A[self.controlNodeOut, jy ] += -1 # I
+        step.A[jx, self.controlNodeIn  ] += -1 # V
+        step.A[jx, self.controlNodeOut ] +=  1 # V
+        step.A[jy, self.controlNodeIn  ] += -1 # V
+        step.A[jy, self.controlNodeOut ] +=  1 # V
+        step.A[jx,jy]                    += self.Rm
+        
     @classmethod
     def from_nl( cls, params : Tuple[str, int, int, int, int, float] ):
         # VoltageSourceControlByCurrent: 'H'name, noIn, noOut, control_noIn, control_noOut, Rm

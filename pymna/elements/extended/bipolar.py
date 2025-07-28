@@ -4,7 +4,7 @@ __all__ = [
 
 import numpy as np
 
-from pymna.elements import Element
+from pymna.elements import Element, Step
 from pymna.exceptions import InvalidElement
 from typing import Tuple, Union
 
@@ -39,14 +39,8 @@ class BJT(Element):
         self.bjt_type = bjt_type
 
     def backward(self, 
-                 A                : np.array, 
-                 b                : np.array, 
-                 x                : np.array,
-                 x_newton_raphson : np.array,
-                 t                : float,
-                 dt               : float,
-                 current_branch   : int, 
-                 ) -> int:
+                 step : Step
+                 ):
 
         # Pag. 90 from ACQM's book
         if self.bjt_type=="N": # is NPN
@@ -72,9 +66,7 @@ class BJT(Element):
             model = [Deb, ICB, icb, Dcb, IBE, ibe]
 
         for elm in model:
-            current_branch = elm.backward(A, b, x, x_newton_raphson, t, dt, current_branch)
-
-        return current_branch
+            elm.backward(step)
 
     @classmethod
     def from_nl(cls, params: Tuple[str, int, int, int, str]):

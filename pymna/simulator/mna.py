@@ -233,10 +233,7 @@ class Simulator:
 
         return result
 
-    def solve( self, A, b) -> np.array:
-        x = np.linalg.solve(A[1::, 1::],b[1::])
-        return np.concatenate(([0],x))
-
+  
     def solve_system_of_equations( self, 
                                        circuit : Circuit, 
                                        t       : float, 
@@ -283,35 +280,31 @@ class Simulator:
             ValueError
                 If the specified method is not recognized.
             """
-            A                = np.zeros( (max_nodes, max_nodes) )
-            b                = np.zeros( (max_nodes, ))
-            x                = np.zeros( (max_nodes, ) )
+           
             current_branch   = circuit.number_of_nodes
+            step = Step( max_nodes, x_newton_raphson=x_newton_raphson, t=t, dt=delta_t, current_branch=current_branch )
             for elm in circuit.elements:
-                last_branch = current_branch
-
+                last_branch = step.current_branch
                 if method == Method.BACKWARD_EULER:
                     # NOTE: the backward method of each element returns the current branch
-                    current_branch = elm.backward(A,b,x,x_newton_raphson,t,delta_t,current_branch)
+                    elm.backward(step)
                 elif method == Method.TRAPEZOIDAl:
                     # NOTE: the trapezoidal method of each element returns the current branch
-                    current_branch = elm.trapezoidal(A,b,x,x_newton_raphson,t,delta_t,current_branch)
+                    elm.trapezoidal(step)
                 elif method == Method.FORWARD_EULER:
                     # NOTE: the forward method of each element returns the current branch
-                    current_branch = elm.forward(A,b,x,x_newton_raphson,t,delta_t,current_branch)
+                    elm.forward(step)
                 else:
                     # NOTE: if the method is not recognized, raise an error
                     raise ValueError(f"Unknown method: {method}")            
                 
-                if current_branch > last_branch:
-                    col_name = f"J{current_branch}{elm.name}"
+                if step.current_branch > last_branch:
+                    col_name = f"J{step.current_branch}{elm.name}"
                     if not col_name in col_names:
                         col_names.append(col_name)
 
-            max_nodes = current_branch+1
-            A = A[0:max_nodes, 0:max_nodes]
-            b = b[0:max_nodes]
-            x = self.solve(A,b)
+            max_nodes = step.current_branch+1
+            x = step.solve()
             return x, max_nodes, col_names
 
     def run_from_nl( self, nl_path : str ):

@@ -5,7 +5,7 @@ __all__ = [
 ]
 
 import numpy as np
-from pymna.elements import Element
+from pymna.elements import Element, Step
 from pymna.exceptions import InvalidElement
 from typing import Tuple
 from abc import ABC
@@ -110,16 +110,10 @@ class PulseVoltageSource(Element):
         self.delay       = delay
 
     def backward(self, 
-                 A                : np.array, 
-                 b                : np.array, 
-                 x                : np.array,
-                 x_newton_raphson : np.array,
-                 t                : float,
-                 dt               : float,
-                 current_branch   : int, 
-                 ) -> int:
+                 step : Step,
+                 ):
 
-        V = self.pulse(t,
+        V = self.pulse(step.t,
                         self.amplitude_1,
                         self.amplitude_2,
                         self.T,
@@ -129,7 +123,7 @@ class PulseVoltageSource(Element):
                         self.delay)
 
         Vs = VoltageSource(self.nodeIn, self.nodeOut, V)
-        return Vs.backward(A, b, x, x_newton_raphson, t, dt, current_branch)
+        Vs.backward(step)
 
     @classmethod
     def from_nl( cls, params : Tuple[str, int, int, str, float, float, float, float, float, float, float, int] ):
@@ -186,16 +180,10 @@ class PulseCurrentSource(PulseVoltageSource):
                                     name)
 
     def backward(self, 
-                 A                : np.array, 
-                 b                : np.array, 
-                 x                : np.array,
-                 x_newton_raphson : np.array,
-                 t                : float,
-                 dt               : float,
-                 current_branch   : int, 
+                 step : Step,
                  ) -> int:
                  
-        I = self.pulse(t,
+        I = self.pulse(step.t,
                         self.amplitude_1,
                         self.amplitude_2,
                         self.T,
@@ -204,4 +192,4 @@ class PulseCurrentSource(PulseVoltageSource):
                         self.time_on,
                         self.delay)
         Is = CurrentSource(self.nodeIn, self.nodeOut, I)
-        return Is.backward(A, b, x, x_newton_raphson, t, dt, current_branch)
+        Is.backward(step)

@@ -28,7 +28,7 @@ __all__ = ['NOT',
            ]
 
 from typing import Tuple, List
-from pymna.elements import Element
+from pymna.elements import Element, Step
 from pymna.elements import Resistor
 from pymna.elements import Capacitor
 from pymna.elements import CurrentSource, CurrentSourceControlByVoltage
@@ -282,42 +282,33 @@ class NOT(Element):
             self.ic_a           = 0
 
     def backward(self, 
-                 A                : np.array, 
-                 b                : np.array, 
-                 x                : np.array,
-                 x_newton_raphson : np.array,
-                 t                : float,
-                 dt               : float,
-                 current_branch   : int, 
-                 ) -> int:
+                 step : Step
+                 ):
         
-        ddp = x_newton_raphson[self.control_nodeIn] - x_newton_raphson[self.gnd]
+        ddp = step.x_newton_raphson[self.control_nodeIn] - step.x_newton_raphson[self.gnd]
         control_node = self.control_nodeIn
 
         # input A
         # Capacitor from control_nodeIn to gnd in parallel with 
         # a current source from gnd to control_nodeIn (initial condition)
         Ca = Capacitor( self.control_nodeIn, self.gnd, self.C, initial_condition = self.ic_a )
-        current_branch = Ca.backward(A, b, x, x_newton_raphson, t, dt, current_branch)
+        Ca.backward(step)
 
         # get G and V given the gate type and inputs
         Go, Vo, control_node = get_gate_params("NOT", self.V, self.A, ddp, 0, self.control_nodeIn, 0)
 
         # transconductance from control_node to gnd
         Ic = CurrentSourceControlByVoltage( self.gnd, self.nodeOut, control_node, self.gnd, Go/self.R)
-        current_branch = Ic.backward(A, b, x, x_newton_raphson, t, dt, current_branch)  
+        Ic.backward(step)  
 
         # current source from nodeOut to gnd 
         Iout = CurrentSource( self.gnd, self.nodeOut,  Vo/self.R )   
-        current_branch = Iout.backward(A, b, x, x_newton_raphson, t, dt, current_branch)
+        Iout.backward(step)
 
         # resistor from nodeOut to gnd
         Rout  = Resistor( self.nodeOut, self.gnd, self.R )
-        current_branch = Rout.backward(A, b, x, x_newton_raphson, t, dt, current_branch)
-
-        # backward pass
-        return current_branch			
-				
+        Rout.backward(step)
+						
     def update(self, x : np.array):
         self.ic_a = x[self.control_nodeIn] - x[self.gnd]
 
@@ -365,43 +356,34 @@ class TwoInputsGate(Element):
         self.gate_name        = gate_name
 
     def backward(self, 
-                 A                : np.array, 
-                 b                : np.array, 
-                 x                : np.array,
-                 x_newton_raphson : np.array,
-                 t                : float,
-                 dt               : float,
-                 current_branch   : int, 
-                 ) -> int:
+                 step : Step
+                 ):
         
-        ddp_a = x_newton_raphson[self.control_nodeIn_a] - x_newton_raphson[self.gnd]
-        ddp_b = x_newton_raphson[self.control_nodeIn_b] - x_newton_raphson[self.gnd]
+        ddp_a = step.x_newton_raphson[self.control_nodeIn_a] - step.x_newton_raphson[self.gnd]
+        ddp_b = step.x_newton_raphson[self.control_nodeIn_b] - step.x_newton_raphson[self.gnd]
 
         # input A
         Ca = Capacitor( self.control_nodeIn_a, self.gnd, self.C, initial_condition = self.ic_a )
-        current_branch = Ca.backward(A, b, x, x_newton_raphson, t, dt, current_branch)
+        Ca.backward(step)
 
         # input B
         Cb = Capacitor( self.control_nodeIn_b, self.gnd, self.C, initial_condition = self.ic_b )
-        current_branch = Cb.backward(A, b, x, x_newton_raphson, t, dt, current_branch)
+        Cb.backward(step)
         
         # get G and V given the gate type and inputs
         Go, Vo, control_node = get_gate_params(self.gate_name, self.V, self.A, ddp_a, ddp_b, self.control_nodeIn_a, self.control_nodeIn_b)
 
         # transconductance from control_node to gnd
         Ic = CurrentSourceControlByVoltage( self.gnd, self.nodeOut, control_node, self.gnd, Go/self.R)
-        current_branch = Ic.backward(A, b, x, x_newton_raphson, t, dt, current_branch)  
+        Ic.backward(step)  
 
         # current source from nodeOut to gnd 
         Iout = CurrentSource( self.gnd, self.nodeOut,  Vo/self.R )   
-        current_branch = Iout.backward(A, b, x, x_newton_raphson, t, dt, current_branch)
+        Iout.backward(step)
 
         # resistor from nodeOut to gnd
         Rout  = Resistor( self.nodeOut, self.gnd, self.R )
-        current_branch = Rout.backward(A, b, x, x_newton_raphson, t, dt, current_branch)
-
-        # backward pass
-        return current_branch			
+        Rout.backward(step)		
 				
     def update(self, x : np.array):
         self.ic_a = x[self.control_nodeIn_a] - x[self.gnd]
