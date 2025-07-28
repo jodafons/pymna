@@ -1,13 +1,4 @@
 
-"""
-This module defines basic electrical elements used in circuit simulations, including:
-- Resistor
-- Capacitor
-- Inductor
-
-Each class represents a specific element and provides methods for updating circuit matrices and handling initial conditions.
-"""
-
 
 
 __all__ = [
@@ -15,13 +6,18 @@ __all__ = [
             "Capacitor",
             "Inductor",
             "OpAmp",
-            "NoLinearResistor"
+            "NoLinearResistor",
+            "transcondutance",
+            "condutance"
         ]
 
 import numpy as np
 from pymna.elements import Element
 from pymna.exceptions import InvalidElement
 from typing import Tuple, Union
+
+
+
 
 #
 # Resistor
@@ -74,10 +70,7 @@ class Resistor(Element):
                  current_branch   : int, 
                  ) -> int:
         G = (1/self.R)
-        A[self.nodeIn , self.nodeIn ] +=  G
-        A[self.nodeIn , self.nodeOut] += -G
-        A[self.nodeOut, self.nodeIn ] += -G
-        A[self.nodeOut, self.nodeOut] +=  G
+        condutance(A, self.nodeIn, self.nodeOut, G)
         return current_branch
 
     def fourier(self,
@@ -88,10 +81,7 @@ class Resistor(Element):
                 ):
 
         G = (1/self.R)
-        A[self.nodeIn , self.nodeIn ] +=  G
-        A[self.nodeIn , self.nodeOut] += -G
-        A[self.nodeOut, self.nodeIn ] += -G
-        A[self.nodeOut, self.nodeOut] +=  G
+        condutance(A, self.nodeIn, self.nodeOut, G)
         return current_branch    
 
     @classmethod
@@ -167,13 +157,9 @@ class Capacitor(Element):
         Updates the circuit matrices for the capacitor element in backward time step.
         """
         R = dt/self.C # dt/C
-        G = (1/R) # C/dt
-        A[self.nodeIn , self.nodeIn]  +=  G
-        A[self.nodeIn , self.nodeOut] += -G
-        A[self.nodeOut, self.nodeIn]  += -G
-        A[self.nodeOut, self.nodeOut] +=  G
-        b[self.nodeIn]                +=  G*self.ic # +C/dt v(t0)
-        b[self.nodeOut]               += -G*self.ic # -C/dt v(t0)
+        condutance(A, self.nodeIn, self.nodeOut, 1/R)
+        Ic = CurrentSource( self.nodeOut, self.nodeIn, self.ic/R)  
+        current_branch = Ic.backward(A, b, x, x_newton_raphson, t, dt, current_branch)
         return current_branch
 
     #
@@ -192,10 +178,7 @@ class Capacitor(Element):
 
         Z = 1 / 1j * w * self.C 
         G = 1 / Z  # G = 1 / (j * w * C)
-        A[self.nodeIn , self.nodeIn]  +=  G
-        A[self.nodeIn , self.nodeOut] += -G
-        A[self.nodeOut, self.nodeIn]  += -G
-        A[self.nodeOut, self.nodeOut] +=  G
+        condutance(A, self.nodeIn, self.nodeOut, G)
         return current_branch
 
 
@@ -315,81 +298,6 @@ class Inductor(Element):
             raise InvalidElement("Invalid parameters for Inductor: expected 'L' as first element.")
         return Inductor(nodeIn=int(params[1]), nodeOut=int(params[2]), inductance=float(params[3]), 
                         name=params[0], initial_condition=float(params[4][3::]) if len(params) > 4 else 0)
-
-#
-# OpAmp
-#
-class OpAmp(Element):
-
-    # This class represents an operational amplifier element in a circuit.
-    # The letter is 'O'.
-    def __init__(self, 
-                 controlNodePos : int,
-                 controlNodeNeg : int,
-                 nodeOut        : int,
-                 name           : str=""
-    ):
-        """
-        Initializes an instance of the Ampop class.
-
-        Parameters:
-        controlNodePos (int): The positive control node of the operational amplifier.
-        controlNodeNeg (int): The negative control node of the operational amplifier.
-        nodeOut (int): The positive output node of the operational amplifier.
-        name (str, optional): The name of the operational amplifier. Defaults to an empty string.
-        """
-        Element.__init__(self, name)
-        self.controlNodePos = controlNodePos
-        self.controlNodeNeg = controlNodeNeg
-        self.nodeOutPos     = nodeOut
-        self.nodeOutNeg     = 0
-
-    def backward(self, 
-                 A                : np.array, 
-                 b                : np.array, 
-                 x                : np.array,
-                 x_newton_raphson : np.array,
-                 t                : float,
-                 dt               : float,
-                 current_branch   : int, 
-                 ) -> int:
- 
-        current_branch += 1
-        jx = current_branch
-        A[self.nodeOutPos, jx]     +=  1 
-        A[self.nodeOutNeg, jx]     += -1
-        A[jx, self.controlNodePos] += -1
-        A[jx, self.controlNodeNeg] +=  1
-        return current_branch
-
-    def fourier(                self,
-                A : np.array,
-                b : np.array,
-                w : float,
-                current_branch : int,
-                ):
-        current_branch += 1
-        jx = current_branch
-        A[self.nodeOutPos, jx]     +=  1 
-        A[self.nodeOutNeg, jx]     += -1
-        A[jx, self.controlNodePos] += -1
-        A[jx, self.controlNodeNeg] +=  1
-        return current_branch
-
-    @classmethod
-    def from_nl(cls, params: Tuple[str, int, int, int]):
-        """
-        Creates an Ampop instance from a tuple of parameters.
-
-        Parameters:
-        params (Tuple[str, int, int, int]): A tuple containing the parameters for the operational amplifier.
-
-        Returns:
-        Ampop: An instance of the Ampop class.
-        """
-        if params[0][0] != "O":
-            raise InvalidElement("Invalid parameters for Operational Amplifier: expected 'O' as first element.")
-        return Ampop(controlNodePos=int(params[1]), controlNodeNeg=int(params[2]), nodeOut=int(params[3]), name=params[0])
 
 
 class NoLinearResistor(Element):
