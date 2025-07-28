@@ -30,7 +30,7 @@ class BJT(Element):
         id (float, optional): The current through the BJT (default is 1.0).
         name (str, optional): The name of the BJT element (default is an empty string).
         """
-        Element.__init__(self,name)
+        Element.__init__(self,name ,nolinear_element=True)
         self.collector = collector
         self.base = base
         self.emitter = emitter
@@ -90,4 +90,3 @@ class BJT(Element):
         if params[0][0] != "Q":
             raise InvalidElement("Invalid parameters for BJT: expected 'Q' as first element.")
         return BJT(bjt_type=params[4], collector=int(params[1]), base=int(params[2]), emitter=int(params[3]), name=params[0])
-

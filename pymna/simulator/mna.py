@@ -315,7 +315,23 @@ class Simulator:
             return x, max_nodes, col_names
 
     def run_from_nl( self, nl_path : str ):
-
+        
+        # Resistor:  R<nome> <no+> <no-> <resistencia>
+        # VCCS:      G<nome> <io+> <io-> <vi+> <vi-> <transcondutancia>
+        # VCVC:      E<nome> <vo+> <vo-> <vi+> <vi-> <ganho de tensao>
+        # CCCS:      F<nome> <io+> <io-> <ii+> <ii-> <ganho de corrente>
+        # CCVS:      H<nome> <vo+> <vo-> <ii+> <ii-> <transresistencia>
+        # Fonte I:   I<nome> <io+> <io-> <tipo de fonte>
+        # Fonte V:   V<nome> <vo+> <vo-> <tipo de fonte>
+        # Amp. op.:  O<nome> <vo1> <vo2> <vi1> <vi2>
+        # Capacitor: C<nome> <no+> <no-> <capacitancia> [IC=<tensao inicial>]
+        # Indutor:   L<nome> <no+> <no-> <indutancia> [IC=<corrente inicial>]
+        # Indutor 1: X<nome> <no+> <no-> <indutancia> [IC=<corrente inicial>]
+        # Ind. mutua:K<nome> <L1> <L2> <coeficiente de acoplamento>
+        # Diodo:     D<nome> <no+> <no->
+        # Trans. MOS:M<nome> <nod> <nog> <nos> <nob> <tipo> L=<comprimento> W=<largura>
+        # Trans. BJT:Q<nome> <noc> <nob> <noe> <tipo>
+                
         circuit    = Circuit()
 
         with open(nl_path, 'r') as f:
@@ -336,7 +352,7 @@ class Simulator:
                     continue
 
                 print(line)
-
+             
                 params = line.split()
                 element = params[0][0]
                 if element == "R":
