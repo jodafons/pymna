@@ -1,24 +1,16 @@
-
-
-
 __all__ = [
             "Resistor",
             "Capacitor",
             "Inductor",
-            "OpAmp",
             "NoLinearResistor",
-            "transcondutance",
-            "condutance"
         ]
 
 import numpy as np
 from pymna.elements import Element
+from pymna.elements.element import condutance
+from pymna.elements.sources import CurrentSource
 from pymna.exceptions import InvalidElement
 from typing import Tuple, Union
-
-
-
-
 #
 # Resistor
 #
@@ -378,12 +370,9 @@ class NoLinearResistor(Element):
             G = (self.nolinear_current_2 - self.nolinear_current_1)/(self.nolinear_voltage_2 - self.nolinear_voltage_1)
             I = self.nolinear_current_2 - G*self.nolinear_voltage_2
        
-        A[self.nodeIn, self.nodeIn]   +=  G		# G
-        A[self.nodeIn, self.nodeOut]  += -G		# G
-        A[self.nodeOut, self.nodeIn]  += -G		# G
-        A[self.nodeOut, self.nodeOut] +=  G		# G
-        b[self.nodeIn]  += -I # Fonte de corrente referente ao modelo do resistor nao linear indo do no 1 para o no 2.
-        b[self.nodeOut] +=  I # Fonte de corrente referente ao modelo do resistor nao linear indo do no 1 para o no 2.
+        condutance(A, self.nodeIn, self.nodeOut, G)  # Condutance matrix
+        I = CurrentSource(self.nodeIn, self.nodeOut, I)  # Current source
+        current_branch = I.backward(A, b, x, x_newton_raphson, t, dt, current_branch)  # Update current branch
         return current_branch
 
     @classmethod

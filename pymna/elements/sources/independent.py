@@ -5,12 +5,13 @@ __all__ = [
 ]
 
 import numpy as np
-
+from pymna.elements import Element
 from pymna.exceptions import InvalidElement
 from typing import Tuple
 from abc import ABC
 
-class VoltageSource(Source):
+class VoltageSource(Element):
+    
     def __init__(self, 
                  nodeIn  : int,
                  nodeOut : int,
@@ -18,7 +19,7 @@ class VoltageSource(Source):
                  name    : str=""
             ):
         """
-        Initializes a DCVoltageSource object with the given parameters.
+        Initializes a VoltageSource object with the given parameters.
         This class represents a DC voltage source in a circuit simulation.
 
         Parameters:
@@ -27,7 +28,9 @@ class VoltageSource(Source):
             dc (float, optional): The DC voltage value. Defaults to 0.
             name (str, optional): The name of the source. Defaults to an empty string.
         """
-        Source.__init__(self, name, nodeIn, nodeOut)
+        Element.__init__(self, name)
+        self.nodeIn  = nodeIn
+        self.nodeOut = nodeOut        
         self.V = V
 
     def backward(self, 
@@ -47,7 +50,7 @@ class VoltageSource(Source):
         b[self.jx] += -self.V
         return current_branch
 
-class CurrentSource(Source):
+class CurrentSource(Element):
     def __init__(self, 
                  nodeIn  : int,
                  nodeOut : int,
@@ -64,7 +67,9 @@ class CurrentSource(Source):
             dc (float, optional): The DC current value. Defaults to 0.
             name (str, optional): The name of the source. Defaults to an empty string.
         """
-        Source.__init__(self, name, nodeIn, nodeOut)
+        Element.__init__(self, name)
+        self.nodeIn  = nodeIn
+        self.nodeOut = nodeOut
         self.I = I
 
     def backward(self, 

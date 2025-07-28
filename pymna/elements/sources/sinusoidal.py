@@ -4,7 +4,7 @@ __all__ = [
 ]
 
 import numpy as np
-
+from pymna.elements import Element
 from pymna.exceptions import InvalidElement
 from typing import Tuple
 from abc import ABC
@@ -40,7 +40,7 @@ def sin(t                : float,
         V = (dc + amplitude*np.exp( -1 * attenuation * (t-delay) )) * np.sin( 2*np.pi*frequency*(t-delay) + (np.pi*angle)/180 )
     return V
 
-class SinusoidalVoltageSource(Source):
+class SinusoidalVoltageSource(Element):
 
     def __init__(self,
                      nodeIn           : int,
@@ -69,7 +69,9 @@ class SinusoidalVoltageSource(Source):
             attenuation (float, optional): The attenuation parameter for the source. Defaults to 0.
             name (str, optional): The name of the source. Defaults to an empty string.
         """
-        Source.__init__(self, name, nodeIn, nodeOut)
+        Element.__init__(self, name=name)
+        self.nodeIn = nodeIn
+        self.nodeOut = nodeOut
         self.amplitude   = amplitude
         self.frequency   = frequency
         self.number_of_cycles = number_of_cycles

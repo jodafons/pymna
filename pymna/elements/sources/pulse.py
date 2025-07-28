@@ -5,7 +5,7 @@ __all__ = [
 ]
 
 import numpy as np
-
+from pymna.elements import Element
 from pymna.exceptions import InvalidElement
 from typing import Tuple
 from abc import ABC
@@ -58,7 +58,7 @@ def pulse(t               : float,
         V = amplitude_1
     return V
 
-class PulseVoltageSource(Source):
+class PulseVoltageSource(Element):
 
     def __init__(self,
              nodeIn      : int,
@@ -98,7 +98,9 @@ class PulseVoltageSource(Source):
             attenuation (float, optional): The damping factor for the source. Default is 0.
             name (str, optional): The name of the source. Default is an empty string.
         """
-        Source.__init__(self, name, nodeIn, nodeOut)
+        Element.__init__(self, name)
+        self.nodeIn  = nodeIn
+        self.nodeOut = nodeOut
         self.amplitude   = amplitude
         self.frequency   = frequency
         self.number_of_cycles = number_of_cycles
@@ -168,7 +170,20 @@ class PulseCurrentSource(PulseVoltageSource):
         Initializes a PulseCurrentSource object with the given parameters.
         This class represents a pulse current source in a circuit simulation.
         """
-        PulseVoltageSource.__init__(self, nodeIn, nodeOut, amplitude_1, amplitude_2, T, number_of_cycles, delay, rise_time, fall_time, time_on, angle, attenuation, name)
+        PulseVoltageSource.__init__(self, 
+                                    nodeIn, 
+                                    nodeOut, 
+                                    amplitude_1, 
+                                    amplitude_2, 
+                                    T, 
+                                    number_of_cycles, 
+                                    delay, 
+                                    rise_time, 
+                                    fall_time, 
+                                    time_on, 
+                                    angle, 
+                                    attenuation, 
+                                    name)
 
     def backward(self, 
                  A                : np.array, 

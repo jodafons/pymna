@@ -8,7 +8,7 @@ __all__ = [
 ]
 
 import numpy as np
-
+from pymna.elements import Element
 from pymna.exceptions import InvalidElement
 from typing import Tuple
 from abc import ABC
@@ -17,7 +17,7 @@ from abc import ABC
 # Voltage and current source gains
 #
 
-class VoltageSourceControlByVoltage(Source):
+class VoltageSourceControlByVoltage(Element):
 
     # This class represents a voltage source controlled by another voltage source.
     # The letter is 'E'.
@@ -79,7 +79,7 @@ class VoltageSourceControlByVoltage(Source):
                                               Av=float(params[5]),
                                               name=params[0])
  
-class CurrentSourceControlByCurrent:
+class CurrentSourceControlByCurrent(Element):
    
    # This class represents a current source controlled by a voltage source.
    # The letter if 'F'
@@ -102,7 +102,9 @@ class CurrentSourceControlByCurrent:
         
         Calls the parent class's __init__ method to initialize the node identifiers.
         """
-        Source.__init__(self, name, nodeIn, nodeOut)
+        Element.__init__(self, name)
+        self.nodeIn  = nodeIn
+        self.nodeOut = nodeOut
         self.Ai = Ai
         self.controlNodeIn  = controlNodeIn
         self.controlNodeOut = controlNodeOut
@@ -140,7 +142,7 @@ class CurrentSourceControlByCurrent:
                                               name=params[0])
 
 # Trancondutance
-class CurrentSourceControlByVoltage(Source):
+class CurrentSourceControlByVoltage(Element):
     
     # This class represents a current source controlled by a voltage source.
     # The letter is 'G'.
@@ -164,7 +166,9 @@ class CurrentSourceControlByVoltage(Source):
         name (str, optional): The name of the source. Defaults to an empty string.
 
         """
-        Source.__init__(self, name, nodeIn, nodeOut)
+        Element.__init__(self, name)
+        self.nodeIn  = nodeIn
+        self.nodeOut = nodeOut        
         self.Gm = Gm
         self.controlNodeIn = controlNodeIn
         self.controlNodeOut = controlNodeOut
@@ -197,7 +201,7 @@ class CurrentSourceControlByVoltage(Source):
                                               Gm=float(params[5]),
                                               name=params[0])
 
-class VoltageSourceControlByCurrent(Source):
+class VoltageSourceControlByCurrent(Element):
 
     # This class represents a voltage source controlled by a current source.
     # The letter is 'H'.
@@ -213,7 +217,9 @@ class VoltageSourceControlByCurrent(Source):
      
         """
         
-        Source.__init__(self, name, nodeIn, nodeOut)
+        Element.__init__(self, name)
+        self.nodeIn  = nodeIn
+        self.nodeOut = nodeOut        
         self.Rm = Rm
         self.controlNodeIn = controlNodeIn
         self.controlNodeOut = controlNodeOut
