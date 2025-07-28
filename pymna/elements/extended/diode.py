@@ -58,8 +58,7 @@ class Diode(Element):
         self.g  = (IS/VT)*np.exp( ddp )
         self.Id = IS * (np.exp(ddp/VT) - 1) - self.g * ddp
         # condutance
-        R = Resistor(self.nodeIn, self.nodeOut, 1/self.g)
-        current_branch = R.backward(A, b, x, x_newton_raphson, t, dt, current_branch)
+        condutance( A, self.nodeIn, self.nodeOut, self.g)
         I = CurrentSource(self.nodeIn, self.nodeOut, self.Id)
         current_branch = I.backward(A, b, x, x_newton_raphson, t, dt, current_branch)
         return current_branch

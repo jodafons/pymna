@@ -51,21 +51,25 @@ class BJT(Element):
         # Pag. 90 from ACQM's book
         if self.bjt_type=="N": # is NPN
             Dbe = Diode(self.base, self.emitter)
-            Icb = CurrentSource(self.collector, self.base, self.alpha*Dbe.Id )
-            Icbc= CurrentSourceControlByVoltage(self.collector, self.base, self.base, self.emitter, self.alpha*Dbe.g)
+            ICB = CurrentSource(self.collector, self.base, self.alpha*Dbe.Id )
+            # transcondutance
+            icb= CurrentSourceControlByVoltage(self.collector, self.base, self.base, self.emitter, self.alpha*Dbe.g)
             Dbc = Diode(self.base, self.collector)
-            Ibe = CurrentSource(self.emitter, self.base, self.alpha_R*Dbc.Id)
-            Ibec= CurrentSourceControlByVoltage(self.emitter, self.base, self.base, self.collector, self.alpha_R*Dbc.g)
-            model = [Dbe, Icb, Icbc, Dbc, Ibe, Ibec]
+            IBE = CurrentSource(self.emitter, self.base, self.alpha_R*Dbc.Id)
+            # transcondutance
+            ibe= CurrentSourceControlByVoltage(self.emitter, self.base, self.base, self.collector, self.alpha_R*Dbc.g)
+            model = [Dbe, ICB, icb, Dbc, IBE, ibe]
 
         else: # 'P' is PNP
             Deb = Diode(self.emitter, self.base)
-            Icb = CurrentSource(self.base, self.collector, self.alpha*Deb.Id )
-            Icbc= CurrentSourceControlByVoltage(self.collector, self.base, self.base, self.emitter, self.alpha*Deb.g)
+            ICB = CurrentSource(self.base, self.collector, self.alpha*Deb.Id )
+            # transcondutance
+            icb= CurrentSourceControlByVoltage(self.collector, self.base, self.base, self.emitter, self.alpha*Deb.g)
             Dcb = Diode(self.collector, self.base)
-            Ibe = CurrentSource(self.base, self.emitter, self.alpha_R*Dcb.Id)
-            Ibec= CurrentSourceControlByVoltage(self.emitter, self.base, self.base, self.collector, self.alpha_R*Dcb.g)
-            model = [Deb, Icb, Icbc, Dcb, Ibe, Ibec]
+            IBE = CurrentSource(self.base, self.emitter, self.alpha_R*Dcb.Id)
+            # transcondutance
+            ibe= CurrentSourceControlByVoltage(self.emitter, self.base, self.base, self.collector, self.alpha_R*Dcb.g)
+            model = [Deb, ICB, icb, Dcb, IBE, ibe]
 
         for elm in model:
             current_branch = elm.backward(A, b, x, x_newton_raphson, t, dt, current_branch)

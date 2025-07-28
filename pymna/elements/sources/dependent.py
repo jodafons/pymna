@@ -9,6 +9,7 @@ __all__ = [
 
 import numpy as np
 from pymna.elements import Element
+from pymna.elements.element import condutance, transcondutance
 from pymna.exceptions import InvalidElement
 from typing import Tuple
 from abc import ABC
@@ -183,10 +184,7 @@ class CurrentSourceControlByVoltage(Element):
                  current_branch   : int, 
                  ) -> int:
 
-        A[self.nodeIn, self.controlNodeIn   ] +=  self.Gm
-        A[self.nodeIn, self.controlNodeOut  ] += -self.Gm
-        A[self.nodeOut, self.controlNodeIn  ] += -self.Gm
-        A[self.nodeOut, self.controlNodeOut ] +=  self.Gm
+        transcondutance(A, self.nodeIn, self.nodeOut, self.controlNodeIn, self.controlNodeOut, self.Gm)
         return current_branch
 
     @classmethod
@@ -247,8 +245,8 @@ class VoltageSourceControlByCurrent(Element):
         A[self.controlNodeOut, jy ] += -1 # I
         A[jx, self.controlNodeIn  ] += -1 # V
         A[jx, self.controlNodeOut ] +=  1 # V
-        A[jx, self.controlNodeIn  ] += -1 # V
-        A[jx, self.controlNodeOut ] +=  1 # V
+        A[jy, self.controlNodeIn  ] += -1 # V
+        A[jy, self.controlNodeOut ] +=  1 # V
         A[jx,jy]                    += self.Rm
         return current_branch
 
