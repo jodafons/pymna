@@ -5,6 +5,7 @@ __all__ = [
 ]
 
 import numpy as np
+from pymna.elements import VoltageSource, CurrentSource
 from pymna.elements import Element, Step
 from pymna.exceptions import InvalidElement
 from typing import Tuple
@@ -113,14 +114,14 @@ class PulseVoltageSource(Element):
                  step : Step,
                  ):
 
-        V = self.pulse(step.t,
-                        self.amplitude_1,
-                        self.amplitude_2,
-                        self.T,
-                        self.rise_time,
-                        self.fall_time,
-                        self.time_on,
-                        self.delay)
+        V = pulse(step.t,
+                  self.amplitude_1,
+                  self.amplitude_2,
+                  self.T,
+                  self.rise_time,
+                  self.fall_time,
+                  self.time_on,
+                  self.delay)
 
         Vs = VoltageSource(self.nodeIn, self.nodeOut, V)
         Vs.backward(step)
@@ -183,13 +184,13 @@ class PulseCurrentSource(PulseVoltageSource):
                  step : Step,
                  ) -> int:
                  
-        I = self.pulse(step.t,
-                        self.amplitude_1,
-                        self.amplitude_2,
-                        self.T,
-                        self.rise_time,
-                        self.fall_time,
-                        self.time_on,
-                        self.delay)
+        I = pulse(step.t,
+                  self.amplitude_1,
+                  self.amplitude_2,
+                  self.T,
+                  self.rise_time,
+                  self.fall_time,
+                  self.time_on,
+                  self.delay)
         Is = CurrentSource(self.nodeIn, self.nodeOut, I)
         Is.backward(step)

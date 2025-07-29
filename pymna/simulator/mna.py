@@ -27,6 +27,7 @@ import numpy as np
 
 from typing           import List, Dict, Tuple
 from pymna.circuit    import Circuit
+from pymna.elements   import Step
 from pymna.elements   import Capacitor
 from pymna.elements   import Resistor
 from pymna.elements   import NoLinearResistor
@@ -199,7 +200,8 @@ class Simulator:
                             number_of_guesses+=1
                             number_of_execution_newton_raphson=0
 
-                        x, max_nodes, col_names = self.solve_system_of_equations(circuit, t, delta_t, max_nodes, method, x_newton_raphson, col_names)
+                        x, max_nodes, col_names = self.solve_system_of_equations(circuit, t, delta_t, max_nodes, internal_step, 
+                                                                                 method, x_newton_raphson, col_names)
                         x_newton_raphson = x_newton_raphson[0:max_nodes]
                         tolerance = np.abs( x - x_newton_raphson ).max()
                         if tolerance > max_tolerance:
@@ -239,6 +241,7 @@ class Simulator:
                                        t       : float, 
                                        delta_t : float,
                                        max_nodes : int,
+                                       internal_step : int,
                                        method    : Method,
                                        x_newton_raphson : np.array,
                                        col_names : List[str],
@@ -282,7 +285,13 @@ class Simulator:
             """
            
             current_branch   = circuit.number_of_nodes
-            step = Step( max_nodes, x_newton_raphson=x_newton_raphson, t=t, dt=delta_t, current_branch=current_branch )
+            step = Step( max_nodes, 
+                         x_newton_raphson=x_newton_raphson, 
+                         t=t, 
+                         dt=delta_t, 
+                         current_branch=current_branch, 
+                         internal_step=internal_step )
+                         
             for elm in circuit.elements:
                 last_branch = step.current_branch
                 if method == Method.BACKWARD_EULER:

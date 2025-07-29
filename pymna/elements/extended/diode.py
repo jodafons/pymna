@@ -5,6 +5,8 @@ __all__ = [
 import numpy as np
 
 from pymna.elements import Element, Step
+from pymna.elements.element import condutance
+from pymna.elements.sources import CurrentSource
 from pymna.exceptions import InvalidElement
 from typing import Tuple, Union
 
@@ -31,7 +33,7 @@ class Diode(Element):
             This constructor calls the parent class's constructor to initialize the element with the given name.
             It also sets the input and output nodes, saturation current, and thermal voltage for the semiconductor.
             """
-            Element.__init__(self,name)
+            Element.__init__(self,name, nolinear_element=True)
             self.nodeIn = nodeIn
             self.nodeOut = nodeOut
             self.IS=IS
@@ -43,16 +45,16 @@ class Diode(Element):
                  step : Step
                  ):
 
-        if t==0:
+        if step.t==0 and step.internal_step==0:
             ddp=0.6
         else:
             ddp = step.x_newton_raphson[self.nodeIn] - step.x_newton_raphson[self.nodeOut]
             ddp = 0.9 if ddp > 0.9 else ddp
 
-        self.g  = (IS/VT)*np.exp( ddp )
-        self.Id = IS * (np.exp(ddp/VT) - 1) - self.g * ddp
+        self.g  = (self.IS/self.VT)*np.exp( ddp/self.VT )
+        self.Id = self.IS * (np.exp(ddp/self.VT) - 1) - self.g * ddp
         # condutance
-        condutance( A, self.nodeIn, self.nodeOut, self.g)
+        condutance( step.A, self.nodeIn, self.nodeOut, self.g)
         I = CurrentSource(self.nodeIn, self.nodeOut, self.Id)
         I.backward(step)
         

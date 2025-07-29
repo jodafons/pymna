@@ -11,7 +11,7 @@ from pymna.elements import CurrentSourceControlByVoltage
 from pymna.elements import VoltageSourceControlByVoltage
 from pymna.elements import CurrentSourceControlByCurrent
 from pymna.elements import AND, OR, NOT, NAND, NOR, XOR, XNOR
-from pymna.elements import BJT
+from pymna.elements import BJT, Diode, MOSFET
 
 
 
@@ -265,7 +265,7 @@ class Circuit:
              dc        : float=0,
              delay     : float=0,
              angle     : float=0,
-             alpha     : float=0,
+             attenuation     : float=0,
              name      : str=""
             ) -> SinusoidalVoltageSource:
         """
@@ -280,7 +280,7 @@ class Circuit:
         dc (float, optional): A DC offset added to the sinusoidal voltage. Default is 0.
         delay (float, optional): The delay before the sinusoidal voltage starts. Default is 0.
         angle (float, optional): The phase angle of the sinusoidal voltage in degrees. Default is 0.
-        alpha (float, optional): The damping factor for the sinusoidal voltage. Default is 0.
+        attenuation (float, optional): The damping factor for the sinusoidal voltage. Default is 0.
         name (str, optional): An optional name for the voltage source. Default is an empty string.
 
         Example:
@@ -300,15 +300,15 @@ class Circuit:
         """
         
         Vsin = SinusoidalVoltageSource(self.node(positive), 
-                           self.node(negative), 
-                           amplitude, 
-                           frequency, 
-                           number_of_cycles,
-                           dc = dc,
-                           delay = delay,
-                           angle = angle,
-                           alpha = alpha,
-                           name = name)
+                                       self.node(negative), 
+                                       amplitude, 
+                                       frequency, 
+                                       number_of_cycles,
+                                       dc = dc,
+                                       delay = delay,
+                                       angle = angle,
+                                       attenuation = attenuation,
+                                       name = name)
         self+=Vsin
 
     def SinusoidalCurrentSource(self,
@@ -320,7 +320,7 @@ class Circuit:
              dc        : float=0,
              delay     : float=0,
              angle     : float=0,
-             alpha     : float=0,
+             attenuation     : float=0,
              name      : str=""
             ) -> SinusoidalCurrentSource:
         """
@@ -335,7 +335,7 @@ class Circuit:
         dc (float, optional): A DC offset added to the sinusoidal current. Default is 0.
         delay (float, optional): The delay before the sinusoidal current starts. Default is 0.
         angle (float, optional): The phase angle of the sinusoidal current in degrees. Default is 0.
-        alpha (float, optional): The damping factor for the sinusoidal current. Default is 0.
+        attenuation (float, optional): The damping factor for the sinusoidal current. Default is 0.
         name (str, optional): An optional name for the current source. Default is an empty string.
 
         Returns:
@@ -350,7 +350,7 @@ class Circuit:
                            dc = dc,
                            delay = delay,
                            angle = angle,
-                           alpha = alpha,
+                           attenuation = attenuation,
                            name = name)
         self+=Isin
         return Isin
@@ -705,8 +705,8 @@ class Circuit:
                 collector : Union[int,str],
                 base      : Union[int,str],
                 emitter   : Union[int,str],
-                alpha     : float=0.99,
-                alpha_R   : float=0.5,
+                attenuation     : float=0.99,
+                attenuation_R   : float=0.5,
                 name      : str=""
                ) -> BJT:
         """
@@ -716,15 +716,15 @@ class Circuit:
         collector (Union[int, str]): The collector node of the BJT.
         base (Union[int, str]): The base node of the BJT.
         emitter (Union[int, str]): The emitter node of the BJT.
-        alpha (float, optional): The forward current gain of the BJT. Default is 0.99.
-        alpha_R (float, optional): The reverse current gain of the BJT. Default is 0.5.
+        attenuation (float, optional): The forward current gain of the BJT. Default is 0.99.
+        attenuation_R (float, optional): The reverse current gain of the BJT. Default is 0.5.
         name (str, optional): An optional name for the BJT. Default is an empty string.
 
         Returns:
         BJT: An instance of the BJT class representing the created NPN transistor.
         """
         
-        bjt = BJT("N", self.node(collector), self.node(base), self.node(emitter), alpha, alpha_R, name)
+        bjt = BJT("N", self.node(collector), self.node(base), self.node(emitter), attenuation, attenuation_R, name)
         self+=bjt
         return bjt
 
@@ -732,8 +732,8 @@ class Circuit:
                 collector : Union[int,str],
                 base      : Union[int,str],
                 emitter   : Union[int,str],
-                alpha     : float=0.99,
-                alpha_R   : float=0.5,
+                attenuation     : float=0.99,
+                attenuation_R   : float=0.5,
                 name      : str=""
                ) -> BJT:
         """
@@ -743,17 +743,44 @@ class Circuit:
         collector (Union[int, str]): The collector node of the BJT.
         base (Union[int, str]): The base node of the BJT.
         emitter (Union[int, str]): The emitter node of the BJT.
-        alpha (float, optional): The forward current gain of the BJT. Default is 0.99.
-        alpha_R (float, optional): The reverse current gain of the BJT. Default is 0.5.
+        attenuation (float, optional): The forward current gain of the BJT. Default is 0.99.
+        attenuation_R (float, optional): The reverse current gain of the BJT. Default is 0.5.
         name (str, optional): An optional name for the BJT. Default is an empty string.
 
         Returns:
         BJT: An instance of the BJT class representing the created PNP transistor.
         """
         
-        bjt = BJT("P", self.node(collector), self.node(base), self.node(emitter), alpha, alpha_R, name)
+        bjt = BJT("P", self.node(collector), self.node(base), self.node(emitter), attenuation, attenuation_R, name)
         self+=bjt
         return bjt
+
+    def Diode(self, 
+              nodeIn  : Union[int,str],
+              nodeOut : Union[int,str],
+              name    : str=""
+             ) -> Diode:
+        """
+        Creates a diode in the circuit.
+
+        Parameters:
+        nodeIn (Union[int, str]): The anode node of the diode.
+        nodeOut (Union[int, str]): The cathode node of the diode.
+        name (str, optional): An optional name for the diode. Default is an empty string.
+
+        Returns:
+        BJT: An instance of the BJT class representing the created diode.
+        """
+        
+        diode = Diode(self.node(nodeIn), 
+                      self.node(nodeOut), 
+                      name=name)
+        self+=diode
+        return diode
+
+
+
+
 
 if __name__ == "__main__":
     from pymna.units import *

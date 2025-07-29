@@ -20,7 +20,7 @@ class MOSFET(Element):
                  source       : int,
                  W            : float,
                  L            : float,
-                 lambda       : float=0.05,
+                 Lambda       : float=0.05,
                  K            : float=0.0001,
                  Vth          : float=1,
                  name         : str=""
@@ -32,7 +32,7 @@ class MOSFET(Element):
         self.source = source
         self.W = W
         self.L = L
-        self.Lambda = lambda
+        self.Lambda = Lambda
         self.K = K
         self.Vth = Vth
         if mosfet_type not in ["N", "P"]:

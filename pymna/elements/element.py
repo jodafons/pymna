@@ -13,10 +13,10 @@ from abc import ABC, abstractmethod
 class Step(ABC):
     def __init__(self, 
                  max_nodes: int,
-                 x_newton_raphson: np.array,
-                 t: float,
-                 dt: float,
-                 current_branch: int,
+                 x_newton_raphson: np.array=None,
+                 t: float=0,
+                 dt: float=0,
+                 current_branch: int=0,
                  internal_step: int = 0,
                  omega = 0,
 
@@ -31,7 +31,7 @@ class Step(ABC):
         self.omega = omega
   
              
-    def solve( self, A, b) -> np.array:
+    def solve( self ) -> np.array:
         max_nodes = self.current_branch+1    
         self.A = self.A[0:max_nodes, 0:max_nodes]
         self.b = self.b[0:max_nodes]

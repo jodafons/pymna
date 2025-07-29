@@ -5,6 +5,7 @@ __all__ = [
 
 import numpy as np
 from pymna.elements import Element, Step
+from pymna.elements import VoltageSource, CurrentSource
 from pymna.exceptions import InvalidElement
 from typing import Tuple
 from abc import ABC
@@ -84,13 +85,13 @@ class SinusoidalVoltageSource(Element):
                  step : Step
                  ):
                  
-        V = self.sin(step.t, self.amplitude, 
-                             self.frequency, 
-                             self.number_of_cycles, 
-                             self.dc, 
-                             self.angle, 
-                             self.attenuation, 
-                             self.delay)
+        V = sin(step.t, self.amplitude, 
+                        self.frequency, 
+                        self.number_of_cycles, 
+                        self.dc, 
+                        self.angle, 
+                        self.attenuation, 
+                        self.delay)
         Vs = VoltageSource(self.nodeIn, self.nodeOut, V)
         Vs.backward(step)
 

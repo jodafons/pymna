@@ -227,7 +227,7 @@ class Inductor(Element):
     #
     # Update all initial conditions
     #
-    def update(self, x : np.ndarray): ):
+    def update(self, x : np.ndarray):
         self.ic = x[self.jx]
 
     def fourier(self,
