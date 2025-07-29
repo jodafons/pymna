@@ -5,7 +5,7 @@ __all__ = [
 ]
 
 import numpy as np
-from pymna.elements import VoltageSource, CurrentSource
+from pymna.elements.sources.independent import VoltageSource, CurrentSource
 from pymna.elements import Element, Step
 from pymna.exceptions import InvalidElement
 from typing import Tuple

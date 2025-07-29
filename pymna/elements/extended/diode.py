@@ -4,7 +4,7 @@ __all__ = [
 
 import numpy as np
 
-from pymna.elements import Element, Step
+from pymna.elements import Element, Step, Resistor
 from pymna.elements.element import condutance
 from pymna.elements.sources import CurrentSource
 from pymna.exceptions import InvalidElement
@@ -16,8 +16,8 @@ class Diode(Element):
     def __init__(self, 
                      nodeIn : int, 
                      nodeOut: int, 
-                     IS     : float=3.7751345e-14,
-                     VT     : float=25e-3,
+                     IS     : float=50e-15, #3.7751345e-14,
+                     VT     : float=22.5e-3,#25e-3,
                      name   : str=""
                 ):
             """
@@ -44,15 +44,18 @@ class Diode(Element):
     def backward(self, 
                  step : Step
                  ):
-
+        
+        ddp = step.x_newton_raphson[self.nodeIn] - step.x_newton_raphson[self.nodeOut]
         if step.t==0 and step.internal_step==0:
             ddp=0.6
         else:
             ddp = step.x_newton_raphson[self.nodeIn] - step.x_newton_raphson[self.nodeOut]
             ddp = 0.9 if ddp > 0.9 else ddp
-
-        self.g  = (self.IS/self.VT)*np.exp( ddp/self.VT )
+            #ddp = -2 if ddp < -2 else ddp
+        self.g  = (self.IS * np.exp( ddp/self.VT ) )/self.VT
         self.Id = self.IS * (np.exp(ddp/self.VT) - 1) - self.g * ddp
+        #print(self.Id, self.g, ddp)
+
         # condutance
         condutance( step.A, self.nodeIn, self.nodeOut, self.g)
         I = CurrentSource(self.nodeIn, self.nodeOut, self.Id)

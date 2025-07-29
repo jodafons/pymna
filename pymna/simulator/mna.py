@@ -127,7 +127,7 @@ class Simulator:
                   circuit                      : Circuit, 
                   end_time                     : float, 
                   step_time                    : float,
-                  max_tolerance                : float=1,
+                  max_tolerance                : float=1e-4,
                   max_number_of_internal_step  : int=1,
                   max_number_of_guesses        : int=100,
                   max_number_of_newton_raphson : int=20,
@@ -167,6 +167,7 @@ class Simulator:
         print(f"Max number of nodes: {circuit.number_of_nodes}")
         col_names = [f"{node_name+1}" for node_name in range(circuit.number_of_nodes)]
         
+        k = 0
         while t <= end_time:
 
             if t==0:
@@ -204,6 +205,8 @@ class Simulator:
                                                                                  method, x_newton_raphson, col_names)
                         x_newton_raphson = x_newton_raphson[0:max_nodes]
                         tolerance = np.abs( x - x_newton_raphson ).max()
+                        #print(f't= {k} , nr = {number_of_execution_newton_raphson} x = {x} x_nr = {x_newton_raphson}, tolerance = {tolerance}')
+
                         if tolerance > max_tolerance:
                             x_newton_raphson = x
                             number_of_execution_newton_raphson += 1
@@ -227,6 +230,7 @@ class Simulator:
             times.append(t)
             internal_step = 0
             e.append( x )
+            k+=1
 
         e = np.array(e)
         result = {"t":times}
@@ -291,7 +295,7 @@ class Simulator:
                          dt=delta_t, 
                          current_branch=current_branch, 
                          internal_step=internal_step )
-                         
+
             for elm in circuit.elements:
                 last_branch = step.current_branch
                 if method == Method.BACKWARD_EULER:
