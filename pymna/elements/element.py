@@ -6,7 +6,7 @@ __all__ = [
 
 import numpy as np
 
-from typing import Tuple
+from typing import Tuple, List
 from abc import ABC, abstractmethod
 
 
@@ -30,13 +30,25 @@ class Step(ABC):
         self.x_newton_raphson = x_newton_raphson
         self.omega = omega
   
-             
     def solve( self ) -> np.array:
         max_nodes = self.current_branch+1    
         self.A = self.A[0:max_nodes, 0:max_nodes]
         self.b = self.b[0:max_nodes]
         x = np.linalg.solve(self.A[1::, 1::],self.b[1::])
         return np.concatenate(([0],x))
+
+    def print( self, names: List[str], precision : int=10):
+        col_names = [''] + names
+        col_names = ''.join([f'{name:<15}' for name in col_names])
+        print(f't = {self.t}')
+        print(col_names)
+        for idx in range(len(names)):
+            row = f'{names[idx]: <15}|' + ''.join( [f'{round(value, precision):<15}' for value in self.A[idx,0:len(names)]] ) 
+            row+="|" + f"|e({idx})| "
+            row+=" = " if idx==int(len(names)/2) else "   "
+            row+=f"|{round(self.b[idx],precision):<15}" + "|"
+            print(row)
+        print()
 
 
 
@@ -69,7 +81,7 @@ class Element(ABC):
 
 
 
-def transcondutance( A              : np.array,
+def transconductance( A              : np.array,
                      nodeIn         : int,
                      nodeOut        : int,
                      controlNodeIn  : int,
@@ -82,9 +94,9 @@ def transcondutance( A              : np.array,
     A[nodeOut, controlNodeOut ] +=  Gm
 
 
-def condutance( A : np.array,
+def conductance( A : np.array,
                 nodeIn : int,
                 nodeOut : int,
                 G : float):
-    transcondutance(A, nodeIn, nodeOut, nodeIn, nodeOut, G)    
+    transconductance(A, nodeIn, nodeOut, nodeIn, nodeOut, G)    
 

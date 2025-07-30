@@ -7,7 +7,7 @@ __all__ = [
 
 import numpy as np
 from pymna.elements import Element, Step
-from pymna.elements.element import condutance
+from pymna.elements.element import conductance
 from pymna.elements.sources import CurrentSource
 from pymna.exceptions import InvalidElement
 from typing import Tuple, Union
@@ -56,14 +56,14 @@ class Resistor(Element):
                  step : Step,
                  ):
         G = (1/self.R)
-        condutance(step.A, self.nodeIn, self.nodeOut, G)
+        conductance(step.A, self.nodeIn, self.nodeOut, G)
 
     def fourier(self,
                 step : Step,
                 ):
 
         G = (1/self.R)
-        condutance(step.A, self.nodeIn, self.nodeOut, G)
+        conductance(step.A, self.nodeIn, self.nodeOut, G)
 
     @classmethod
     def from_nl(cls, params: Tuple[str, int, int, float]):
@@ -132,7 +132,7 @@ class Capacitor(Element):
         Updates the circuit matrices for the capacitor element in backward time step.
         """
         R = step.dt/self.C # dt/C
-        condutance(step.A, self.nodeIn, self.nodeOut, 1/R)
+        conductance(step.A, self.nodeIn, self.nodeOut, 1/R)
         Ic = CurrentSource( self.nodeOut, self.nodeIn, self.ic/R)  
         Ic.backward(step)
 
@@ -149,7 +149,7 @@ class Capacitor(Element):
 
         Z = 1 / 1j * w * self.C 
         G = 1 / Z  # G = 1 / (j * w * C)
-        condutance(step.A, self.nodeIn, self.nodeOut, G)
+        conductance(step.A, self.nodeIn, self.nodeOut, G)
 
 
     @classmethod
@@ -332,7 +332,7 @@ class NoLinearResistor(Element):
             G = (self.nolinear_current_2 - self.nolinear_current_1)/(self.nolinear_voltage_2 - self.nolinear_voltage_1)
             I = self.nolinear_current_2 - G*self.nolinear_voltage_2
        
-        condutance(step.A, self.nodeIn, self.nodeOut, G)  # Condutance matrix
+        conductance(step.A, self.nodeIn, self.nodeOut, G)  # conductance matrix
         I = CurrentSource(self.nodeIn, self.nodeOut, I)  # Current source
         I.backward(step)  # Update current branch
 

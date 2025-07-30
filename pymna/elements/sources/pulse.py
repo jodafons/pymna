@@ -17,6 +17,7 @@ def pulse(t               : float,
           amplitude_1     : float,
           amplitude_2     : float,
           T               : float,
+          number_of_cycles: int=1,
           rise_time       : float=0,
           fall_time       : float=0,
           time_on         : float=0,
@@ -41,17 +42,17 @@ def pulse(t               : float,
     """
     rise_time = step if rise_time==0 else rise_time
     fall_time = step if fall_time==0 else fall_time
-    if (t <= (self.T*self.number_of_cycles+self.delay)) and t>self.delay:
+    if (t <= (T*number_of_cycles+delay)) and t>delay:
         t-=delay
         while (t>T):
             t-=T
         if (t>=0) and (t<rise_time):
-            slope = (amplitude_2-amplitude_1)/rise_time
+            slope = (amplitude_2-amplitude_1)/rise_time 
             V = amplitude_1 + t*slope
         elif (t>=rise_time) and (t<=(rise_time+time_on)):
             V = amplitude_2
         elif (t>(rise_time+time_on)) and (t<=(rise_time+time_on+fall_time)):
-            slope = (amplitude_1 - amplitude_2)/fall_time
+            slope = (amplitude_1 - amplitude_2)/fall_time 
             V = amplitude_2 + (t-(rise_time+time_on))*slope
         else: # t> (rise_time+time_on+fall_time)
             V = amplitude_1
@@ -72,52 +73,32 @@ class PulseVoltageSource(Element):
              rise_time   : float=0,
              fall_time   : float=0,
              time_on     : float=0,
-             angle       : float=0,
-             attenuation : float=0,
              name        : str=""
             ):
-        """
-        Initializes a Source object for a circuit simulation.
-
-        This class represents a source in a circuit, which can provide 
-        varying amplitudes and frequencies over a specified number of cycles. 
-        The source can be configured with parameters such as rise time, 
-        fall time, and delay to simulate real-world behavior.
-
-        Parameters:
-            nodeIn (int): The input node of the source.
-            nodeOut (int): The output node of the source.
-            amplitude_1 (float): The first amplitude value for the source.
-            amplitude_2 (float): The second amplitude value for the source.
-            T (float): The period of the source signal.
-            number_of_cycles (int, optional): The number of cycles to simulate. Default is 1.
-            delay (float, optional): The delay before the source starts. Default is 0.
-            rise_time (float, optional): The time it takes for the signal to rise to its peak. Default is 0.
-            fall_time (float, optional): The time it takes for the signal to fall to zero. Default is 0.
-            time_on (float, optional): The duration for which the source is active. Default is 0.
-            angle (float, optional): The phase angle of the source. Default is 0.
-            attenuation (float, optional): The damping factor for the source. Default is 0.
-            name (str, optional): The name of the source. Default is an empty string.
-        """
+     
         Element.__init__(self, name)
         self.nodeIn  = nodeIn
         self.nodeOut = nodeOut
-        self.amplitude   = amplitude
-        self.frequency   = frequency
+        self.amplitude_1 = amplitude_1
+        self.amplitude_2 = amplitude_2
+        self.T = T
         self.number_of_cycles = number_of_cycles
-        self.dc          = dc
-        self.angle       = angle
-        self.attenuation = attenuation
-        self.delay       = delay
+        self.delay = delay
+        self.rise_time = rise_time
+        self.fall_time = fall_time
+        self.time_on = time_on
+    
 
     def backward(self, 
                  step : Step,
                  ):
 
         V = pulse(step.t,
+                  step.dt,
                   self.amplitude_1,
                   self.amplitude_2,
                   self.T,
+                  self.number_of_cycles,
                   self.rise_time,
                   self.fall_time,
                   self.time_on,
@@ -157,8 +138,6 @@ class PulseCurrentSource(PulseVoltageSource):
              rise_time   : float=0,
              fall_time   : float=0,
              time_on     : float=0,
-             angle       : float=0,
-             attenuation : float=0,
              name        : str=""
             ):
         """
@@ -176,8 +155,6 @@ class PulseCurrentSource(PulseVoltageSource):
                                     rise_time, 
                                     fall_time, 
                                     time_on, 
-                                    angle, 
-                                    attenuation, 
                                     name)
 
     def backward(self, 
@@ -185,12 +162,17 @@ class PulseCurrentSource(PulseVoltageSource):
                  ) -> int:
                  
         I = pulse(step.t,
+                  step.dt,
                   self.amplitude_1,
                   self.amplitude_2,
                   self.T,
+                  self.number_of_cycles,
                   self.rise_time,
                   self.fall_time,
                   self.time_on,
                   self.delay)
+
+
+
         Is = CurrentSource(self.nodeIn, self.nodeOut, I)
         Is.backward(step)

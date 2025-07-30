@@ -5,7 +5,7 @@ __all__ = [
 import numpy as np
 
 from pymna.elements import Element, Step, Resistor
-from pymna.elements.element import condutance
+from pymna.elements.element import conductance
 from pymna.elements.sources import CurrentSource
 from pymna.exceptions import InvalidElement
 from typing import Tuple, Union
@@ -56,8 +56,8 @@ class Diode(Element):
         self.Id = self.IS * (np.exp(ddp/self.VT) - 1) - self.g * ddp
         #print(self.Id, self.g, ddp)
 
-        # condutance
-        condutance( step.A, self.nodeIn, self.nodeOut, self.g)
+        # conductance
+        conductance( step.A, self.nodeIn, self.nodeOut, self.g)
         I = CurrentSource(self.nodeIn, self.nodeOut, self.Id)
         I.backward(step)
         

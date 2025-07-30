@@ -24,7 +24,7 @@ __all__ = [
 
 import enum 
 import numpy as np
-
+from pprint import pprint
 from typing           import List, Dict, Tuple
 from pymna.circuit    import Circuit
 from pymna.elements   import Step
@@ -52,6 +52,8 @@ class Method(enum.Enum):
     FORWARD_EULER = "forward_euler"
     BACKWARD_EULER = "backward_euler"
     
+
+
 
 
 class Simulator:
@@ -132,6 +134,7 @@ class Simulator:
                   max_number_of_guesses        : int=100,
                   max_number_of_newton_raphson : int=20,
                   step_factor                  : float=1e9,
+                  verbose                      : bool=False,
                   method                       : Method=Method.BACKWARD_EULER
                 ) -> Dict:
         """
@@ -202,10 +205,10 @@ class Simulator:
                             number_of_execution_newton_raphson=0
 
                         x, max_nodes, col_names = self.solve_system_of_equations(circuit, t, delta_t, max_nodes, internal_step, 
-                                                                                 method, x_newton_raphson, col_names)
+                                                                                 method, x_newton_raphson=x_newton_raphson, 
+                                                                                 verbose=verbose)
                         x_newton_raphson = x_newton_raphson[0:max_nodes]
                         tolerance = np.abs( x - x_newton_raphson ).max()
-                        #print(f't= {k} , nr = {number_of_execution_newton_raphson} x = {x} x_nr = {x_newton_raphson}, tolerance = {tolerance}')
 
                         if tolerance > max_tolerance:
                             x_newton_raphson = x
@@ -216,7 +219,7 @@ class Simulator:
 
                 # NOTE: if the circuit has no nonlinear elements, we can use the linear solver directly
                 else: # circuit has no nonlinear elements
-                    x, max_nodes, col_names = self.solve_system_of_equations(circuit, t, delta_t, max_nodes, method, [], col_names)
+                    x, max_nodes, col_names = self.solve_system_of_equations(circuit, t, delta_t, max_nodes, internal_step, method, verbose=verbose)
           
                 # update ICs
                 for elm in circuit.elements:
@@ -234,22 +237,22 @@ class Simulator:
 
         e = np.array(e)
         result = {"t":times}
-        for col_idx, col_name in enumerate(col_names):            
+        for col_idx, col_name in enumerate(col_names[1::]):            
             result[ col_name ] = e[ :, col_idx+1 ]
 
         return result
 
   
     def solve_system_of_equations( self, 
-                                       circuit : Circuit, 
-                                       t       : float, 
-                                       delta_t : float,
-                                       max_nodes : int,
-                                       internal_step : int,
-                                       method    : Method,
-                                       x_newton_raphson : np.array,
-                                       col_names : List[str],
-                                    ) -> Tuple[np.array, int]:
+                                   circuit          : Circuit, 
+                                   t                : float, 
+                                   delta_t          : float,
+                                   max_nodes        : int,
+                                   internal_step    : int,
+                                   method           : Method,
+                                   x_newton_raphson : np.array=None,
+                                   verbose          : bool=False,
+                                ) -> Tuple[np.array, int]:
             """
             Solves a system of equations for the given circuit using the specified numerical method.
 
@@ -289,6 +292,8 @@ class Simulator:
             """
            
             current_branch   = circuit.number_of_nodes
+            col_names = [ f"{name}" for name in circuit.nodes.keys() ]
+
             step = Step( max_nodes, 
                          x_newton_raphson=x_newton_raphson, 
                          t=t, 
@@ -317,6 +322,8 @@ class Simulator:
                         col_names.append(col_name)
 
             max_nodes = step.current_branch+1
+            if verbose:
+                step.print(col_names)
             x = step.solve()
             return x, max_nodes, col_names
 

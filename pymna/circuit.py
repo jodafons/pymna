@@ -3,8 +3,8 @@
 __all__ = ["Circuit"]
 
 from typing import Union, List
-from pymna.elements import Capacitor, Resistor, NoLinearResistor, OpAmp
-from pymna.elements import SinusoidalVoltageSource, SinusoidalCurrentSource
+from pymna.elements import Capacitor, Resistor, NoLinearResistor, OpAmp, IdealOpAmp
+from pymna.elements import SinusoidalVoltageSource, SinusoidalCurrentSource, VoltageSource
 from pymna.elements import PulseVoltageSource, PulseCurrentSource
 from pymna.elements import VoltageSourceControlByCurrent
 from pymna.elements import CurrentSourceControlByVoltage
@@ -12,6 +12,7 @@ from pymna.elements import VoltageSourceControlByVoltage
 from pymna.elements import CurrentSourceControlByCurrent
 from pymna.elements import AND, OR, NOT, NAND, NOR, XOR, XNOR
 from pymna.elements import BJT, Diode, MOSFET
+from pymna.units    import MOhm, MHz, Ohm, nF
 
 
 
@@ -231,7 +232,7 @@ class Circuit:
                name         : str="",
     ) -> OpAmp:
         """
-        Creates an operational amplifier (op-amp) in the circuit.
+        Creates an ideal operational amplifier (op-amp) in the circuit.
 
         Parameters:
         nodePositive (Union[int, str]): The positive input node of the op-amp.
@@ -247,14 +248,40 @@ class Circuit:
         A = OpAmp(self.node(nodePositive), 
                   self.node(nodeNegative), 
                   self.node(nodeOut), 
+                  Rin = 2*MOhm ,
+                  Rout = 75*Ohm,
+                  C = 3*nF, # 1/(2*pi*fc*R)
+                  A = 10000,
                   name=name)
         self+=A
         return A
 
-
     #
     # sources
     #
+
+    def VoltageSource(self, 
+             positive  : Union[int,str],
+             negative  : Union[int,str],
+             voltage   : float,
+             name      : str=""
+            ) -> VoltageSource:
+        """
+        Creates a voltage source in the circuit.
+
+        Parameters:
+        positive (Union[int, str]): The positive terminal node of the voltage source.
+        negative (Union[int, str]): The negative terminal node of the voltage source.
+        voltage (float): The voltage value of the source in Volts.
+        name (str, optional): An optional name for the voltage source. Default is an empty string.
+
+        Returns:
+        VoltageSourceControlByVoltage: An instance of the VoltageSourceControlByVoltage class representing the created voltage source.
+        """
+        
+        V = VoltageSource(self.node(positive), self.node(negative), voltage, name=name)
+        self+=V
+        return V
 
     def SinusoidalVoltageSource(self,
              positive  : Union[int,str],
@@ -366,8 +393,6 @@ class Circuit:
              rise_time   : float=0,
              fall_time   : float=0,
              time_on     : float=0,
-             angle       : float=0,
-             attenuation       : float=0,
              name        : str=""
             ) -> PulseVoltageSource:
         """
@@ -384,8 +409,6 @@ class Circuit:
         rise_time (float, optional): The rise time of the pulse. Default is 0.
         fall_time (float, optional): The fall time of the pulse. Default is 0.
         time_on (float, optional): The duration for which the pulse is on. Default is 0.
-        angle (float, optional): The phase angle of the pulse in degrees. Default is 0.
-        attenuation (float, optional): The attenuation factor for the pulse. Default is 0.
         name (str, optional): An optional name for the pulse voltage source. Default is an empty string.
 
         Returns:
@@ -402,8 +425,6 @@ class Circuit:
                                     rise_time=rise_time,
                                     fall_time=fall_time,
                                     time_on=time_on,
-                                    angle=angle,
-                                    attenuation=attenuation,
                                     name=name)
         self+=Vpulse
         return Vpulse
@@ -419,8 +440,6 @@ class Circuit:
              rise_time   : float=0,
              fall_time   : float=0,
              time_on     : float=0,
-             angle       : float=0,
-             attenuation       : float=0,
              name        : str=""
             ) -> PulseCurrentSource:
         """
@@ -437,8 +456,6 @@ class Circuit:
         rise_time (float, optional): The rise time of the pulse. Default is 0.
         fall_time (float, optional): The fall time of the pulse. Default is 0.
         time_on (float, optional): The duration for which the pulse is on. Default is 0.
-        angle (float, optional): The phase angle of the pulse in degrees. Default is 0.
-        attenuation (float, optional): The attenuation factor for the pulse. Default is 0.
         name (str, optional): An optional name for the pulse current source. Default is an empty string.
 
         Returns:
@@ -455,8 +472,6 @@ class Circuit:
                                     rise_time=rise_time,
                                     fall_time=fall_time,
                                     time_on=time_on,
-                                    angle=angle,
-                                    attenuation=attenuation,
                                     name=name)
         self+=Ipulse
         return Ipulse
@@ -755,6 +770,9 @@ class Circuit:
         self+=bjt
         return bjt
 
+
+
+
     def Diode(self, 
               nodeIn  : Union[int,str],
               nodeOut : Union[int,str],
@@ -779,7 +797,71 @@ class Circuit:
         return diode
 
 
+    def mosfet_channel_n( self, 
+                          drain     : Union[int,str],
+                          gate      : Union[int,str],
+                          source    : Union[int,str],
+                          W         : float,
+                          L         : float,
+                          Lambda    : float=0.05,
+                          K         : float=0.0001,
+                          Vth       : float=1,
+                          name      : str=""
+                         ) -> MOSFET:
+        """
+        Creates an N-channel MOSFET in the circuit.
 
+        Parameters:
+        collector (Union[int, str]): The collector node of the MOSFET.
+        gate (Union[int, str]): The gate node of the MOSFET.
+        source (Union[int, str]): The source node of the MOSFET.
+        W (float): The width of the MOSFET channel.
+        L (float): The length of the MOSFET channel.
+        Lambda (float, optional): The channel length modulation parameter. Default is 0.05.
+        K (float, optional): The transconductance parameter. Default is 0.0001.
+        Vth (float, optional): The threshold voltage of the MOSFET. Default is 1.
+        name (str, optional): An optional name for the MOSFET. Default is an empty string.
+
+        Returns:
+        MOSFET: An instance of the MOSFET class representing the created N-channel transistor.
+        """
+        
+        mosfet = MOSFET("N", self.node(drain), self.node(gate), self.node(source), W=W, L=L, Lambda=Lambda, K=K, Vth=Vth, name=name)
+        self+=mosfet
+        return mosfet
+
+    def mosfet_channel_p(self, 
+                          drain     : Union[int,str],
+                          gate      : Union[int,str],
+                          source    : Union[int,str],
+                          W         : float,
+                          L         : float,
+                          Lambda    : float=0.05,
+                          K         : float=0.0001,
+                          Vth       : float=1,
+                          name      : str=""
+                         ) -> MOSFET:
+        """
+        Creates a P-channel MOSFET in the circuit.
+
+        Parameters:
+        collector (Union[int, str]): The collector node of the MOSFET.
+        gate (Union[int, str]): The gate node of the MOSFET.
+        source (Union[int, str]): The source node of the MOSFET.
+        W (float): The width of the MOSFET channel.
+        L (float): The length of the MOSFET channel.
+        Lambda (float, optional): The channel length modulation parameter. Default is 0.05.
+        K (float, optional): The transconductance parameter. Default is 0.0001.
+        Vth (float, optional): The threshold voltage of the MOSFET. Default is 1.
+        name (str, optional): An optional name for the MOSFET. Default is an empty string.
+
+        Returns:
+        MOSFET: An instance of the MOSFET class representing the created P-channel transistor.
+        """
+        
+        mosfet = MOSFET("P", self.node(drain), self.node(gate), self.node(source), W=W, L=L, Lambda=Lambda, K=K, Vth=Vth, name=name)
+        self+=mosfet
+        return mosfet
 
 
 if __name__ == "__main__":

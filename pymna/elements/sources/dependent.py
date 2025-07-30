@@ -9,7 +9,7 @@ __all__ = [
 
 import numpy as np
 from pymna.elements import Element, Step
-from pymna.elements.element import condutance, transcondutance
+from pymna.elements.element import conductance, transconductance
 from pymna.exceptions import InvalidElement
 from typing import Tuple
 from abc import ABC
@@ -43,8 +43,10 @@ class VoltageSourceControlByVoltage(Element):
         the node identifiers and sets the voltage gain.
         """
         
-        Source.__init__(self, name, nodeIn, nodeOut)
+        Element.__init__(self, name)
         self.Av = Av
+        self.nodeIn  = nodeIn
+        self.nodeOut = nodeOut
         self.controlNodeIn = controlNodeIn
         self.controlNodeOut = controlNodeOut
 
@@ -128,7 +130,7 @@ class CurrentSourceControlByCurrent(Element):
                                               Ai=float(params[5]),
                                               name=params[0])
 
-# Trancondutance
+# Tranconductance
 class CurrentSourceControlByVoltage(Element):
     
     # This class represents a current source controlled by a voltage source.
@@ -164,7 +166,7 @@ class CurrentSourceControlByVoltage(Element):
                  step : Step
                  ):
 
-        transcondutance(step.A, self.nodeIn, self.nodeOut, self.controlNodeIn, self.controlNodeOut, self.Gm)
+        transconductance(step.A, self.nodeIn, self.nodeOut, self.controlNodeIn, self.controlNodeOut, self.Gm)
 
     @classmethod
     def from_nl( cls, params : Tuple[str, int, int, int, int, float] ):

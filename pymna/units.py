@@ -11,6 +11,8 @@ m = 1e-3
 u = m*m
 n = m*m*m
 
+um = u
+nm = n 
 
 F = 1 #Faraday
 mF = m*F

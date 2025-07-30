@@ -36,9 +36,9 @@ def sin(t                : float,
         float: The calculated voltage at time t.
     """
     if (t < delay) or (t>(delay + (1/frequency)*number_of_cycles)):
-        V = dc + amplitude * np.sin( (np.pi * angle)/180 )
+        V = dc + (amplitude * np.sin( (np.pi * angle)/180 ))
     else:
-        V = (dc + amplitude*np.exp( -1 * attenuation * (t-delay) )) * np.sin( 2*np.pi*frequency*(t-delay) + (np.pi*angle)/180 )
+        V = (dc + (amplitude*np.exp( -1 * attenuation * (t-delay) )) * np.sin( 2*np.pi*frequency*(t-delay) + (np.pi*angle)/180 ))
     return V
 
 class SinusoidalVoltageSource(Element):
