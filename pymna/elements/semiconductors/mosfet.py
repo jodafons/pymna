@@ -7,8 +7,8 @@ import numpy as np
 
 from pymna.elements import Element, Step
 from pymna.elements import CurrentSource
-from pymna.elements.element import conductance, transconductance
-from pymna.elements.extended.diode import Diode
+from pymna.elements import conductance, transconductance
+from pymna.elements.semiconductors.diode import Diode
 from pymna.exceptions import InvalidElement
 from typing import Tuple, Union
 
@@ -28,7 +28,7 @@ class MOSFET(Element):
                  name         : str=""
             ):
 
-        Element.__init__(self,name, nolinear_element=True)
+        Element.__init__(self,name, nonlinear_element=True)
         self.drain = drain
         self.gate = gate
         self.source = source

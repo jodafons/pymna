@@ -5,7 +5,7 @@ __all__ = [
 import numpy as np
 
 from pymna.elements import Element, Step, Resistor
-from pymna.elements.element import conductance
+from pymna.elements import conductance
 from pymna.elements.sources import CurrentSource
 from pymna.exceptions import InvalidElement
 from typing import Tuple, Union
@@ -33,7 +33,7 @@ class Diode(Element):
             This constructor calls the parent class's constructor to initialize the element with the given name.
             It also sets the input and output nodes, saturation current, and thermal voltage for the semiconductor.
             """
-            Element.__init__(self,name, nolinear_element=True)
+            Element.__init__(self,name, nonlinear_element=True)
             self.nodeIn = nodeIn
             self.nodeOut = nodeOut
             self.IS=IS

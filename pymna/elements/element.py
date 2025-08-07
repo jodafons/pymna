@@ -2,10 +2,10 @@
 __all__ = [
             "Step",
             "Element",
+
         ]
 
 import numpy as np
-
 from typing import Tuple, List
 from abc import ABC, abstractmethod
 
@@ -13,7 +13,7 @@ from abc import ABC, abstractmethod
 class Step(ABC):
     def __init__(self, 
                  max_nodes: int,
-                 x_newton_raphson: np.array=None,
+                 x_t: np.array=None,
                  t: float=0,
                  dt: float=0,
                  current_branch: int=0,
@@ -27,7 +27,7 @@ class Step(ABC):
         self.internal_step = internal_step
         self.t = t
         self.current_branch = current_branch
-        self.x_newton_raphson = x_newton_raphson
+        self.x_t = x_t
         self.omega = omega
   
     def solve( self ) -> np.array:
@@ -53,7 +53,7 @@ class Step(ABC):
 
 
 class Element(ABC):
-    def __init__(self, name: str, nolinear_element: bool = False):
+    def __init__(self, name: str, nonlinear_element: bool = False):
         """
         Initializes an instance of the Element class.
 
@@ -61,7 +61,7 @@ class Element(ABC):
         name (str): The name of the element.
         """
         self.name = name
-        self.nolinear_element = nolinear_element
+        self.nonlinear_element = nonlinear_element
  
     def update( self,  x : np.array):
         pass
@@ -78,25 +78,4 @@ class Element(ABC):
     def fourier(self, step : Step ):
         pass
  
-
-
-
-def transconductance( A              : np.array,
-                     nodeIn         : int,
-                     nodeOut        : int,
-                     controlNodeIn  : int,
-                     controlNodeOut : int,
-                     Gm             : float
-                    ):
-    A[nodeIn , controlNodeIn  ] +=  Gm
-    A[nodeIn , controlNodeOut ] += -Gm
-    A[nodeOut, controlNodeIn  ] += -Gm
-    A[nodeOut, controlNodeOut ] +=  Gm
-
-
-def conductance( A : np.array,
-                nodeIn : int,
-                nodeOut : int,
-                G : float):
-    transconductance(A, nodeIn, nodeOut, nodeIn, nodeOut, G)    
 

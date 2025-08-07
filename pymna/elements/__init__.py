@@ -1,4 +1,30 @@
-__all__ = []
+
+__all__ = [
+          
+            "transconductance",
+            "conductance",
+        ]
+
+import numpy as np
+
+
+def transconductance( A              : np.array,
+                     nodeIn         : int,
+                     nodeOut        : int,
+                     controlNodeIn  : int,
+                     controlNodeOut : int,
+                     Gm             : float
+                    ):
+    A[nodeIn , controlNodeIn  ] +=  Gm
+    A[nodeIn , controlNodeOut ] += -Gm
+    A[nodeOut, controlNodeIn  ] += -Gm
+    A[nodeOut, controlNodeOut ] +=  Gm
+
+def conductance( A : np.array,
+                nodeIn : int,
+                nodeOut : int,
+                G : float):
+    transconductance(A, nodeIn, nodeOut, nodeIn, nodeOut, G)    
 
 from . import element
 __all__.extend( element.__all__ )
@@ -12,11 +38,15 @@ from . import basics
 __all__.extend( basics.__all__ )
 from .basics import *
 
-from . import extended
-__all__.extend( extended.__all__ )
-from .extended import *
+from . import amplifiers
+__all__.extend( amplifiers.__all__ )
+from .amplifiers import *
 
-from . import logic
-__all__.extend( logic.__all__ )
-from .logic import *
+from . import semiconductors
+__all__.extend( semiconductors.__all__ )
+from .semiconductors import *
+
+from . import gates
+__all__.extend( gates.__all__ )
+from .gates import *
 

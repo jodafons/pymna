@@ -12,10 +12,10 @@ class InvalidElement(Exception):
 
 class InvalidMethod(Exception):
     def __init__(self, message, errors):
-        super(MethodElement, self).__init__(message)
+        super(InvalidMethod, self).__init__(message)
         self.errors=errors
 
 class ImpossibleSolution(Exception):
     def __init__(self, message, errors):
-        super(MethodElement, self).__init__(message)
+        super(ImpossibleSolution, self).__init__(message)
         self.errors=errors

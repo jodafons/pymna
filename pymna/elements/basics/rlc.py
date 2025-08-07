@@ -2,15 +2,16 @@ __all__ = [
             "Resistor",
             "Capacitor",
             "Inductor",
-            "NoLinearResistor",
+            "NonLinearResistor",
         ]
 
 import numpy as np
 from pymna.elements import Element, Step
-from pymna.elements.element import conductance
 from pymna.elements.sources import CurrentSource
 from pymna.exceptions import InvalidElement
 from typing import Tuple, Union
+
+
 #
 # Resistor
 #
@@ -260,7 +261,7 @@ class Inductor(Element):
                         name=params[0], initial_condition=float(params[4][3::]) if len(params) > 4 else 0)
 
 
-class NoLinearResistor(Element):
+class NonLinearResistor(Element):
 
     # This class represents a nonlinear resistor element in a circuit.
     # The letter is 'N'.
@@ -302,7 +303,7 @@ class NoLinearResistor(Element):
             nolinear_current_4 (float): The fourth nonlinear current value.
             name (str, optional): The name of the element. Defaults to an empty string.
             """
-            Element.__init__(self,name, nolinear_element = True)
+            Element.__init__(self,name, nonlinear_element = True)
             self.nodeIn             = nodeIn  # node 1
             self.nodeOut            = nodeOut # node 2
             self.nolinear_voltage_1 = nolinear_voltage_1

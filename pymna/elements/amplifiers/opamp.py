@@ -6,7 +6,7 @@ __all__ = [
 import numpy as np
 from pymna.elements import Element, Step
 from pymna.elements.basics import Resistor, Capacitor 
-from pymna.elements.sources import VoltageSourceControlByVoltage
+from pymna.elements.sources.dependent import VoltageSourceControlByVoltage
 from pymna.exceptions import InvalidElement
 from typing import Tuple, Union
 

@@ -1,20 +1,4 @@
-"""
-This module contains the Simulator class, which is responsible for simulating electrical circuits.
-The Simulator can perform both AC analysis and transient analysis of circuits defined by the Circuit class.
-It utilizes numerical methods, including the Newton-Raphson method, to solve nonlinear equations that arise during the simulation.
 
-Classes:
-- Simulator: A class that simulates the behavior of electrical circuits.
-
-Methods:
-- __init__: Initializes the Simulator with temperature and maximum nodes.
-- ac: Performs AC analysis on a given circuit (not yet implemented).
-- transient: Simulates the transient response of a circuit over a specified time period.
-- solve: Solves the linear equation Ax = b using NumPy's linear algebra solver.
-"""
-"""
-
-"""
 
 __all__ = [
     "Simulator",
@@ -24,13 +8,16 @@ __all__ = [
 
 import enum 
 import numpy as np
-from pprint import pprint
-from typing           import List, Dict, Tuple
-from pymna.circuit    import Circuit
+import pymna
+
+from pprint           import pprint
+from typing           import List, Dict, Tuple, Union
 from pymna.elements   import Step
+from pymna.exceptions import ImpossibleSolution
+from pymna.circuit    import Circuit
 from pymna.elements   import Capacitor
 from pymna.elements   import Resistor
-from pymna.elements   import NoLinearResistor
+from pymna.elements   import NonLinearResistor
 from pymna.elements   import Inductor
 from pymna.elements   import OpAmp
 from pymna.elements   import SinusoidalVoltageSource, SinusoidalCurrentSource
@@ -41,7 +28,8 @@ from pymna.elements   import VoltageSourceControlByVoltage
 from pymna.elements   import CurrentSourceControlByCurrent
 from pymna.elements   import VoltageSource, CurrentSource
 from pymna.elements   import NOT, AND, NAND, OR, NOR, XOR, XNOR
-from pymna.exceptions import ImpossibleSolution
+
+
 
 
 class Method(enum.Enum):
@@ -52,15 +40,11 @@ class Method(enum.Enum):
     FORWARD_EULER = "forward_euler"
     BACKWARD_EULER = "backward_euler"
     
-
-
-
-
 class Simulator:
 
-    def __init__(self , temperature : float=25, max_nodes : int=1000):
-        self.temperature = temperature
+    def __init__(self , max_nodes : int=1000):
         self.max_nodes = max_nodes
+
 
     def ac(self, circuit : Circuit ,
                freqInitial : float,
@@ -125,8 +109,9 @@ class Simulator:
             
             return mod_result, phase_result
 
+
     def transient(self, 
-                  circuit                      : Circuit, 
+                  circuit                      : pymna.Circuit, 
                   end_time                     : float, 
                   step_time                    : float,
                   max_tolerance                : float=1e-4,
@@ -135,29 +120,10 @@ class Simulator:
                   max_number_of_newton_raphson : int=20,
                   step_factor                  : float=1e9,
                   verbose                      : bool=False,
-                  method                       : Method=Method.BACKWARD_EULER
+                  method                       : Method=Method.BACKWARD_EULER,
+                  temperature                  : float=25,
                 ) -> Dict:
-        """
-        Simulates the transient response of a circuit over a specified time period.
-        Parameters:
-        - circuit (Circuit): The circuit to be simulated.
-        - end_time (float): The time at which the simulation ends.
-        - step_time (float): The time increment for each simulation step.
-        - tolerance (float, optional): The tolerance for convergence in Newton-Raphson method. Default is 1.
-        - max_number_of_internal_step (int, optional): Maximum number of internal steps per time increment. Default is 1.
-        - max_number_of_guesses (int, optional): Maximum number of guesses for Newton-Raphson method. Default is 100.
-        - max_number_of_newton_raphson (int, optional): Maximum iterations for Newton-Raphson method. Default is 20.
-        - step_factor (float, optional): Factor to adjust the step size. Default is 1e9.
-        
-        Returns:
-        - List: A list containing the time points and corresponding node voltages.
-        
-        Notes:
-        - The method uses the Newton-Raphson method for solving nonlinear equations.
-        - If the solution does not converge within the specified number of iterations or guesses, an exception is raised.
-        - The circuit's elements are updated at each internal step based on the computed voltages.
-        """
-
+  
         t                = 0
         e                = []
         times            = []
@@ -170,8 +136,7 @@ class Simulator:
         print(f"Max number of nodes: {circuit.number_of_nodes}")
         col_names = [f"{node_name+1}" for node_name in range(circuit.number_of_nodes)]
         
-        k = 0
-        while t <= end_time:
+        while t < end_time:
 
             if t==0:
                 max_internal_step = 1
@@ -188,52 +153,44 @@ class Simulator:
                 # NOTE: Newton Raphson loop
                 # Execute 20 ciclos and if not converge, abort the approximation and repeat the guess
                 # If the max number of guess reached (100 guesses), abort the simulation
-                if circuit.has_nolinear_elements:
 
-                    stop_newton_raphson = False
-                    number_of_guesses   = 0
-                    x_newton_raphson    = np.random.rand( max_nodes )%100 + 1
-                    number_of_execution_newton_raphson = 0
-
-                    while not stop_newton_raphson:
+                stop_newton_raphson = False
+                number_of_guesses   = 0
+                x_t                 = np.random.rand( max_nodes )%100 + 1
+                number_of_execution_newton_raphson = 0
+                while not stop_newton_raphson:
+                
+                    if number_of_execution_newton_raphson == max_number_of_newton_raphson:
+                        if number_of_guesses > max_number_of_guesses:
+                            raise ImpossibleSolution("Its not possible to found a solution to this problem.")
+                        x_t = np.random.rand(max_nodes)%100 + 1
+                        number_of_guesses+=1
+                        number_of_execution_newton_raphson=0
                     
-                        if number_of_execution_newton_raphson == max_number_of_newton_raphson:
-                            if number_of_guesses > max_number_of_guesses:
-                                raise ImpossibleSolution("Its not possible to found a solution to this problem.")
-                            x_newton_raphson    = np.random.rand(max_nodes)%100 + 1
-                            number_of_guesses+=1
-                            number_of_execution_newton_raphson=0
+                    x_t_plus_dt, max_nodes, col_names = self.solve(circuit, x_t, t, delta_t, max_nodes, internal_step, 
+                                                                   method, verbose=verbose)
+                    x_t = x_t[0:max_nodes]
+                    tolerance = np.abs( x_t_plus_dt - x_t ).max()
+                    if circuit.has_nonlinear_elements and (tolerance > max_tolerance):
+                        x_t = x_t_plus_dt
+                        number_of_execution_newton_raphson += 1
+                    else:
+                        stop_newton_raphson = True
+                # end of Newton Raphson
 
-                        x, max_nodes, col_names = self.solve_system_of_equations(circuit, t, delta_t, max_nodes, internal_step, 
-                                                                                 method, x_newton_raphson=x_newton_raphson, 
-                                                                                 verbose=verbose)
-                        x_newton_raphson = x_newton_raphson[0:max_nodes]
-                        tolerance = np.abs( x - x_newton_raphson ).max()
-
-                        if tolerance > max_tolerance:
-                            x_newton_raphson = x
-                            number_of_execution_newton_raphson += 1
-                        else:
-                            stop_newton_raphson = True
-                    # end of Newton Raphson
-
-                # NOTE: if the circuit has no nonlinear elements, we can use the linear solver directly
-                else: # circuit has no nonlinear elements
-                    x, max_nodes, col_names = self.solve_system_of_equations(circuit, t, delta_t, max_nodes, internal_step, method, verbose=verbose)
-          
+               
                 # update ICs
                 for elm in circuit.elements:
-                    elm.update( x )
+                    elm.update( x_t_plus_dt )
                 
                 internal_step += 1
 
             # end of internal step
 
-            t += delta_t
             times.append(t)
+            t += delta_t
             internal_step = 0
-            e.append( x )
-            k+=1
+            e.append( x_t_plus_dt )
 
         e = np.array(e)
         result = {"t":times}
@@ -243,59 +200,22 @@ class Simulator:
         return result
 
   
-    def solve_system_of_equations( self, 
-                                   circuit          : Circuit, 
-                                   t                : float, 
-                                   delta_t          : float,
-                                   max_nodes        : int,
-                                   internal_step    : int,
-                                   method           : Method,
-                                   x_newton_raphson : np.array=None,
-                                   verbose          : bool=False,
+    def solve( self, 
+               circuit          : pymna.Circuit, 
+               x_t              : np.array,
+               t                : float, 
+               delta_t          : float,
+               max_nodes        : int,
+               internal_step    : int,
+               method           : Method,
+               verbose          : bool=False,
                                 ) -> Tuple[np.array, int]:
-            """
-            Solves a system of equations for the given circuit using the specified numerical method.
-
-            This method constructs the system of equations based on the circuit elements and 
-            applies the chosen numerical method (Backward Euler, Trapezoidal, or Forward Euler) 
-            to compute the solution.
-
-            Parameters:
-            ----------
-            circuit : Circuit
-                The circuit object containing elements and node information.
-            t : float
-                The current time at which the system is being solved.
-            delta_t : float
-                The time step for the numerical method.
-            max_nodes : int
-                The maximum number of nodes in the circuit.
-            method : Method
-                The numerical method to be used for solving the equations.
-            x_newton_raphson : np.array
-                The initial guess for the Newton-Raphson method.
-            col_names : List[str]
-                A list to store the names of the columns in the resulting matrix.
-
-            Returns:
-            -------
-            Tuple[np.array, int]
-                A tuple containing:
-                - The solution vector `x` as a NumPy array.
-                - The updated number of nodes after processing the circuit elements.
-                - The updated list of column names.
-
-            Raises:
-            ------
-            ValueError
-                If the specified method is not recognized.
-            """
-           
+     
             current_branch   = circuit.number_of_nodes
             col_names = [ f"{name}" for name in circuit.nodes.keys() ]
 
             step = Step( max_nodes, 
-                         x_newton_raphson=x_newton_raphson, 
+                         x_t=x_t, 
                          t=t, 
                          dt=delta_t, 
                          current_branch=current_branch, 
@@ -324,10 +244,11 @@ class Simulator:
             max_nodes = step.current_branch+1
             if verbose:
                 step.print(col_names)
-            x = step.solve()
-            return x, max_nodes, col_names
+            x_t_plus_dt = step.solve()
+            return x_t_plus_dt, max_nodes, col_names
 
-    def run_from_nl( self, nl_path : str ):
+
+    def run_from_nl( self, nl_path : str ) -> Union['Circuit', Dict]:
         
         # Resistor:  R<nome> <no+> <no-> <resistencia>
         # VCCS:      G<nome> <io+> <io-> <vi+> <vi-> <transcondutancia>
@@ -344,7 +265,7 @@ class Simulator:
         # Diodo:     D<nome> <no+> <no->
         # Trans. MOS:M<nome> <nod> <nog> <nos> <nob> <tipo> L=<comprimento> W=<largura>
         # Trans. BJT:Q<nome> <noc> <nob> <noe> <tipo>
-                
+
         circuit    = Circuit()
 
         with open(nl_path, 'r') as f:
@@ -419,6 +340,8 @@ class Simulator:
                 else:
                     raise ValueError(f"Unknown element type: {element}")
 
+            
+
             print(simu_config)
             if '.TRAN' in simu_config[0]:
                 # .TRAN
@@ -435,11 +358,10 @@ class Simulator:
                     raise ValueError(f"Unknown method: {method}")
                 max_number_of_internal_step = int(simu_config[4])
                 use_ic = True if simu_config[5]=='UIC' else False
-                result = self.transient(circuit, end_time, step_time,
-                                        max_number_of_internal_step=max_number_of_internal_step,
-                                        method = method
-                                        )
-
+                simulator = Transient()
+                result = simulator.transient(end_time, step_time,
+                                           max_number_of_internal_step=max_number_of_internal_step,
+                                           method = method)
             elif '.AC' in simu_config[0]:
                 # .AC LIN/OCT/DEC total_of_steps, freq_start, freq_end 
                 scale = simu_config[0].split()[1]
@@ -447,7 +369,4 @@ class Simulator:
                 freq_start = float(simu_config[2])
                 freq_end = float(simu_config[3])
                 result = self.ac(circuit, freq_start, freq_end, stepsPerDecade=steps)
-
-
-            return result
-
+            return circuit, result

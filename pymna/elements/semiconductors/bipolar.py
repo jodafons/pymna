@@ -30,7 +30,7 @@ class BJT(Element):
         id (float, optional): The current through the BJT (default is 1.0).
         name (str, optional): The name of the BJT element (default is an empty string).
         """
-        Element.__init__(self,name ,nolinear_element=True)
+        Element.__init__(self,name ,nonlinear_element=True)
         self.collector = collector
         self.base = base
         self.emitter = emitter

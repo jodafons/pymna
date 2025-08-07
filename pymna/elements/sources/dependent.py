@@ -4,12 +4,11 @@ __all__ = [
     "CurrentSourceControlByCurrent",
     "CurrentSourceControlByVoltage",
     "VoltageSourceControlByCurrent",
-
 ]
 
 import numpy as np
 from pymna.elements import Element, Step
-from pymna.elements.element import conductance, transconductance
+from pymna.elements import conductance, transconductance
 from pymna.exceptions import InvalidElement
 from typing import Tuple
 from abc import ABC
