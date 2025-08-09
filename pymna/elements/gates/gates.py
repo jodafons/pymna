@@ -271,7 +271,7 @@ class NOT(Element):
             This constructor initializes the gate element with the provided parameters
             and sets the ground and initial current values.
             """
-            Element.__init__(self, name, nolinear_element=True) 
+            Element.__init__(self, name, nonlinear_element=True) 
             self.control_nodeIn = nodeIn
             self.nodeOut        = nodeOut
             self.R              = R 
@@ -285,7 +285,7 @@ class NOT(Element):
                  step : Step
                  ):
         
-        ddp = step.x_newton_raphson[self.control_nodeIn] - step.x_newton_raphson[self.gnd]
+        ddp = step.x_t[self.control_nodeIn] - step.x_t[self.gnd]
         control_node = self.control_nodeIn
 
         # input A
@@ -342,7 +342,7 @@ class TwoInputsGate(Element):
                      name      : str = ""
                      ):
 
-        Element.__init__(self, name, nolinear_element=True)
+        Element.__init__(self, name, nonlinear_element=True)
         self.control_nodeIn_a = nodeIn_a
         self.control_nodeIn_b = nodeIn_b
         self.nodeOut          = nodeOut
@@ -359,8 +359,8 @@ class TwoInputsGate(Element):
                  step : Step
                  ):
         
-        ddp_a = step.x_newton_raphson[self.control_nodeIn_a] - step.x_newton_raphson[self.gnd]
-        ddp_b = step.x_newton_raphson[self.control_nodeIn_b] - step.x_newton_raphson[self.gnd]
+        ddp_a = step.x_t[self.control_nodeIn_a] - step.x_t[self.gnd]
+        ddp_b = step.x_t[self.control_nodeIn_b] - step.x_t[self.gnd]
 
         # input A
         Ca = Capacitor( self.control_nodeIn_a, self.gnd, self.C, initial_condition = self.ic_a )

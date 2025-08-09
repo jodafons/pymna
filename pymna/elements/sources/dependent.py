@@ -74,6 +74,15 @@ class VoltageSourceControlByVoltage(Element):
                                               Av=float(params[5]),
                                               name=params[0])
  
+    def to_nl(self) -> str:
+        """
+        Converts the VoltageSourceControlByVoltage instance to a string representation for NL format.
+
+        Returns:
+        str: A string representation of the VoltageSourceControlByVoltage in NL format.
+        """
+        return f"E{self.name} {self.nodeIn} {self.nodeOut} {self.controlNodeIn} {self.controlNodeOut} {self.Av}"
+
 class CurrentSourceControlByCurrent(Element):
    
    # This class represents a current source controlled by a voltage source.
@@ -128,6 +137,14 @@ class CurrentSourceControlByCurrent(Element):
                                               controlNodeOut=int(params[4]), 
                                               Ai=float(params[5]),
                                               name=params[0])
+    def to_nl(self) -> str:
+        """
+        Converts the CurrentSourceControlByCurrent instance to a string representation for NL format.
+
+        Returns:
+        str: A string representation of the CurrentSourceControlByCurrent in NL format.
+        """
+        return f"F{self.name} {self.nodeIn} {self.nodeOut} {self.controlNodeIn} {self.controlNodeOut} {self.Ai}"
 
 # Tranconductance
 class CurrentSourceControlByVoltage(Element):
@@ -178,6 +195,15 @@ class CurrentSourceControlByVoltage(Element):
                                               controlNodeOut=int(params[4]), 
                                               Gm=float(params[5]),
                                               name=params[0])
+    def to_nl(self) -> str:
+        """
+        Converts the CurrentSourceControlByVoltage instance to a string representation for NL format.
+
+        Returns:
+        str: A string representation of the CurrentSourceControlByVoltage in NL format.
+        """
+        return f"G{self.name} {self.nodeIn} {self.nodeOut} {self.controlNodeIn} {self.controlNodeOut} {self.Gm}"
+
 
 class VoltageSourceControlByCurrent(Element):
 
@@ -234,3 +260,12 @@ class VoltageSourceControlByCurrent(Element):
                                               controlNodeOut=int(params[4]), 
                                               Rm=float(params[5]),
                                               name=params[0])
+
+    def to_nl(self) -> str:
+        """
+        Converts the VoltageSourceControlByCurrent instance to a string representation for NL format.
+
+        Returns:
+        str: A string representation of the VoltageSourceControlByCurrent in NL format.
+        """
+        return f"H{self.name} {self.nodeIn} {self.nodeOut} {self.controlNodeIn} {self.controlNodeOut} {self.Rm}"

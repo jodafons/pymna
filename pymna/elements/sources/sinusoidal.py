@@ -125,6 +125,16 @@ class SinusoidalVoltageSource(Element):
                                         attenuation=float(params[8]),
                                         name=params[0])
 
+    def to_nl(self) -> str:
+        """
+        Converts the SinusoidalVoltageSource instance to a string representation for NL format.
+
+        Returns:
+        str: A string representation of the SinusoidalVoltageSource in NL format.
+        """
+        return f"V{self.name} {self.nodeIn} {self.nodeOut} SIN {self.dc} {self.amplitude} {self.frequency} " \
+               f"{self.delay} {self.attenuation} {self.angle} {self.number_of_cycles}"
+
 class SinusoidalCurrentSource(SinusoidalVoltageSource):
     def __init__(self,
                      nodeIn           : int,
@@ -179,3 +189,43 @@ class SinusoidalCurrentSource(SinusoidalVoltageSource):
                 self.delay)
         Is = CurrentSource(self.nodeIn, self.nodeOut, I)
         Is.backward(step)
+
+    @classmethod
+    def from_nl(cls, params: Tuple[str, int, int, str, float, float, float, float, float, float, int]):
+        """
+        Creates a SinusoidalCurrentSource instance from a parameter tuple.
+
+        Parameters:
+            cls: The class itself.
+            params (Tuple): A tuple containing parameters for the source.
+
+        Returns:
+            SinusoidalCurrentSource: An instance of the SinusoidalCurrentSource class.
+        """
+        # Isin: I/Vname, nodeIn, nodeOut, 'SIN', DC, AMPLITUDE, FREQ, DELAY, ATTENUATION (alpha), ANGLE, NUMBER_OF_CYCLES
+        if params[0][0] != 'I' or params[0][0] != 'V':
+            raise InvalidElement(f"Invalid parameters for SinusoidalCurrentSource: expected 'I' or 'V' ({params[0]}) as first element.")
+        
+        if params[3] != "SIN" and len(params) != 11:
+            raise InvalidElement(f"Invalid parameters for SinusoidalCurrentSource: expected 'SIN' ({params[3]}) as third element and 11 {len(params)} parameters in total.")
+
+        return SinusoidalCurrentSource( nodeIn=int(params[1]), 
+                                        nodeOut=int(params[2]), 
+                                        amplitude=float(params[5]), 
+                                        frequency=float(params[6]), 
+                                        number_of_cycles=int(params[10]),
+                                        dc=float(params[4]),
+                                        delay=float(params[7]),
+                                        angle=float(params[9]),
+                                        attenuation=float(params[8]),
+                                        name=params[0])
+
+    def to_nl(self) -> str:
+        """
+        Converts the SinusoidalCurrentSource instance to a string representation for NL format.
+
+        Returns:
+        str: A string representation of the SinusoidalCurrentSource in NL format.
+        """
+        return f"I{self.name} {self.nodeIn} {self.nodeOut} SIN {self.dc} {self.amplitude} {self.frequency} " \
+               f"{self.delay} {self.attenuation} {self.angle} {self.number_of_cycles}"

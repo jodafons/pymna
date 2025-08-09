@@ -6,7 +6,7 @@ __all__ = [
         ]
 
 import numpy as np
-from pymna.elements import Element, Step
+from pymna.elements import Element, Step, conductance
 from pymna.elements.sources import CurrentSource
 from pymna.exceptions import InvalidElement
 from typing import Tuple, Union
@@ -81,6 +81,14 @@ class Resistor(Element):
             raise InvalidElement("Invalid parameters for Resistor: expected 'R' as first element.")
         return Resistor(nodeIn=int(params[1]), nodeOut=int(params[2]), resistence=float(params[3]), name=params[0])
 
+    def to_nl(self) -> str:
+        """
+        Converts the Resistor instance to a string representation for NL format.
+
+        Returns:
+        str: A string representation of the Resistor in NL format.
+        """
+        return f"R{self.name} {self.nodeIn} {self.nodeOut} {self.R}"
 #
 # Capacitor
 #
@@ -168,6 +176,15 @@ class Capacitor(Element):
             raise InvalidElement("Invalid parameters for Capacitor: expected 'C' as first element.")
         return Capacitor(nodeIn=int(params[1]), nodeOut=int(params[2]), capacitance=float(params[3]), 
                          name=params[0], initial_condition=float(params[4][3::]) if len(params) > 4 else 0)
+
+    def to_nl(self) -> str:
+        """
+        Converts the Capacitor instance to a string representation for NL format.
+
+        Returns:
+        str: A string representation of the Capacitor in NL format.
+        """
+        return f"C{self.name} {self.nodeIn} {self.nodeOut} {self.C}" + f" IC={self.ic}" if self.ic != 0 else ""
 
 #
 # Inductor
@@ -260,6 +277,14 @@ class Inductor(Element):
         return Inductor(nodeIn=int(params[1]), nodeOut=int(params[2]), inductance=float(params[3]), 
                         name=params[0], initial_condition=float(params[4][3::]) if len(params) > 4 else 0)
 
+    def to_nl(self) -> str:
+        """
+        Converts the Inductor instance to a string representation for NL format.
+
+        Returns:
+        str: A string representation of the Inductor in NL format.
+        """
+        return f"L{self.name} {self.nodeIn} {self.nodeOut} {self.L}" + f" IC={self.ic}" if self.ic != 0 else ""
 
 class NonLinearResistor(Element):
 
@@ -319,7 +344,7 @@ class NonLinearResistor(Element):
                  step : Step,
                  ):
    
-        ddp = step.x_newton_raphson[self.nodeIn] - step.x_newton_raphson[self.nodeOut]
+        ddp = step.x_t[self.nodeIn] - step.x_t[self.nodeOut]
         if ddp > self.nolinear_voltage_3:
             # Tangente da reta ou derivada da funcao
             G = (self.nolinear_current_4 - self.nolinear_current_3)/(self.nolinear_voltage_4 - self.nolinear_voltage_3)
@@ -352,8 +377,19 @@ class NonLinearResistor(Element):
         # nolinear_voltage_2, nolinear_current_2, nolinear_voltage_3, nolinear_current_3, nonlinear_voltage_4, nolinear_current_4 
         if params[0][0] != "N":
             raise InvalidElement("Invalid parameters for Nonlinear Resistor: expected 'NLR' as first element.")
-        return NoLinearResistor(nodeIn=int(params[1]), nodeOut=int(params[2]), 
+        return NonLinearResistor(nodeIn=int(params[1]), nodeOut=int(params[2]), 
                                 nolinear_voltage_1=float(params[3]), nolinear_current_1=float(params[4]),
                                 nolinear_voltage_2=float(params[5]), nolinear_current_2=float(params[6]),
                                 nolinear_voltage_3=float(params[7]), nolinear_current_3=float(params[8]),
                                 nolinear_voltage_4=float(params[9]), nolinear_current_4=float(params[10]), name=params[0])
+
+    def to_nl(self) -> str:
+        """
+        Converts the NonLinearResistor instance to a string representation for NL format.
+
+        Returns:
+        str: A string representation of the NonLinearResistor in NL format.
+        """
+        return f"N{self.name} {self.nodeIn} {self.nodeOut} {self.nolinear_voltage_1} {self.nolinear_current_1} " \
+               f"{self.nolinear_voltage_2} {self.nolinear_current_2} {self.nolinear_voltage_3} {self.nolinear_current_3} " \
+               f"{self.nolinear_voltage_4} {self.nolinear_current_4}"

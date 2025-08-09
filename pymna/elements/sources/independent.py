@@ -45,7 +45,16 @@ class VoltageSource(Element):
         step.A[jx, self.nodeIn]  += -1
         step.A[jx, self.nodeOut] +=  1
         step.b[jx] += -self.V
-        
+
+    def to_nl(self) -> str:
+        """
+        Converts the VoltageSource instance to a string representation for NL format.
+
+        Returns:
+        str: A string representation of the VoltageSource in NL format.
+        """
+        return f"V{self.name} {self.nodeIn} {self.nodeOut} {self.V}"
+   
 class CurrentSource(Element):
     def __init__(self, 
                  nodeIn  : int,
@@ -75,3 +84,11 @@ class CurrentSource(Element):
         step.b[self.nodeIn]   += -I
         step.b[self.nodeOut]  +=  I
         
+    def to_nl(self) -> str:
+        """
+        Converts the CurrentSource instance to a string representation for NL format.
+
+        Returns:
+        str: A string representation of the CurrentSource in NL format.
+        """
+        return f"I{self.name} {self.nodeIn} {self.nodeOut} {self.I}"

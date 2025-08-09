@@ -36,10 +36,52 @@ class Method(enum.Enum):
     """
     Enumeration of methods for integration.
     """
-    TRAPEZOIDAL = "trapezoidal"
-    FORWARD_EULER = "forward_euler"
-    BACKWARD_EULER = "backward_euler"
+    TRAPEZOIDAL = "TRAP"
+    FORWARD_EULER = "FE"
+    BACKWARD_EULER = "BE"
     
+
+class Result:
+    def __init__(self, circuit : Circuit, simulation_str: str = ""):
+        self.circuit = circuit
+        self.data = {}
+        self.simulation_str = simulation_str
+
+    def __getitem__(self, key: str) -> Union[float, np.ndarray]:
+        return self.data[key]
+
+    def __setitem__(self, key: str, value: Union[float, np.ndarray]) -> None:
+        self.data[key] = value
+
+    def __repr__(self) -> str:
+        return f"Result(data={self.data})"
+
+    def to_nl(self) -> str:
+        """
+        Convert the result to a string in NL format.
+        """
+        output = self.circuit.to_nl()
+        output += f"{self.simulation_str}"
+        return output
+    
+    def names(self) -> List[str]:
+        return list(self.data.keys())
+
+    def number_of_points(self) -> int:
+        """
+        Returns the number of points in the result data.
+        """
+        return len( self.data[self.names()[0]] )
+
+
+    def dump(self) -> str:
+        output = str(' ').join(self.names())+'\n'
+        for step in range(self.number_of_points()):
+            for name in self.names():
+                output+= f"{round(self[name][step],6)} "
+            output += '\n'
+        return output
+
 class Simulator:
 
     def __init__(self , max_nodes : int=1000):
@@ -122,7 +164,7 @@ class Simulator:
                   verbose                      : bool=False,
                   method                       : Method=Method.BACKWARD_EULER,
                   temperature                  : float=25,
-                ) -> Dict:
+                ) -> Result:
   
         t                = 0
         e                = []
@@ -136,18 +178,17 @@ class Simulator:
         print(f"Max number of nodes: {circuit.number_of_nodes}")
         col_names = [f"{node_name+1}" for node_name in range(circuit.number_of_nodes)]
         
+        first_exec = True
         while t < end_time:
 
             if t==0:
                 max_internal_step = 1
                 # NOTE: at the beginner, using short step to accomodate the circuit at first loop
-                delta_t = (step_time/max_number_of_internal_step)/step_factor
+                delta_t = step_time/step_factor
             else:
-                max_internal_step = max_number_of_internal_step
-                delta_t = step_time/max_number_of_internal_step
+                delta_t = step_time
 
             internal_step = 0
-
             while internal_step < max_internal_step:
 
                 # NOTE: Newton Raphson loop
@@ -167,8 +208,9 @@ class Simulator:
                         number_of_guesses+=1
                         number_of_execution_newton_raphson=0
                     
-                    x_t_plus_dt, max_nodes, col_names = self.solve(circuit, x_t, t, delta_t, max_nodes, internal_step, 
+                    x_t_plus_dt, max_nodes, col_names = self.solve(circuit, x_t, t, delta_t, max_nodes, internal_step, first_exec,
                                                                    method, verbose=verbose)
+                    first_exec = False
                     x_t = x_t[0:max_nodes]
                     tolerance = np.abs( x_t_plus_dt - x_t ).max()
                     if circuit.has_nonlinear_elements and (tolerance > max_tolerance):
@@ -187,13 +229,15 @@ class Simulator:
 
             # end of internal step
 
-            times.append(t)
-            t += delta_t
             internal_step = 0
             e.append( x_t_plus_dt )
+            times.append(t)
+            t += step_time
 
         e = np.array(e)
-        result = {"t":times}
+        simulation_str=f".TRAN {end_time} {step_time} {method.value} {max_number_of_internal_step} {'UIC' if first_exec else ''}"
+        result = Result(circuit, simulation_str=simulation_str)
+        result["t"]=times
         for col_idx, col_name in enumerate(col_names[1::]):            
             result[ col_name ] = e[ :, col_idx+1 ]
 
@@ -207,6 +251,7 @@ class Simulator:
                delta_t          : float,
                max_nodes        : int,
                internal_step    : int,
+               first_exec       : bool,
                method           : Method,
                verbose          : bool=False,
                                 ) -> Tuple[np.array, int]:
@@ -219,7 +264,8 @@ class Simulator:
                          t=t, 
                          dt=delta_t, 
                          current_branch=current_branch, 
-                         internal_step=internal_step )
+                         internal_step=internal_step,
+                         first_exec=first_exec, )
 
             for elm in circuit.elements:
                 last_branch = step.current_branch
@@ -296,7 +342,7 @@ class Simulator:
                 elif element == "L":
                     circuit += Inductor.from_nl(params)
                 elif element == "N":
-                    circuit += NoLinearResistor.from_nl(params)
+                    circuit += NonLinearResistor.from_nl(params)
                 elif element == "O":
                     circuit += OpAmp.from_nl(params)
                 elif element == "E":
@@ -358,10 +404,9 @@ class Simulator:
                     raise ValueError(f"Unknown method: {method}")
                 max_number_of_internal_step = int(simu_config[4])
                 use_ic = True if simu_config[5]=='UIC' else False
-                simulator = Transient()
-                result = simulator.transient(end_time, step_time,
-                                           max_number_of_internal_step=max_number_of_internal_step,
-                                           method = method)
+                result = self.transient(circuit, end_time, step_time,
+                                        max_number_of_internal_step=max_number_of_internal_step,
+                                        method = method)
             elif '.AC' in simu_config[0]:
                 # .AC LIN/OCT/DEC total_of_steps, freq_start, freq_end 
                 scale = simu_config[0].split()[1]

@@ -5,7 +5,6 @@ __all__ = ["Circuit"]
 from typing           import Union, List
 from pymna.units      import MOhm, MHz, Ohm, nF
 
-
 class Circuit:
     
     def __init__(self, 
@@ -39,4 +38,10 @@ class Circuit:
     def number_of_nodes(self):
         return self.n_nodes
 
-  
+    def to_nl( self ) -> str:
+        output = f"{self.number_of_nodes}\n"
+        for elm in self.elements:
+            output+=elm.to_nl()+"\n"
+        return output
+
+          

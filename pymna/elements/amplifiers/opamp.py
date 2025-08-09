@@ -75,6 +75,14 @@ class IdealOpAmp(Element):
             raise InvalidElement("Invalid parameters for Operational Amplifier: expected 'O' as first element.")
         return Ampop(controlNodePos=int(params[1]), controlNodeNeg=int(params[2]), nodeOut=int(params[3]), name=params[0])
 
+    def to_nl(self) -> str:
+        """
+        Converts the OpAmp instance to a tuple of parameters.
+
+        Returns:
+        str: A tuple containing the parameters for the operational amplifier.
+        """
+        return f"O{self.name} {self.controlNodePos} {self.controlNodeNeg} {self.nodeOutPos}"  
 
 class OpAmp(Element):
 
@@ -140,3 +148,11 @@ class OpAmp(Element):
             raise InvalidElement("Invalid parameters for Operational Amplifier: expected 'O' as first element.")
         return OpAmp(controlNodePos=int(params[1]), controlNodeNeg=int(params[2]), nodeOut=int(params[3]), name=params[0])
 
+    def to_nl(self) -> str:
+        """
+        Converts the OpAmp instance to a tuple of parameters.
+
+        Returns:
+        str: A tuple containing the parameters for the operational amplifier.
+        """
+        return f"O{self.name} {self.controlNodePos} {self.controlNodeNeg} {self.nodeOutPos}"

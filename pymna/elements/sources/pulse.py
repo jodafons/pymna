@@ -126,6 +126,16 @@ class PulseVoltageSource(Element):
                                    number_of_cycles=int(params[11]),
                                    name=params[0])
 
+    def to_nl(self) -> str:
+        """
+        Converts the PulseVoltageSource instance to a string representation for NL format.
+
+        Returns:
+        str: A string representation of the PulseVoltageSource in NL format.
+        """
+        return f"V{self.name} {self.nodeIn} {self.nodeOut} PULSE {self.amplitude_1} {self.amplitude_2} " \
+               f"{self.delay} {self.rise_time} {self.fall_time} {self.time_on} {self.T} {self.number_of_cycles}"
+
 class PulseCurrentSource(PulseVoltageSource):
     def __init__(self,
              nodeIn      : int,
@@ -176,3 +186,32 @@ class PulseCurrentSource(PulseVoltageSource):
 
         Is = CurrentSource(self.nodeIn, self.nodeOut, I)
         Is.backward(step)
+
+    @classmethod
+    def from_nl(cls, params: Tuple[str, int, int, str, float, float, float, float, float, float, float, int]):
+        # PulseCurrentSource: 'I/V'name, nodeIn, nodeOut, 'PULSE', AMPLITUDE_1, AMPLITUDE_2, DELAY, RISE_TIME, FALL_TIME, TIME_ON, PERIOUD, NUMBER_OF_CYCLES
+        if params[0][0] != 'I' or params[0][0] != 'V':
+            raise InvalidElement(f"Invalid parameters for PulseCurrentSource: expected 'I/V' ({params[0]}) as first element.")
+        if params[3] != "PULSE" and len(params) != 12:
+            raise InvalidElement(f"Invalid parameters for PulseCurrentSource: expected 'PULSE' ({params[3]}) as third element and 12 ({len(params)}) parameters in total.")
+        return PulseCurrentSource( nodeIn=int(params[1]),
+                                   nodeOut=int(params[2]),
+                                   amplitude_1=float(params[4]),
+                                   amplitude_2=float(params[5]),
+                                   delay=float(params[6]),
+                                   rise_time=float(params[7]),
+                                   fall_time=float(params[8]),
+                                   time_on=float(params[9]),
+                                   T=float(params[10]),
+                                   number_of_cycles=int(params[11]),
+                                   name=params[0])
+
+    def to_nl(self) -> str:
+        """
+        Converts the PulseCurrentSource instance to a string representation for NL format.
+
+        Returns:
+        str: A string representation of the PulseCurrentSource in NL format.
+        """
+        return f"I{self.name} {self.nodeIn} {self.nodeOut} PULSE {self.amplitude_1} {self.amplitude_2} " \
+               f"{self.delay} {self.rise_time} {self.fall_time} {self.time_on} {self.T} {self.number_of_cycles}"

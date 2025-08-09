@@ -18,6 +18,7 @@ class Step(ABC):
                  dt: float=0,
                  current_branch: int=0,
                  internal_step: int = 0,
+                 first_exec: bool = False,
                  omega = 0,
 
             ):
@@ -29,6 +30,7 @@ class Step(ABC):
         self.current_branch = current_branch
         self.x_t = x_t
         self.omega = omega
+        self.first_exec = first_exec
   
     def solve( self ) -> np.array:
         max_nodes = self.current_branch+1    
